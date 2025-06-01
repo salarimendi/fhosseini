@@ -65,7 +65,7 @@ class Title(db.Model):
     # روابط
     verses = db.relationship('Verse', backref='title', lazy='dynamic', cascade='all, delete-orphan')
     comments = db.relationship('Comment', backref='poem_title', lazy='dynamic')
-    version_verses = db.relationship('VersionVerse', backref='title', lazy='dynamic')
+    recordings = db.relationship('Recording', backref='title', lazy='dynamic')
     
     @property
     def garden_name(self):
@@ -99,9 +99,6 @@ class Verse(db.Model):
     verse_1 = db.Column(db.Text, nullable=False)  # مصراع اول
     verse_2 = db.Column(db.Text)  # مصراع دوم (اختیاری)
     
-    # روابط
-    recordings = db.relationship('Recording', backref='verse', lazy='dynamic', cascade='all, delete-orphan')
-    
     @property
     def full_verse(self):
         """بیت کامل"""
@@ -118,54 +115,14 @@ class Comment(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    title_id = db.Column(db.Integer, db.ForeignKey('titles.id'), nullable=False)
-    
-    # انواع نظرات
-    critical_comment = db.Column(db.Text)  # نظر مقابله‌ای
-    research_comment = db.Column(db.Text)  # نظر پژوهشی
-    
+    title_id = db.Column(db.Integer, db.ForeignKey('titles.id'))
+    comment = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    is_approved = db.Column(db.Boolean, default=True)  # تأیید شده یا خیر
+    is_approved = db.Column(db.Boolean, default=False)  # تأیید شده یا خیر
     
     def __repr__(self):
-        return f'<Comment by {self.author.username} on {self.poem_title.title[:30]}>'
-
-class Version(db.Model):
-    """مدل نسخه‌های مختلف"""
-    __tablename__ = 'versions'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # روابط
-    version_verses = db.relationship('VersionVerse', backref='version', lazy='dynamic')
-    
-    def __repr__(self):
-        return f'<Version {self.name}>'
-
-class VersionVerse(db.Model):
-    """مدل ابیات نسخه‌های مختلف"""
-    __tablename__ = 'version_verses'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    version_id = db.Column(db.Integer, db.ForeignKey('versions.id'), nullable=False)
-    title_id = db.Column(db.Integer, db.ForeignKey('titles.id'), nullable=False)
-    order_in_title = db.Column(db.Integer, nullable=False)
-    verse_1 = db.Column(db.Text, nullable=False)
-    verse_2 = db.Column(db.Text)
-    
-    @property
-    def full_verse(self):
-        """بیت کامل"""
-        if self.verse_2:
-            return f"{self.verse_1} *** {self.verse_2}"
-        return self.verse_1
-    
-    def __repr__(self):
-        return f'<VersionVerse {self.id}>'
+        return f'<Comment by {self.author.username}>'
 
 class Recording(db.Model):
     """مدل ضبط‌های صوتی"""
@@ -179,10 +136,7 @@ class Recording(db.Model):
     file_size = db.Column(db.Integer)  # اندازه فایل به بایت
     duration = db.Column(db.Float)  # مدت زمان به ثانیه
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    is_approved = db.Column(db.Boolean, default=True)
-    
-    # ارتباط با عنوان
-    title = db.relationship('Title', backref='recordings')
+    is_approved = db.Column(db.Boolean, default=False)
     
     @property
     def file_path(self):
