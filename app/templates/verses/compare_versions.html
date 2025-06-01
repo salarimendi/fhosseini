@@ -9,7 +9,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">خانه</a></li>
-                    <li class="breadcrumb-item"><a href="{{ url_for('main.garden', garden_id=title.garden) }}">باغ {{ title.garden }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.garden', garden_num=title.garden) }}">باغ {{ title.garden }}</a></li>
                     <li class="breadcrumb-item"><a href="{{ url_for('main.poem', title_id=title.id) }}">{{ title.title }}</a></li>
                     <li class="breadcrumb-item active">مقایسه نسخه‌ها</li>
                 </ol>

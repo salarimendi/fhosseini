@@ -13,7 +13,7 @@ from app import db
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
-def index():
+def home():
     """صفحه اصلی - نمایش باغ‌ها"""
     
     # دریافت آمار کلی
