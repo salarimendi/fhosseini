@@ -162,7 +162,7 @@ def download_audio(recording_id):
         flash('فایل صوتی یافت نشد.', 'error')
         return redirect(url_for('main.title', title_id=recording.title_id))
     
-    # نام فایل برای دانلود
+    # نام فایل برای دانلود - استفاده از relationship که در models تعریف شده
     download_name = f"{recording.title.title}_{recording.user.username}.{recording.filename.split('.')[-1]}"
     
     return send_file(file_path, 
@@ -220,6 +220,7 @@ def api_recordings(title_id):
     title_obj = Title.query.get_or_404(title_id)
     
     recordings_data = []
+    # استفاده از relationship که در models تعریف شده
     for recording in title_obj.recordings:
         if recording.is_approved:
             recordings_data.append({
@@ -244,13 +245,12 @@ def compare_versions(title_id):
     
     title_obj = Title.query.get_or_404(title_id)
     
-    # دریافت ابیات اصلی
+    # دریافت ابیات اصلی - استفاده از متد موجود در models
     main_verses = title_obj.get_verses_ordered()
     
-    # دریافت نسخه‌های مختلف (در صورت وجود)
-    version_verses = title_obj.version_verses.all()
+    # حذف بخش version_verses چون در models تعریف نشده
+    # فقط ابیات اصلی را نمایش می‌دهیم
     
     return render_template('verses/compare_versions.html',
                          title=title_obj,
-                         main_verses=main_verses,
-                         version_verses=version_verses)
+                         main_verses=main_verses)

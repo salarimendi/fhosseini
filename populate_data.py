@@ -5,7 +5,7 @@ Usage: python populate_data.py
 """
 
 from app import create_app, db
-from app.models import Title, Verse, User, Version
+from app.models import Title, Verse, User
 
 def populate_sample_data():
     """Populate database with sample data"""
@@ -23,14 +23,6 @@ def populate_sample_data():
                 return
         
         try:
-            # Create sample version
-            version = Version(
-                name='نسخه اصلی',
-                description='نسخه اصلی کتاب چهار خیابان باغ فردوس'
-            )
-            db.session.add(version)
-            db.session.flush()  # Get the ID
-            
             # Sample data for four gardens (chapters)
             sample_data = {
                 1: {  # باغ اول
@@ -123,7 +115,6 @@ def populate_sample_data():
             print(f"\n✅ Sample data populated successfully!")
             print(f"📚 Created {title_count} titles")  
             print(f"📝 Created {verse_count} verses")
-            print(f"📖 Created 1 version")
             print(f"🌸 Created 4 gardens (باغ)")
             
             print(f"\nSample structure:")
@@ -148,7 +139,8 @@ def create_sample_users():
             researcher = User(
                 username='محقق_نمونه',
                 email='researcher@example.com',
-                role='researcher'
+                role='researcher',
+                is_active=True
             )
             researcher.set_password('password123')
             db.session.add(researcher)
@@ -157,7 +149,8 @@ def create_sample_users():
             reader = User(
                 username='خواننده_نمونه',
                 email='reader@example.com', 
-                role='reader'
+                role='reader',
+                is_active=True
             )
             reader.set_password('password123')
             db.session.add(reader)

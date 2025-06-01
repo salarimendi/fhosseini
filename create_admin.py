@@ -69,7 +69,8 @@ def create_admin():
             admin_user = User(
                 username=username,
                 email=email,
-                role='admin'
+                role='admin',
+                is_active=True  # اضافه کردن فیلد is_active
             )
             admin_user.set_password(password)
             
@@ -79,6 +80,7 @@ def create_admin():
             print(f"\n✅ Admin user '{username}' created successfully!")
             print(f"Email: {email}")
             print(f"Role: admin")
+            print(f"Status: Active")
             print("\nYou can now login to the website using these credentials.")
             
         except Exception as e:

@@ -40,7 +40,8 @@ def search_in_database(query):
     for verse in verses:
         title = Title.query.get(verse.title_id)
         match_text = verse.verse_1
-        if query.lower() in verse.verse_2.lower() if verse.verse_2 else False:
+        # اصلاح بررسی verse_2 برای جلوگیری از خطا
+        if verse.verse_2 and query.lower() in verse.verse_2.lower():
             match_text = verse.verse_2
             
         results.append({
@@ -81,7 +82,8 @@ def get_title_recordings(title_id):
             'id': recording.id,
             'filename': recording.filename,
             'user_name': user.username if user else 'نامشخص',
-            'created_at': recording.created_at
+            'created_at': recording.created_at,
+            'is_approved': recording.is_approved
         })
     
     return result
@@ -111,7 +113,7 @@ def get_gardens_info():
             gardens[garden_num] = {
                 'number': garden_num,
                 'count': 0,
-                'name': get_garden_name(garden_num)
+                'name': title.garden_name  # استفاده از property در مدل
             }
         gardens[garden_num]['count'] += 1
     
@@ -135,6 +137,8 @@ def get_statistics():
         'total_users': User.query.count(),
         'total_comments': Comment.query.count(),
         'total_recordings': Recording.query.count(),
+        'approved_comments': Comment.query.filter_by(is_approved=True).count(),
+        'approved_recordings': Recording.query.filter_by(is_approved=True).count(),
         'gardens_count': len(set([t.garden for t in Title.query.all()]))
     }
     return stats

@@ -12,7 +12,7 @@ def admin_required(f):
     """دکوراتور برای محدود کردن دسترسی به مدیران"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'admin':
+        if not current_user.is_authenticated or not current_user.is_admin():
             flash('دسترسی غیرمجاز', 'error')
             return redirect(url_for('main.home'))
         return f(*args, **kwargs)
@@ -61,7 +61,7 @@ def edit_user(user_id):
         # تغییر رمز عبور (اختیاری)
         new_password = request.form.get('password')
         if new_password:
-            user.password_hash = generate_password_hash(new_password)
+            user.set_password(new_password)
         
         try:
             db.session.commit()
@@ -85,18 +85,17 @@ def delete_user(user_id):
         return redirect(url_for('admin.users'))
     
     try:
-        # حذف نظرات و ضبط‌های صوتی کاربر
-        Comment.query.filter_by(user_id=user.id).delete()
+        # حذف فایل‌های صوتی قبل از حذف رکوردها
         recordings = Recording.query.filter_by(user_id=user.id).all()
-        
-        # حذف فایل‌های صوتی
         for recording in recordings:
             try:
-                os.remove(os.path.join('app/static/recordings', recording.filename))
+                # استفاده از property file_path از مدل Recording
+                if os.path.exists(recording.file_path):
+                    os.remove(recording.file_path)
             except:
                 pass
         
-        Recording.query.filter_by(user_id=user.id).delete()
+        # حذف کاربر (با cascade، نظرات و رکوردها خودکار حذف می‌شوند)
         db.session.delete(user)
         db.session.commit()
         
@@ -174,9 +173,10 @@ def delete_recording(recording_id):
     recording = Recording.query.get_or_404(recording_id)
     
     try:
-        # حذف فایل صوتی
+        # حذف فایل صوتی با استفاده از property file_path
         try:
-            os.remove(os.path.join('app/static/recordings', recording.filename))
+            if os.path.exists(recording.file_path):
+                os.remove(recording.file_path)
         except:
             pass
         
@@ -201,7 +201,7 @@ def reset_user_password(user_id):
         return jsonify({'success': False, 'message': 'رمز عبور جدید الزامی است'})
     
     try:
-        user.password_hash = generate_password_hash(new_password)
+        user.set_password(new_password)
         db.session.commit()
         return jsonify({'success': True, 'message': 'رمز عبور با موفقیت تغییر یافت'})
     except:

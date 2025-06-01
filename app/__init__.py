@@ -27,7 +27,12 @@ def create_app(config_name=None):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
+
+
+    # اطمینان از وجود پوشه instance
+    os.makedirs(app.instance_path, exist_ok=True)
     
+
     # راه‌اندازی افزونه‌ها
     db.init_app(app)
     login_manager.init_app(app)
@@ -41,7 +46,7 @@ def create_app(config_name=None):
     
     @login_manager.user_loader
     def load_user(user_id):
-        from app.models import User
+        from models import User
         return User.query.get(int(user_id))
     
     # ثبت Blueprintها

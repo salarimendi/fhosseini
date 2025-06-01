@@ -80,6 +80,7 @@ def register():
         if password != password_confirm:
             errors.append('تکرار رمز عبور مطابقت ندارد.')
         
+        # بررسی نقش‌های مجاز (بر اساس models.py)
         if role not in ['user', 'researcher', 'reader']:
             role = 'user'
         
@@ -129,10 +130,12 @@ def logout():
 def profile():
     """پروفایل کاربر"""
     
-    # آمار کاربر
+    # آمار کاربر بر اساس روابط تعریف شده در models.py
     stats = {
         'comments_count': current_user.comments.count(),
         'recordings_count': current_user.recordings.count(),
+        'approved_comments': current_user.comments.filter_by(is_approved=True).count(),
+        'approved_recordings': current_user.recordings.filter_by(is_approved=True).count(),
     }
     
     return render_template('auth/profile.html', stats=stats)
@@ -265,6 +268,45 @@ def reset_password(token):
             flash('خطا در تغییر رمز عبور.', 'error')
     
     return render_template('auth/reset_password.html', token=token)
+
+@auth_bp.route('/users')
+@login_required
+def users_list():
+    """لیست کاربران - فقط برای مدیران"""
+    
+    if not current_user.is_admin():
+        flash('شما مجوز دسترسی به این صفحه را ندارید.', 'error')
+        return redirect(url_for('main.index'))
+    
+    users = User.query.order_by(User.created_at.desc()).all()
+    return render_template('auth/users_list.html', users=users)
+
+@auth_bp.route('/toggle_user_status/<int:user_id>')
+@login_required
+def toggle_user_status(user_id):
+    """فعال/غیرفعال کردن کاربر - فقط برای مدیران"""
+    
+    if not current_user.is_admin():
+        flash('شما مجوز دسترسی به این عملیات را ندارید.', 'error')
+        return redirect(url_for('main.index'))
+    
+    user = User.query.get_or_404(user_id)
+    
+    if user.id == current_user.id:
+        flash('نمی‌توانید وضعیت خود را تغییر دهید.', 'error')
+        return redirect(url_for('auth.users_list'))
+    
+    user.is_active = not user.is_active
+    
+    try:
+        db.session.commit()
+        status = 'فعال' if user.is_active else 'غیرفعال'
+        flash(f'وضعیت کاربر {user.username} به {status} تغییر کرد.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('خطا در تغییر وضعیت کاربر.', 'error')
+    
+    return redirect(url_for('auth.users_list'))
 
 def send_reset_email(user, token):
     """ارسال ایمیل بازیابی رمز عبور"""

@@ -9,15 +9,13 @@ comments_bp = Blueprint('comments', __name__)
 @login_required
 def add_comment():
     """افزودن نظر محقق"""
-    if current_user.role not in ['researcher', 'admin']:
+    if not current_user.can_comment():
         flash('شما مجاز به ثبت نظر نیستید', 'error')
         return redirect(request.referrer or url_for('main.home'))
     
     data = request.get_json() if request.is_json else request.form
     title_id = data.get('title_id')
-    verse_id = data.get('verse_id')
     comment_text = data.get('comment')
-    comment_type = data.get('comment_type', 'research')  # research یا critical
     
     if not comment_text or not title_id:
         if request.is_json:
@@ -28,8 +26,7 @@ def add_comment():
     # بررسی اینکه آیا محقق قبلاً نظر داده یا نه
     existing_comment = Comment.query.filter_by(
         user_id=current_user.id,
-        title_id=title_id,
-        comment_type=comment_type
+        title_id=title_id
     ).first()
     
     if existing_comment:
@@ -42,10 +39,7 @@ def add_comment():
     new_comment = Comment(
         user_id=current_user.id,
         title_id=title_id,
-        verse_id=verse_id,
-        comment=comment_text,
-        comment_type=comment_type,
-        created_at=datetime.utcnow()
+        comment=comment_text
     )
     
     try:
@@ -70,7 +64,7 @@ def edit_comment(comment_id):
     """ویرایش نظر توسط مدیر یا صاحب نظر"""
     comment = Comment.query.get_or_404(comment_id)
     
-    if current_user.role != 'admin' and comment.user_id != current_user.id:
+    if not current_user.is_admin() and comment.user_id != current_user.id:
         flash('شما مجاز به ویرایش این نظر نیستید', 'error')
         return redirect(request.referrer)
     
@@ -94,7 +88,7 @@ def edit_comment(comment_id):
 @login_required
 def delete_comment(comment_id):
     """حذف نظر توسط مدیر"""
-    if current_user.role != 'admin':
+    if not current_user.is_admin():
         flash('شما مجاز به حذف نظر نیستید', 'error')
         return redirect(request.referrer)
     
@@ -110,6 +104,26 @@ def delete_comment(comment_id):
     
     return redirect(request.referrer)
 
+@comments_bp.route('/approve_comment/<int:comment_id>', methods=['POST'])
+@login_required
+def approve_comment(comment_id):
+    """تأیید نظر توسط مدیر"""
+    if not current_user.is_admin():
+        flash('شما مجاز به تأیید نظر نیستید', 'error')
+        return redirect(request.referrer)
+    
+    comment = Comment.query.get_or_404(comment_id)
+    
+    try:
+        comment.is_approved = True
+        db.session.commit()
+        flash('نظر با موفقیت تأیید شد', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('خطا در تأیید نظر', 'error')
+    
+    return redirect(request.referrer)
+
 @comments_bp.route('/get_comments/<int:title_id>')
 def get_comments(title_id):
     """دریافت نظرات یک شعر"""
@@ -119,12 +133,13 @@ def get_comments(title_id):
     for comment in comments:
         comments_data.append({
             'id': comment.id,
-            'user': comment.user.username,
+            'user': comment.author.username,
             'comment': comment.comment,
-            'comment_type': comment.comment_type,
             'created_at': comment.created_at.strftime('%Y/%m/%d %H:%M'),
+            'updated_at': comment.updated_at.strftime('%Y/%m/%d %H:%M') if comment.updated_at != comment.created_at else None,
+            'is_approved': comment.is_approved,
             'can_edit': current_user.is_authenticated and (
-                current_user.role == 'admin' or comment.user_id == current_user.id
+                current_user.is_admin() or comment.user_id == current_user.id
             )
         })
     
