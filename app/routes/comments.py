@@ -1,0 +1,131 @@
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
+from flask_login import login_required, current_user
+from app.models import Comment, Title, Verse, User, db
+from datetime import datetime
+
+comments_bp = Blueprint('comments', __name__)
+
+@comments_bp.route('/add_comment', methods=['POST'])
+@login_required
+def add_comment():
+    """افزودن نظر محقق"""
+    if current_user.role not in ['researcher', 'admin']:
+        flash('شما مجاز به ثبت نظر نیستید', 'error')
+        return redirect(request.referrer or url_for('main.home'))
+    
+    data = request.get_json() if request.is_json else request.form
+    title_id = data.get('title_id')
+    verse_id = data.get('verse_id')
+    comment_text = data.get('comment')
+    comment_type = data.get('comment_type', 'research')  # research یا critical
+    
+    if not comment_text or not title_id:
+        if request.is_json:
+            return jsonify({'success': False, 'message': 'اطلاعات ناقص است'})
+        flash('اطلاعات ناقص است', 'error')
+        return redirect(request.referrer)
+    
+    # بررسی اینکه آیا محقق قبلاً نظر داده یا نه
+    existing_comment = Comment.query.filter_by(
+        user_id=current_user.id,
+        title_id=title_id,
+        comment_type=comment_type
+    ).first()
+    
+    if existing_comment:
+        if request.is_json:
+            return jsonify({'success': False, 'message': 'شما قبلاً نظر خود را ثبت کرده‌اید'})
+        flash('شما قبلاً نظر خود را ثبت کرده‌اید', 'error')
+        return redirect(request.referrer)
+    
+    # ایجاد نظر جدید
+    new_comment = Comment(
+        user_id=current_user.id,
+        title_id=title_id,
+        verse_id=verse_id,
+        comment=comment_text,
+        comment_type=comment_type,
+        created_at=datetime.utcnow()
+    )
+    
+    try:
+        db.session.add(new_comment)
+        db.session.commit()
+        
+        if request.is_json:
+            return jsonify({'success': True, 'message': 'نظر شما با موفقیت ثبت شد'})
+        flash('نظر شما با موفقیت ثبت شد', 'success')
+        return redirect(request.referrer)
+        
+    except Exception as e:
+        db.session.rollback()
+        if request.is_json:
+            return jsonify({'success': False, 'message': 'خطا در ثبت نظر'})
+        flash('خطا در ثبت نظر', 'error')
+        return redirect(request.referrer)
+
+@comments_bp.route('/edit_comment/<int:comment_id>', methods=['POST'])
+@login_required
+def edit_comment(comment_id):
+    """ویرایش نظر توسط مدیر یا صاحب نظر"""
+    comment = Comment.query.get_or_404(comment_id)
+    
+    if current_user.role != 'admin' and comment.user_id != current_user.id:
+        flash('شما مجاز به ویرایش این نظر نیستید', 'error')
+        return redirect(request.referrer)
+    
+    new_comment_text = request.form.get('comment')
+    if not new_comment_text:
+        flash('متن نظر نمی‌تواند خالی باشد', 'error')
+        return redirect(request.referrer)
+    
+    try:
+        comment.comment = new_comment_text
+        comment.updated_at = datetime.utcnow()
+        db.session.commit()
+        flash('نظر با موفقیت ویرایش شد', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('خطا در ویرایش نظر', 'error')
+    
+    return redirect(request.referrer)
+
+@comments_bp.route('/delete_comment/<int:comment_id>', methods=['POST'])
+@login_required
+def delete_comment(comment_id):
+    """حذف نظر توسط مدیر"""
+    if current_user.role != 'admin':
+        flash('شما مجاز به حذف نظر نیستید', 'error')
+        return redirect(request.referrer)
+    
+    comment = Comment.query.get_or_404(comment_id)
+    
+    try:
+        db.session.delete(comment)
+        db.session.commit()
+        flash('نظر با موفقیت حذف شد', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('خطا در حذف نظر', 'error')
+    
+    return redirect(request.referrer)
+
+@comments_bp.route('/get_comments/<int:title_id>')
+def get_comments(title_id):
+    """دریافت نظرات یک شعر"""
+    comments = Comment.query.filter_by(title_id=title_id).join(User).all()
+    
+    comments_data = []
+    for comment in comments:
+        comments_data.append({
+            'id': comment.id,
+            'user': comment.user.username,
+            'comment': comment.comment,
+            'comment_type': comment.comment_type,
+            'created_at': comment.created_at.strftime('%Y/%m/%d %H:%M'),
+            'can_edit': current_user.is_authenticated and (
+                current_user.role == 'admin' or comment.user_id == current_user.id
+            )
+        })
+    
+    return jsonify({'comments': comments_data})

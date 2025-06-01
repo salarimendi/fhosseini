@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت کاربران - سایت فردوسی حسینی{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- منوی کناری -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h5 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    پنل مدیریت
+                </h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                            داشبورد
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin.users') }}">
+                            مدیریت کاربران
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.comments') }}">
+                            مدیریت نظرات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.recordings') }}">
+                            مدیریت ضبط‌ها
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- محتوای اصلی -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">مدیریت کاربران</h1>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="alert alert-info">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- جستجو و فیلتر -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <form method="GET" class="d-flex">
+                        <input class="form-control me-2" type="search" name="search" placeholder="جستجو در نام کاربری یا ایمیل..." value="{{ request.args.get('search', '') }}" dir="rtl">
+                        <button class="btn btn-outline-primary" type="submit">جستجو</button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <form method="GET" class="d-flex">
+                        <select name="role" class="form-select me-2" dir="rtl">
+                            <option value="">همه نقش‌ها</option>
+                            <option value="user" {% if request.args.get('role') == 'user' %}selected{% endif %}>کاربر عادی</option>
+                            <option value="researcher" {% if request.args.get('role') == 'researcher' %}selected{% endif %}>محقق</option>
+                            <option value="reader" {% if request.args.get('role') == 'reader' %}selected{% endif %}>خواننده</option>
+                            <option value="admin" {% if request.args.get('role') == 'admin' %}selected{% endif %}>مدیر</option>
+                        </select>
+                        <button class="btn btn-outline-secondary" type="submit">فیلتر</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- جدول کاربران -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>شناسه</th>
+                                    <th>نام کاربری</th>
+                                    <th>ایمیل</th>
+                                    <th>نقش</th>
+                                    <th>تاریخ عضویت</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'danger' if user.role == 'admin' else 'primary' if user.role == 'researcher' else 'success' if user.role == 'reader' else 'secondary' }}">
+                                            {% if user.role == 'admin' %}مدیر
+                                            {% elif user.role == 'researcher' %}محقق
+                                            {% elif user.role == 'reader' %}خواننده
+                                            {% else %}کاربر عادی{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>{{ user.created_at.strftime('%Y/%m/%d') if user.created_at else 'نامشخص' }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <!-- دکمه تغییر نقش -->
+                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changeRoleModal{{ user.id }}">
+                                                تغییر نقش
+                                            </button>
+                                            
+                                            <!-- دکمه بازنشانی رمز -->
+                                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="resetPassword({{ user.id }})">
+                                                بازنشانی رمز
+                                            </button>
+                                            
+                                            <!-- دکمه حذف (فقط برای غیر مدیر) -->
+                                            {% if user.role != 'admin' %}
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteUser({{ user.id }})">
+                                                حذف
+                                            </button>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- مودال تغییر نقش -->
+                                        <div class="modal fade" id="changeRoleModal{{ user.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">تغییر نقش کاربر</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <form method="POST" action="{{ url_for('admin.change_user_role', user_id=user.id) }}">
+                                                        <div class="modal-body">
+                                                            <p>نقش جدید برای <strong>{{ user.username }}</strong> را انتخاب کنید:</p>
+                                                            <select name="new_role" class="form-select" dir="rtl" required>
+                                                                <option value="user" {% if user.role == 'user' %}selected{% endif %}>کاربر عادی</option>
+                                                                <option value="researcher" {% if user.role == 'researcher' %}selected{% endif %}>محقق</option>
+                                                                <option value="reader" {% if user.role == 'reader' %}selected{% endif %}>خواننده</option>
+                                                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>مدیر</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                                                            <button type="submit" class="btn btn-primary">تأیید تغییر</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if not users %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">هیچ کاربری یافت نشد.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+function resetPassword(userId) {
+    if (confirm('آیا مطمئن هستید که می‌خواهید رمز عبور این کاربر را بازنشانی کنید؟')) {
+        fetch(`/admin/users/${userId}/reset-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('رمز عبور با موفقیت بازنشانی شد.');
+                location.reload();
+            } else {
+                alert('خطا در بازنشانی رمز عبور.');
+            }
+        })
+        .catch(error => {
+            alert('خطا در ارتباط با سرور.');
+        });
+    }
+}
+
+function deleteUser(userId) {
+    if (confirm('آیا مطمئن هستید که می‌خواهید این کاربر را حذف کنید؟ این عمل قابل بازگشت نیست.')) {
+        fetch(`/admin/users/${userId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('کاربر با موفقیت حذف شد.');
+                location.reload();
+            } else {
+                alert('خطا در حذف کاربر.');
+            }
+        })
+        .catch(error => {
+            alert('خطا در ارتباط با سرور.');
+        });
+    }
+}
+</script>
+{% endblock %}

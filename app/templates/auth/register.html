@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}ثبت نام - فردوسی حسینی{% endblock %}
+
+{% block content %}
+<div class="container mt-5" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white text-center">
+                    <h4 class="mb-0">ثبت نام در سایت</h4>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">نام کاربری</label>
+                            <input type="text" class="form-control" id="username" name="username" required 
+                                   minlength="3" maxlength="20">
+                            <div class="form-text">حداقل ۳ کاراکتر و حداکثر ۲۰ کاراکتر</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">ایمیل</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">رمز عبور</label>
+                            <input type="password" class="form-control" id="password" name="password" required 
+                                   minlength="6">
+                            <div class="form-text">حداقل ۶ کاراکتر</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">تکرار رمز عبور</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="role" class="form-label">نقش کاربری</label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="">انتخاب کنید</option>
+                                <option value="researcher">محقق</option>
+                                <option value="reader">خواننده</option>
+                            </select>
+                            <div class="form-text">کاربران عادی نیازی به ثبت نام ندارند</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100 mb-3">ثبت نام</button>
+                        
+                        <div class="text-center">
+                            <a href="{{ url_for('auth.login') }}" class="text-decoration-none">قبلاً ثبت نام کرده‌اید؟ وارد شوید</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">بازگشت به صفحه اصلی</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = this.value;
+    
+    if (password !== confirmPassword) {
+        this.setCustomValidity('رمز عبور مطابقت ندارد');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>
+{% endblock %}

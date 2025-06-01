@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}پروفایل کاربری{% endblock %}
+
+{% block content %}
+<div class="container mt-4" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>پروفایل کاربری</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="user-avatar bg-secondary rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="fas fa-user fa-2x text-white"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>نام کاربری:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            {{ current_user.username }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>ایمیل:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            {{ current_user.email }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>نقش:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            {% if current_user.role == 'admin' %}
+                                <span class="badge bg-danger">مدیر</span>
+                            {% elif current_user.role == 'researcher' %}
+                                <span class="badge bg-info">محقق</span>
+                            {% elif current_user.role == 'reader' %}
+                                <span class="badge bg-success">خواننده</span>
+                            {% else %}
+                                <span class="badge bg-secondary">کاربر عادی</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if current_user.role == 'researcher' %}
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>تعداد نظرات:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            {{ current_user.comments|length }} نظر
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if current_user.role == 'reader' %}
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>تعداد ضبط‌ها:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            {{ current_user.recordings|length }} ضبط
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>تاریخ عضویت:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            {{ current_user.created_at.strftime('%Y/%m/%d') if current_user.created_at else 'نامشخص' }}
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('auth.change_password') }}" class="btn btn-warning">
+                            <i class="fas fa-key"></i> تغییر رمز عبور
+                        </a>
+                        
+                        {% if current_user.role == 'researcher' %}
+                        <a href="{{ url_for('comments.my_comments') }}" class="btn btn-info">
+                            <i class="fas fa-comments"></i> نظرات من
+                        </a>
+                        {% endif %}
+                        
+                        {% if current_user.role == 'reader' %}
+                        <a href="{{ url_for('verses.my_recordings') }}" class="btn btn-success">
+                            <i class="fas fa-microphone"></i> ضبط‌های من
+                        </a>
+                        {% endif %}
+                        
+                        {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-danger">
+                            <i class="fas fa-cog"></i> پنل مدیریت
+                        </a>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('main.home') }}" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> بازگشت به صفحه اصلی
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

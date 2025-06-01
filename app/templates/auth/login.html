@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}ورود - فردوسی حسینی{% endblock %}
+
+{% block content %}
+<div class="container mt-5" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">ورود به سایت</h4>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">نام کاربری</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">رمز عبور</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
+                            <label class="form-check-label" for="remember_me">
+                                مرا به خاطر بسپار
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mb-3">ورود</button>
+                        
+                        <div class="text-center">
+                            <a href="{{ url_for('auth.register') }}" class="text-decoration-none">حساب کاربری ندارید؟ ثبت نام کنید</a>
+                        </div>
+                        
+                        <div class="text-center mt-2">
+                            <a href="{{ url_for('auth.forgot_password') }}" class="text-decoration-none small">فراموشی رمز عبور</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">بازگشت به صفحه اصلی</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

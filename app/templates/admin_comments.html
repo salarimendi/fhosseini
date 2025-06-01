@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت نظرات - سایت فردوسی حسینی{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- منوی کناری -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h5 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    پنل مدیریت
+                </h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                            داشبورد
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.users') }}">
+                            مدیریت کاربران
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin.comments') }}">
+                            مدیریت نظرات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.recordings') }}">
+                            مدیریت ضبط‌ها
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- محتوای اصلی -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">مدیریت نظرات</h1>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="alert alert-info">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- جستجو و فیلتر -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <form method="GET" class="d-flex">
+                        <input class="form-control me-2" type="search" name="search" placeholder="جستجو در نظرات..." value="{{ request.args.get('search', '') }}" dir="rtl">
+                        <button class="btn btn-outline-primary" type="submit">جستجو</button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <form method="GET" class="d-flex">
+                        <select name="status" class="form-select me-2" dir="rtl">
+                            <option value="">همه نظرات</option>
+                            <option value="approved" {% if request.args.get('status') == 'approved' %}selected{% endif %}>تأیید شده</option>
+                            <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>در انتظار تأیید</option>
+                            <option value="rejected" {% if request.args.get('status') == 'rejected' %}selected{% endif %}>رد شده</option>
+                        </select>
+                        <button class="btn btn-outline-secondary" type="submit">فیلتر</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- لیست نظرات -->
+            {% for comment in comments %}
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ comment.user.username }}</strong>
+                        <span class="text-muted">- {{ comment.created_at.strftime('%Y/%m/%d %H:%M') }}</span>
+                    </div>
+                    <div>
+                        <span class="badge bg-{{ 'success' if comment.status == 'approved' else 'warning' if comment.status == 'pending' else 'danger' }}">
+                            {% if comment.status == 'approved' %}تأیید شده
+                            {% elif comment.status == 'pending' %}در انتظار تأیید
+                            {% else %}رد شده{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="card-title">
+                                {% if comment.title %}
+                                    نظر روی شعر: {{ comment.title.title }}
+                                {% else %}
+                                    نظر عمومی
+                                {% endif %}
+                            </h6>
+                            <p class="card-text" dir="rtl">{{ comment.comment }}</p>
+                            
+                            {% if comment.research_note %}
+                            <div class="alert alert-info">
+                                <strong>یادداشت پژوهشی:</strong>
+                                <p class="mb-0" dir="rtl">{{ comment.research_note }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="d-flex flex-column gap-2">
+                                {% if comment.status == 'pending' %}
+                                <button class="btn btn-success btn-sm" onclick="approveComment({{ comment.id }})">
+                                    تأیید نظر
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="rejectComment({{ comment.id }})">
+                                    رد نظر
+                                </button>
+                                {% elif comment.status == 'approved' %}
+                                <button class="btn btn-warning btn-sm" onclick="rejectComment({{ comment.id }})">
+                                    لغو تأیید
+                                </button>
+                                {% else %}
+                                <button class="btn btn-success btn-sm" onclick="approveComment({{ comment.id }})">
+                                    تأیید مجدد
+                                </button>
+                                {% endif %}
+                                
+                                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editCommentModal{{ comment.id }}">
+                                    ویرایش
+                                </button>
+                                
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteComment({{ comment.id }})">
+                                    حذف
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- مودال ویرایش نظر -->
+                <div class="modal fade" id="editCommentModal{{ comment.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">ویرایش نظر</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="POST" action="{{ url_for('admin.edit_comment', comment_id=comment.id) }}">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="comment{{ comment.id }}" class="form-label">متن نظر</label>
+                                        <textarea class="form-control" id="comment{{ comment.id }}" name="comment" rows="4" dir="rtl" required>{{ comment.comment }}</textarea>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="research_note{{ comment.id }}" class="form-label">یادداشت پژوهشی</label>
+                                        <textarea class="form-control" id="research_note{{ comment.id }}" name="research_note" rows="3" dir="rtl">{{ comment.research_note or '' }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                                    <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if not comments %}
+            <div class="text-center py-5">
+                <p class="text-muted">هیچ نظری یافت نشد.</p>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<script>
+function approveComment(commentId) {
+    fetch(`/admin/comments/${commentId}/approve`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('خطا در تأیید نظر.');
+        }
+    })
+    .catch(error => {
+        alert('خطا در ارتباط با سرور.');
+    });
+}
+
+function rejectComment(commentId) {
+    fetch(`/admin/comments/${commentId}/reject`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('خطا در رد نظر.');
+        }
+    })
+    .catch(error => {
+        alert('خطا در ارتباط با سرور.');
+    });
+}
+
+function deleteComment(commentId) {
+    if (confirm('آیا مطمئن هستید که می‌خواهید این نظر را حذف کنید؟ این عمل قابل بازگشت نیست.')) {
+        fetch(`/admin/comments/${commentId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('خطا در حذف نظر.');
+            }
+        })
+        .catch(error => {
+            alert('خطا در ارتباط با سرور.');
+        });
+    }
+}
+</script>
+{% endblock %}

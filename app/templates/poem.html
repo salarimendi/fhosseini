@@ -1,0 +1,536 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title.title }} - سایت فردوسی حسینی{% endblock %}
+
+{% block head %}
+<style>
+    .poem-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0 40px;
+        margin-top: 56px;
+    }
+    
+    .poem-content {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        margin: -30px 0 30px;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .poem-title {
+        font-family: 'Noto Nastaliq Urdu', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        padding: 30px;
+        border-bottom: 2px solid #f8f9fa;
+        margin-bottom: 0;
+    }
+    
+    .verses-container {
+        padding: 40px;
+    }
+    
+    .verse-row {
+        margin-bottom: 25px;
+        padding: 20px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        border-right: 3px solid transparent;
+    }
+    
+    .verse-row:hover {
+        background-color: #f8f9fa;
+        border-right-color: #667eea;
+    }
+    
+    .verse-text {
+        font-family: 'Noto Nastaliq Urdu', serif;
+        font-size: 1.4rem;
+        line-height: 2.2;
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    
+    .verse-1 {
+        text-align: right;
+    }
+    
+    .verse-2 {
+        text-align: left;
+    }
+    
+    .verse-number {
+        color: #95a5a6;
+        font-size: 0.9rem;
+        text-align: center;
+        margin-top: 10px;
+    }
+    
+    .audio-controls {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .audio-player {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .audio-player h6 {
+        margin-bottom: 15px;
+        color: #495057;
+    }
+    
+    .comments-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 30px;
+        margin-top: 40px;
+    }
+    
+    .comment-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-right: 4px solid #17a2b8;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .comment-author {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+    
+    .comment-date {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+    }
+    
+    .comment-text {
+        line-height: 1.8;
+        color: #495057;
+    }
+    
+    .comment-form {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin-top: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .toggle-comments {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .toggle-comments:hover {
+        background: linear-gradient(45deg, #764ba2, #667eea);
+        transform: translateY(-2px);
+    }
+    
+    .breadcrumb-custom {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 25px;
+        padding: 12px 20px;
+        margin-bottom: 20px;
+    }
+    
+    .upload-area {
+        border: 2px dashed #ced4da;
+        border-radius: 10px;
+        padding: 30px;
+        text-align: center;
+        margin-top: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-area:hover {
+        border-color: #667eea;
+        background-color: #f8f9fa;
+    }
+    
+    .upload-area.dragover {
+        border-color: #667eea;
+        background-color: #e3f2fd;
+    }
+    
+    @media (max-width: 768px) {
+        .poem-title {
+            font-size: 2rem;
+            padding: 20px;
+        }
+        
+        .verses-container {
+            padding: 20px;
+        }
+        
+        .verse-text {
+            font-size: 1.2rem;
+        }
+        
+        .verse-1, .verse-2 {
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Poem Header -->
+<section class="poem-header">
+    <div class="container">
+        <div class="breadcrumb-custom d-inline-block">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('main.home') }}" class="text-white text-decoration-none">
+                            <i class="fas fa-home"></i> صفحه اصلی
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('main.garden', garden_num=title.garden) }}" class="text-white text-decoration-none">
+                            باغ {{ title.garden }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">
+                        {{ title.title }}
+                    </li>
+                </ol>
+            </nav>
+        </div>
+        
+        <div class="text-center">
+            <p class="mb-2">
+                <span class="badge bg-light text-dark">باغ {{ title.garden }}</span>
+                <span class="badge bg-light text-dark ms-2">{{ verses|length }} بیت</span>
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Poem Content -->
+<section class="pb-5">
+    <div class="container">
+        <div class="poem-content">
+            <!-- Poem Title -->
+            <h1 class="poem-title">{{ title.title }}</h1>
+            
+            <!-- Audio Controls -->
+            {% if recordings %}
+            <div class="audio-controls">
+                <h5 class="mb-3">
+                    <i class="fas fa-volume-up me-2"></i>
+                    قرائت صوتی
+                </h5>
+                
+                {% for recording in recordings %}
+                <div class="audio-player">
+                    <h6>
+                        <i class="fas fa-microphone me-2"></i>
+                        قرائت {{ recording.reader_name }}
+                    </h6>
+                    <audio controls class="w-100">
+                        <source src="{{ url_for('static', filename='audio/' + recording.filename) }}" type="audio/mpeg">
+                        مرورگر شما از پخش صوت پشتیبانی نمی‌کند.
+                    </audio>
+                    <small class="text-muted d-block mt-2">
+                        ضبط شده در {{ recording.created_at.strftime('%Y/%m/%d') }}
+                    </small>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <!-- Upload Audio (for readers) -->
+            {% if current_user.is_authenticated and current_user.role in ['reader', 'admin'] %}
+            <div class="audio-controls">
+                <h5 class="mb-3">
+                    <i class="fas fa-upload me-2"></i>
+                    بارگذاری قرائت صوتی
+                </h5>
+                
+                {% if user_has_recording %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    شما قبلاً برای این شعر قرائت صوتی بارگذاری کرده‌اید.
+                </div>
+                {% else %}
+                <form id="audioUploadForm" enctype="multipart/form-data">
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                        <h6>فایل صوتی را اینجا بکشید یا کلیک کنید</h6>
+                        <p class="text-muted small">حداکثر حجم: 5 مگابایت | فرمت‌های مجاز: MP3, WAV</p>
+                        <input type="file" id="audioFile" name="audio_file" accept="audio/*" style="display: none;">
+                        <button type="button" class="btn btn-outline-primary mt-2" onclick="document.getElementById('audioFile').click()">
+                            انتخاب فایل
+                        </button>
+                    </div>
+                    <div id="uploadProgress" style="display: none;" class="mt-3">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="submit" class="btn btn-success" id="uploadBtn" style="display: none;">
+                            <i class="fas fa-upload me-2"></i>
+                            بارگذاری
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- Verses -->
+            <div class="verses-container">
+                {% for verse in verses %}
+                <div class="verse-row">
+                    <div class="row">
+                        {% if verse.verse_2 %}
+                        <div class="col-md-6">
+                            <div class="verse-text verse-1">{{ verse.verse_1 }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="verse-text verse-2">{{ verse.verse_2 }}</div>
+                        </div>
+                        {% else %}
+                        <div class="col-12">
+                            <div class="verse-text">{{ verse.verse_1 }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="verse-number">بیت {{ verse.order_in_title }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Comments Section -->
+        <div class="comments-section">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>
+                    <i class="fas fa-comments me-2"></i>
+                    نظرات پژوهشی
+                    <span class="badge bg-secondary">{{ comments|length }}</span>
+                </h4>
+                <button class="toggle-comments" onclick="toggleComments()">
+                    <i class="fas fa-eye me-2"></i>
+                    <span id="toggleText">نمایش نظرات</span>
+                </button>
+            </div>
+            
+            <div id="commentsContainer" style="display: none;">
+                {% if comments %}
+                    {% for comment in comments %}
+                    <div class="comment-card">
+                        <div class="comment-author">
+                            <i class="fas fa-user-graduate me-2"></i>
+                            {{ comment.author_name }}
+                        </div>
+                        <div class="comment-date">
+                            {{ comment.created_at.strftime('%Y/%m/%d - %H:%M') }}
+                        </div>
+                        <div class="comment-text">{{ comment.comment }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-comment-slash fa-2x mb-3"></i>
+                        <p>هنوز نظری ثبت نشده است</p>
+                    </div>
+                {% endif %}
+                
+                <!-- Comment Form (for researchers) -->
+                {% if current_user.is_authenticated and current_user.role in ['researcher', 'admin'] %}
+                <div class="comment-form">
+                    <h5 class="mb-3">
+                        <i class="fas fa-pen me-2"></i>
+                        افزودن نظر پژوهشی
+                    </h5>
+                    
+                    {% if user_has_comment %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        شما قبلاً برای این شعر نظر ثبت کرده‌اید.
+                    </div>
+                    {% else %}
+                    <form method="POST" action="{{ url_for('comments.add_comment', title_id=title.id) }}">
+                        {{ comment_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ comment_form.comment.label(class="form-label") }}
+                            {{ comment_form.comment(class="form-control", rows="5", placeholder="نظر پژوهشی خود را در خصوص این شعر بنویسید...") }}
+                        </div>
+                        <div class="text-end">
+                            {{ comment_form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let commentsVisible = false;
+
+function toggleComments() {
+    const container = document.getElementById('commentsContainer');
+    const toggleText = document.getElementById('toggleText');
+    
+    if (commentsVisible) {
+        container.style.display = 'none';
+        toggleText.innerHTML = '<i class="fas fa-eye me-2"></i>نمایش نظرات';
+        commentsVisible = false;
+    } else {
+        container.style.display = 'block';
+        toggleText.innerHTML = '<i class="fas fa-eye-slash me-2"></i>مخفی کردن نظرات';
+        commentsVisible = true;
+    }
+}
+
+// Audio upload functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const audioFile = document.getElementById('audioFile');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadForm = document.getElementById('audioUploadForm');
+    const uploadProgress = document.getElementById('uploadProgress');
+    
+    if (uploadArea && audioFile) {
+        // Drag and drop
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                audioFile.files = files;
+                handleFileSelect(files[0]);
+            }
+        });
+        
+        // File input change
+        audioFile.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                handleFileSelect(this.files[0]);
+            }
+        });
+        
+        // Form submission
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                uploadAudioFile();
+            });
+        }
+    }
+});
+
+function handleFileSelect(file) {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/mp3'];
+    
+    if (file.size > maxSize) {
+        alert('حجم فایل نباید بیش از 5 مگابایت باشد');
+        return;
+    }
+    
+    if (!allowedTypes.includes(file.type)) {
+        alert('فقط فایل‌های صوتی MP3 و WAV مجاز است');
+        return;
+    }
+    
+    document.getElementById('uploadBtn').style.display = 'inline-block';
+    document.getElementById('uploadArea').querySelector('h6').textContent = `فایل انتخاب شده: ${file.name}`;
+}
+
+function uploadAudioFile() {
+    const formData = new FormData();
+    const fileInput = document.getElementById('audioFile');
+    
+    if (!fileInput.files[0]) {
+        alert('لطفاً ابتدا فایل صوتی را انتخاب کنید');
+        return;
+    }
+    
+    formData.append('audio_file', fileInput.files[0]);
+    formData.append('title_id', {{ title.id }});
+    
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressBar = uploadProgress.querySelector('.progress-bar');
+    
+    uploadProgress.style.display = 'block';
+    
+    fetch('{{ url_for("verses.upload_audio") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('فایل صوتی با موفقیت بارگذاری شد');
+            location.reload();
+        } else {
+            alert('خطا در بارگذاری: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('خطا در بارگذاری فایل');
+    })
+    .finally(() => {
+        uploadProgress.style.display = 'none';
+    });
+}
+
+// Verse animation on load
+document.addEventListener('DOMContentLoaded', function() {
+    const verses = document.querySelectorAll('.verse-row');
+    verses.forEach((verse, index) => {
+        verse.style.opacity = '0';
+        verse.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            verse.style.transition = 'all 0.6s ease';
+            verse.style.opacity = '1';
+            verse.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+});
+</script>
+{% endblock %}
