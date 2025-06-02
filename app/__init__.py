@@ -10,6 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
+from flask_migrate import Migrate
 from config import config
 
 # ایجاد نمونه‌های اصلی
@@ -17,6 +18,7 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 mail = Mail()
 csrf = CSRFProtect()
+migrate = Migrate()
 
 def create_app(config_name=None):
     """ایجاد و تنظیم اپلیکیشن Flask"""
@@ -38,6 +40,7 @@ def create_app(config_name=None):
     login_manager.init_app(app)
     mail.init_app(app)
     csrf.init_app(app)
+    migrate.init_app(app, db)
     
     # تنظیمات Login Manager
     login_manager.login_view = 'auth.login'
@@ -46,7 +49,7 @@ def create_app(config_name=None):
     
     @login_manager.user_loader
     def load_user(user_id):
-        from models import User
+        from app.models import User
         return User.query.get(int(user_id))
     
     # ثبت Blueprintها

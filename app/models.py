@@ -119,7 +119,12 @@ class Comment(db.Model):
     comment = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    is_approved = db.Column(db.Boolean, default=False)  # تأیید شده یا خیر
+    status = db.Column(db.String(20), default='pending')  # وضعیت: pending, approved, rejected
+    
+    @property
+    def is_approved(self):
+        """برای حفظ سازگاری با کد قبلی"""
+        return self.status == 'approved'
     
     def __repr__(self):
         return f'<Comment by {self.author.username}>'

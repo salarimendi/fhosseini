@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}باغ {{ garden_num }} - سایت فردوسی حسینی{% endblock %}
+{% block title %}باغ {{ garden_num|persian_number }} - سایت فردوسی حسینی{% endblock %}
 
 {% block head %}
 <style>
@@ -171,7 +171,7 @@
                         </a>
                     </li>
                     <li class="breadcrumb-item active text-white" aria-current="page">
-                        باغ {{ garden_num }}
+                        باغ {{ garden_num|persian_number }}
                     </li>
                 </ol>
             </nav>
@@ -187,13 +187,13 @@
         </h1>
         
         <p class="lead mb-0">
-            باغ {{ garden_num }} از مجموعه چهار خیابان باغ فردوس
+            باغ {{ garden_num|persian_number }} از مجموعه چهار خیابان باغ فردوس
         </p>
         
         {% if titles %}
         <div class="mt-4">
             <span class="badge bg-light text-dark fs-6 px-3 py-2">
-                {{ titles|length }} عنوان شعر
+                {{ titles|length|persian_number }} عنوان شعر
             </span>
         </div>
         {% endif %}
@@ -240,23 +240,23 @@
                                 <h3 class="title-text">{{ title.title }}</h3>
                                 <div class="title-meta">
                                     <i class="fas fa-map-marker-alt"></i>
-                                    باغ {{ garden_num }} - ترتیب {{ title.order_in_garden }}
+                                    باغ {{ garden_num|persian_number }} - ترتیب {{ title.order_in_garden|persian_number }}
                                 </div>
                                 <div class="title-stats">
                                     <div class="stat-item">
                                         <i class="fas fa-quote-right"></i>
-                                        <span>{{ title.verses_count or 0 }} بیت</span>
+                                        <span>{{ title.verses_count|default(0)|persian_number }} بیت</span>
                                     </div>
                                     {% if title.comments_count %}
                                     <div class="stat-item">
                                         <i class="fas fa-comment-alt"></i>
-                                        <span>{{ title.comments_count }} نظر</span>
+                                        <span>{{ title.comments_count|persian_number }} نظر</span>
                                     </div>
                                     {% endif %}
                                     {% if title.recordings_count %}
                                     <div class="stat-item">
                                         <i class="fas fa-microphone"></i>
-                                        <span>{{ title.recordings_count }} ضبط صوتی</span>
+                                        <span>{{ title.recordings_count|persian_number }} ضبط صوتی</span>
                                     </div>
                                     {% endif %}
                                 </div>

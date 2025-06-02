@@ -12,6 +12,7 @@ from flask_mail import Message
 from werkzeug.security import generate_password_hash
 from app import db, mail
 from app.models import User
+from app.forms import LoginForm
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -22,14 +23,11 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
     
-    if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
-        remember = bool(request.form.get('remember'))
-        
-        if not username or not password:
-            flash('لطفاً نام کاربری و رمز عبور را وارد کنید.', 'error')
-            return render_template('auth/login.html')
+    form = LoginForm()
+    if form.validate_on_submit():
+        username = form.username.data.strip()
+        password = form.password.data
+        remember = form.remember_me.data
         
         # جستجوی کاربر بر اساس نام کاربری یا ایمیل
         user = User.query.filter(
@@ -49,7 +47,7 @@ def login():
         else:
             flash('نام کاربری یا رمز عبور اشتباه است.', 'error')
     
-    return render_template('auth/login.html')
+    return render_template('auth/login.html', form=form)
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():

@@ -187,9 +187,7 @@ def delete_recording(recording_id):
         db.session.rollback()
         flash('خطا در حذف ضبط صوتی', 'error')
     
-    return redirect(url_for('admin.recordings'))
-
-@admin_bp.route('/reset-password/<int:user_id>', methods=['POST'])
+    return redirect(url_for('admin.recordings'))@admin_bp.route('/reset-password/<int:user_id>', methods=['POST'])
 @login_required
 @admin_required
 def reset_user_password(user_id):
@@ -207,3 +205,4 @@ def reset_user_password(user_id):
     except:
         db.session.rollback()
         return jsonify({'success': False, 'message': 'خطا در تغییر رمز عبور'})
+

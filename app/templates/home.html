@@ -175,7 +175,7 @@
                             {% else %}خیابان چهارم
                             {% endif %}
                         </h3>
-                        <small>باغ {{ garden_num }}</small>
+                        <small>باغ {{ garden_num|persian_number }}</small>
                     </div>
                     <div class="garden-body">
                         <div class="mb-4">
@@ -207,19 +207,19 @@
     <div class="container">
         <div class="row text-center">
             <div class="col-md-3 mb-4">
-                <div class="h2 text-primary fw-bold">{{ total_titles or 0 }}</div>
+                <div class="h2 text-primary fw-bold">{{ total_titles|default(0)|persian_number }}</div>
                 <p class="text-muted mb-0">عنوان شعر</p>
             </div>
             <div class="col-md-3 mb-4">
-                <div class="h2 text-success fw-bold">{{ total_verses or 0 }}</div>
+                <div class="h2 text-success fw-bold">{{ total_verses|default(0)|persian_number }}</div>
                 <p class="text-muted mb-0">بیت شعر</p>
             </div>
             <div class="col-md-3 mb-4">
-                <div class="h2 text-warning fw-bold">{{ total_comments or 0 }}</div>
+                <div class="h2 text-warning fw-bold">{{ total_comments|default(0)|persian_number }}</div>
                 <p class="text-muted mb-0">نظر پژوهشی</p>
             </div>
             <div class="col-md-3 mb-4">
-                <div class="h2 text-info fw-bold">{{ total_recordings or 0 }}</div>
+                <div class="h2 text-info fw-bold">{{ total_recordings|default(0)|persian_number }}</div>
                 <p class="text-muted mb-0">ضبط صوتی</p>
             </div>
         </div>
