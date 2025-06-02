@@ -20,7 +20,7 @@ def login():
     """ورود کاربر"""
     
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.home'))
     
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
@@ -45,7 +45,7 @@ def login():
                 return redirect(next_page)
             
             flash(f'خوش آمدید، {user.username}!', 'success')
-            return redirect(url_for('main.index'))
+            return redirect(url_for('main.home'))
         else:
             flash('نام کاربری یا رمز عبور اشتباه است.', 'error')
     
@@ -56,7 +56,7 @@ def register():
     """ثبت نام کاربر جدید"""
     
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.home'))
     
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
@@ -123,7 +123,7 @@ def logout():
     """خروج کاربر"""
     logout_user()
     flash('با موفقیت خارج شدید.', 'info')
-    return redirect(url_for('main.index'))
+    return redirect(url_for('main.home'))
 
 @auth_bp.route('/profile')
 @login_required
@@ -182,7 +182,7 @@ def forgot_password():
     """فراموشی رمز عبور"""
     
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.home'))
     
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
@@ -221,7 +221,7 @@ def reset_password(token):
     """بازنشانی رمز عبور"""
     
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.home'))
     
     # بررسی معتبر بودن توکن
     reset_data = session.get(f'reset_token_{token}')
@@ -276,7 +276,7 @@ def users_list():
     
     if not current_user.is_admin():
         flash('شما مجوز دسترسی به این صفحه را ندارید.', 'error')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.home'))
     
     users = User.query.order_by(User.created_at.desc()).all()
     return render_template('auth/users_list.html', users=users)
@@ -288,7 +288,7 @@ def toggle_user_status(user_id):
     
     if not current_user.is_admin():
         flash('شما مجوز دسترسی به این عملیات را ندارید.', 'error')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.home'))
     
     user = User.query.get_or_404(user_id)
     

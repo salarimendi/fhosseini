@@ -136,7 +136,7 @@ def play_audio(recording_id):
     
     if not recording.is_approved:
         flash('این ضبط صوتی هنوز تأیید نشده است.', 'error')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.home'))
     
     file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], recording.filename)
     
@@ -154,7 +154,7 @@ def download_audio(recording_id):
     
     if not recording.is_approved:
         flash('این ضبط صوتی هنوز تأیید نشده است.', 'error')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.home'))
     
     file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], recording.filename)
     

@@ -62,22 +62,22 @@ def home():
                          recent_comments=recent_comments,
                          recent_recordings=recent_recordings)
 
-@main_bp.route('/garden/<int:garden_id>')
-def garden(garden_id):
+@main_bp.route('/garden/<int:garden_num>')
+def garden(garden_num):
     """نمایش عناوین یک باغ خاص"""
     
-    if garden_id < 1 or garden_id > 4:
+    if garden_num < 1 or garden_num > 4:
         flash('باغ مورد نظر یافت نشد.', 'error')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.home'))
     
     # دریافت عناوین باغ مرتب شده
-    titles = Title.query.filter_by(garden=garden_id)\
+    titles = Title.query.filter_by(garden=garden_num)\
                        .order_by(Title.order_in_garden)\
                        .all()
     
     if not titles:
         flash(f'هیچ شعری در این باغ یافت نشد.', 'info')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.home'))
     
     # استفاده از property garden_name از مدل
     garden_name = titles[0].garden_name
@@ -87,21 +87,21 @@ def garden(garden_id):
         'title_count': len(titles),
         'verse_count': db.session.query(func.count(Verse.id))\
                                 .join(Title)\
-                                .filter(Title.garden == garden_id)\
+                                .filter(Title.garden == garden_num)\
                                 .scalar(),
         'comment_count': db.session.query(func.count(Comment.id))\
                                   .join(Title)\
-                                  .filter(Title.garden == garden_id, Comment.is_approved == True)\
+                                  .filter(Title.garden == garden_num, Comment.is_approved == True)\
                                   .scalar(),
         'recording_count': db.session.query(func.count(Recording.id))\
                                     .join(Title)\
-                                    .filter(Title.garden == garden_id, Recording.is_approved == True)\
+                                    .filter(Title.garden == garden_num, Recording.is_approved == True)\
                                     .scalar()
     }
     
     return render_template('garden.html', 
                          titles=titles, 
-                         garden_id=garden_id,
+                         garden_num=garden_num,
                          garden_name=garden_name,
                          garden_stats=garden_stats)
 
@@ -149,7 +149,7 @@ def title(title_id):
         'recording_count': len(recordings)
     }
     
-    return render_template('title.html',
+    return render_template('poem.html',
                          title=title_obj,
                          verses=verses,
                          comments=approved_comments,
@@ -157,6 +157,7 @@ def title(title_id):
                          prev_title=prev_title,
                          next_title=next_title,
                          poem_stats=poem_stats)
+
 
 @main_bp.route('/search')
 def search():
@@ -254,7 +255,7 @@ def random_poem():
     
     if not title_obj:
         flash('هیچ شعری یافت نشد.', 'error')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.home'))
     
     return redirect(url_for('main.title', title_id=title_obj.id))
 
@@ -279,14 +280,14 @@ def api_gardens():
     
     return jsonify({'gardens': gardens})
 
-@main_bp.route('/api/titles/<int:garden_id>')
-def api_titles(garden_id):
+@main_bp.route('/api/titles/<int:garden_num>')
+def api_titles(garden_num):
     """API برای دریافت عناوین یک باغ"""
     
-    if garden_id < 1 or garden_id > 4:
+    if garden_num < 1 or garden_num > 4:
         return jsonify({'error': 'باغ مورد نظر یافت نشد.'}), 404
     
-    titles = Title.query.filter_by(garden=garden_id)\
+    titles = Title.query.filter_by(garden=garden_num)\
                        .order_by(Title.order_in_garden)\
                        .all()
     

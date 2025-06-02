@@ -227,7 +227,7 @@ class ModelTestCase(unittest.TestCase):
     def test_user_roles_and_permissions(self):
         """Test user roles and permissions."""
         # Test admin user
-        admin = User(username='admin', email='admin@test.com', role='admin')
+        admin = User(username='admin2', email='admin2@test.com', role='admin')
         admin.set_password('password')
         
         # Test researcher user

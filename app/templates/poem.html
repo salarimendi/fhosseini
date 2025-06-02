@@ -21,7 +21,7 @@
     }
     
     .poem-title {
-        font-family: 'Noto Nastaliq Urdu', serif;
+        font-family: 'Sahel', Tahoma, sans-serif;
         font-size: 2.5rem;
         font-weight: 700;
         text-align: center;
@@ -48,7 +48,7 @@
     }
     
     .verse-text {
-        font-family: 'Noto Nastaliq Urdu', serif;
+        font-family: 'Vazir', Tahoma, sans-serif;
         font-size: 1.4rem;
         line-height: 2.2;
         color: #2c3e50;
@@ -496,7 +496,8 @@ function uploadAudioFile() {
     
     uploadProgress.style.display = 'block';
     
-    fetch('{{ url_for("verses.upload_audio") }}', {
+
+    fetch('{{ url_for("verses.record_audio", title_id=title.id) }}', {
         method: 'POST',
         body: formData
     })

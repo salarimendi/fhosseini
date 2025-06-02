@@ -1,7 +1,5 @@
 /* استایل‌های اصلی سایت فردوسی حسینی */
 
-/* فونت نستعلیق */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
 
 /* تنظیمات کلی */
 * {
@@ -10,13 +8,76 @@
     box-sizing: border-box;
 }
 
+
+/* تعریف فونت وزیر */
+@font-face {
+    font-family: 'Vazir';
+    src: url('../fonts/vazir/Vazir.woff2') format('woff2'),
+         url('../fonts/vazir/Vazir.woff') format('woff');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Vazir';
+    src: url('../fonts/vazir/Vazir-Bold.woff2') format('woff2'),
+         url('../fonts/vazir/Vazir-Bold.woff') format('woff');
+    font-weight: bold;
+}
+
+/* تعریف فونت ساحل */
+@font-face {
+    font-family: 'Sahel';
+    src: url('../fonts/sahel/Sahel.woff') format('woff');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Sahel';
+    src: url('../fonts/sahel/Sahel-Bold.woff') format('woff');
+        
+    font-weight: bold;
+}
+
+
 body {
-    font-family: 'Noto Nastaliq Urdu', 'Tahoma', sans-serif;
+    font-family: 'Vazir', 'Tahoma', sans-serif;
     direction: rtl;
     text-align: right;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     min-height: 100vh;
     line-height: 1.8;
+}
+
+/* عناوین */
+h1, h2, h3, h4, h5, h6,
+.site-title,
+.garden-title,
+.poem-title,
+.navbar-brand,
+.section-title {
+    font-family: 'Sahel', Tahoma, sans-serif;
+    font-weight: bold;
+}
+
+
+
+/* متن اشعار و محتوا */
+.verse,
+.verse-line,
+.poem-content,
+.card-text,
+.comment-text {
+    font-family: 'Vazir', Tahoma, sans-serif;
+    line-height: 2;
+}
+
+/* فرم‌ها و دکمه‌ها */
+input,
+textarea,
+button,
+.btn,
+.form-control {
+    font-family: 'Vazir', Tahoma, sans-serif;
 }
 
 /* هدر */
