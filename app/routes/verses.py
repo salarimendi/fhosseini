@@ -34,8 +34,7 @@ def record_audio(title_id):
     
     # بررسی مجوز ضبط
     if not current_user.can_record():
-        flash('شما مجوز ضبط صدا ندارید.', 'error')
-        return redirect(url_for('main.title', title_id=title_id))
+        return jsonify({'success': False, 'message': 'شما مجوز ضبط صدا ندارید.'})
     
     title_obj = Title.query.get_or_404(title_id)
     
@@ -48,18 +47,15 @@ def record_audio(title_id):
     if request.method == 'POST':
         # بررسی اینکه آیا فایل آپلود شده یا نه
         if 'audio_file' not in request.files:
-            flash('فایل صوتی انتخاب نشده است.', 'error')
-            return redirect(request.url)
+            return jsonify({'success': False, 'message': 'فایل صوتی انتخاب نشده است.'})
         
         file = request.files['audio_file']
         
         if file.filename == '':
-            flash('فایل صوتی انتخاب نشده است.', 'error')
-            return redirect(request.url)
+            return jsonify({'success': False, 'message': 'فایل صوتی انتخاب نشده است.'})
         
         if not allowed_file(file.filename):
-            flash('فرمت فایل مجاز نیست. فرمت‌های مجاز: mp3, wav, ogg, m4a', 'error')
-            return redirect(request.url)
+            return jsonify({'success': False, 'message': 'فرمت فایل مجاز نیست. فرمت‌های مجاز: mp3, wav, ogg, m4a'})
         
         # بررسی اندازه فایل
         file.seek(0, os.SEEK_END)
@@ -67,19 +63,18 @@ def record_audio(title_id):
         file.seek(0)
         
         if file_size > current_app.config['MAX_CONTENT_LENGTH']:
-            flash('اندازه فایل نباید بیشتر از ۵ مگابایت باشد.', 'error')
-            return redirect(request.url)
-        
-        # ایجاد نام فایل یکتا
-        file_extension = file.filename.rsplit('.', 1)[1].lower()
-        unique_filename = f"{uuid.uuid4().hex}.{file_extension}"
-        
-        # مسیر ذخیره فایل
-        upload_folder = current_app.config['UPLOAD_FOLDER']
-        os.makedirs(upload_folder, exist_ok=True)
-        file_path = os.path.join(upload_folder, unique_filename)
+            return jsonify({'success': False, 'message': 'اندازه فایل نباید بیشتر از ۵ مگابایت باشد.'})
         
         try:
+            # ایجاد نام فایل یکتا
+            file_extension = file.filename.rsplit('.', 1)[1].lower()
+            unique_filename = f"{uuid.uuid4().hex}.{file_extension}"
+            
+            # مسیر ذخیره فایل
+            upload_folder = current_app.config['UPLOAD_FOLDER']
+            os.makedirs(upload_folder, exist_ok=True)
+            file_path = os.path.join(upload_folder, unique_filename)
+            
             # ذخیره فایل
             file.save(file_path)
             
@@ -97,7 +92,10 @@ def record_audio(title_id):
                 existing_recording.created_at = datetime.utcnow()
                 
                 db.session.commit()
-                flash('ضبط صوتی با موفقیت به‌روزرسانی شد.', 'success')
+                return jsonify({
+                    'success': True,
+                    'message': 'ضبط صوتی با موفقیت به‌روزرسانی شد.'
+                })
             
             else:
                 # ایجاد رکورد جدید
@@ -111,19 +109,24 @@ def record_audio(title_id):
                 
                 db.session.add(new_recording)
                 db.session.commit()
-                flash('ضبط صوتی با موفقیت ذخیره شد.', 'success')
+                return jsonify({
+                    'success': True,
+                    'message': 'ضبط صوتی با موفقیت ذخیره شد.'
+                })
             
-            return redirect(url_for('main.title', title_id=title_id))
-        
         except Exception as e:
             db.session.rollback()
             # حذف فایل در صورت خطا
             if os.path.exists(file_path):
                 os.remove(file_path)
             
-            flash('خطا در ذخیره فایل صوتی.', 'error')
             current_app.logger.error(f"Error saving audio file: {e}")
+            return jsonify({
+                'success': False,
+                'message': 'خطا در ذخیره فایل صوتی.'
+            })
     
+    # برای درخواست GET، صفحه ضبط را نمایش می‌دهیم
     return render_template('verses/record_audio.html', 
                          title=title_obj, 
                          existing_recording=existing_recording)

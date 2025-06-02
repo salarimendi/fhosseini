@@ -12,7 +12,7 @@ from flask_mail import Message
 from werkzeug.security import generate_password_hash
 from app import db, mail
 from app.models import User
-from app.forms import LoginForm
+from app.forms import LoginForm, ChangePasswordForm
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -141,39 +141,16 @@ def profile():
 @auth_bp.route('/change_password', methods=['GET', 'POST'])
 @login_required
 def change_password():
-    """تغییر رمز عبور"""
-    
-    if request.method == 'POST':
-        current_password = request.form.get('current_password', '')
-        new_password = request.form.get('new_password', '')
-        confirm_password = request.form.get('confirm_password', '')
-        
-        # اعتبارسنجی
-        if not current_user.check_password(current_password):
-            flash('رمز عبور فعلی اشتباه است.', 'error')
-            return render_template('auth/change_password.html')
-        
-        if len(new_password) < 6:
-            flash('رمز عبور جدید باید حداقل ۶ کاراکتر باشد.', 'error')
-            return render_template('auth/change_password.html')
-        
-        if new_password != confirm_password:
-            flash('تکرار رمز عبور جدید مطابقت ندارد.', 'error')
-            return render_template('auth/change_password.html')
-        
-        # تغییر رمز عبور
-        current_user.set_password(new_password)
-        
-        try:
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if current_user.check_password(form.current_password.data):
+            current_user.set_password(form.new_password.data)
             db.session.commit()
-            flash('رمز عبور با موفقیت تغییر کرد.', 'success')
+            flash('رمز عبور شما با موفقیت تغییر کرد.', 'success')
             return redirect(url_for('auth.profile'))
-        
-        except Exception as e:
-            db.session.rollback()
-            flash('خطا در تغییر رمز عبور.', 'error')
-    
-    return render_template('auth/change_password.html')
+        else:
+            flash('رمز عبور فعلی اشتباه است.', 'error')
+    return render_template('auth/change_password.html', form=form)
 
 @auth_bp.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():

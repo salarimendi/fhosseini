@@ -236,6 +236,29 @@
             <!-- Poem Title -->
             <h1 class="poem-title">{{ title.title }}</h1>
             
+            <!-- Verses -->
+            <div class="verses-container">
+                {% for verse in verses %}
+                <div class="verse-row">
+                    <div class="row">
+                        {% if verse.verse_2 %}
+                        <div class="col-md-6">
+                            <div class="verse-text verse-1">{{ verse.verse_1 }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="verse-text verse-2">{{ verse.verse_2 }}</div>
+                        </div>
+                        {% else %}
+                        <div class="col-12">
+                            <div class="verse-text">{{ verse.verse_1 }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="verse-number">بیت {{ loop.index|persian_number }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
             <!-- Audio Controls -->
             {% if recordings %}
             <div class="audio-controls">
@@ -301,29 +324,6 @@
                 {% endif %}
             </div>
             {% endif %}
-            
-            <!-- Verses -->
-            <div class="verses-container">
-                {% for verse in verses %}
-                <div class="verse-row">
-                    <div class="row">
-                        {% if verse.verse_2 %}
-                        <div class="col-md-6">
-                            <div class="verse-text verse-1">{{ verse.verse_1 }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="verse-text verse-2">{{ verse.verse_2 }}</div>
-                        </div>
-                        {% else %}
-                        <div class="col-12">
-                            <div class="verse-text">{{ verse.verse_1 }}</div>
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="verse-number">بیت {{ loop.index|persian_number }}</div>
-                </div>
-                {% endfor %}
-            </div>
         </div>
         
         <!-- Comments Section -->
@@ -482,7 +482,8 @@ function handleFileSelect(file) {
 function uploadAudioFile() {
     const formData = new FormData();
     const fileInput = document.getElementById('audioFile');
-    const titleId = '{{ title.id }}';  // تعریف متغیر برای title.id
+    const titleId = '{{ title.id }}';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     
     if (!fileInput.files[0]) {
         alert('لطفاً ابتدا فایل صوتی را انتخاب کنید');
@@ -499,9 +500,24 @@ function uploadAudioFile() {
     
     fetch('{{ url_for("verses.record_audio", title_id=title.id) }}', {
         method: 'POST',
-        body: formData
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        body: formData,
+        credentials: 'same-origin'
     })
-    .then(response => response.json())
+    .then(response => {
+        if (response.headers.get('content-type')?.includes('application/json')) {
+            return response.json().then(data => {
+                if (!response.ok) {
+                    throw new Error(data.message || 'خطا در بارگذاری فایل');
+                }
+                return data;
+            });
+        } else {
+            throw new Error('خطای سرور: لطفاً دوباره تلاش کنید');
+        }
+    })
     .then(data => {
         if (data.success) {
             alert('فایل صوتی با موفقیت بارگذاری شد');
@@ -512,7 +528,7 @@ function uploadAudioFile() {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('خطا در بارگذاری فایل');
+        alert(error.message || 'خطا در بارگذاری فایل');
     })
     .finally(() => {
         uploadProgress.style.display = 'none';
