@@ -12,28 +12,28 @@
 /* تعریف فونت وزیر */
 @font-face {
     font-family: 'Vazir';
-    src: url('../fonts/vazir/Vazir.woff2') format('woff2'),
-         url('../fonts/vazir/Vazir.woff') format('woff');
+    src: url('../fonts/Vazir.woff2') format('woff2'),
+         url('../fonts/Vazir.woff') format('woff');
     font-weight: normal;
 }
 
 @font-face {
     font-family: 'Vazir';
-    src: url('../fonts/vazir/Vazir-Bold.woff2') format('woff2'),
-         url('../fonts/vazir/Vazir-Bold.woff') format('woff');
+    src: url('../fonts/Vazir-Bold.woff2') format('woff2'),
+         url('../fonts/Vazir-Bold.woff') format('woff');
     font-weight: bold;
 }
 
 /* تعریف فونت ساحل */
 @font-face {
     font-family: 'Sahel';
-    src: url('../fonts/sahel/Sahel.woff') format('woff');
+    src: url('../fonts/Sahel.woff') format('woff');
     font-weight: normal;
 }
 
 @font-face {
     font-family: 'Sahel';
-    src: url('../fonts/sahel/Sahel-Bold.woff') format('woff');
+    src: url('../fonts/Sahel-Bold.woff') format('woff');
         
     font-weight: bold;
 }

@@ -22,12 +22,13 @@ class Config:
     db_path = basedir / "instance" / "ferdosi.db"
     print(f"Database path: {db_path}")
     
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{db_path}"
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///app.db'
     print(f"Database URI: {SQLALCHEMY_DATABASE_URI}")
 
 
     # تنظیمات امنیتی
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'ferdowsi-hosseini-secret-key-2025'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-secret-key-here'
+    WTF_CSRF_SECRET_KEY = os.environ.get('WTF_CSRF_SECRET_KEY') or 'your-csrf-secret-key'
     
     # تنظیمات پایگاه داده
     #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///instance/ferdosi.db'
@@ -40,7 +41,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # تنظیمات فایل آپلود
-    UPLOAD_FOLDER = 'app/static/uploads'
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app/static/uploads')
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB محدودیت برای فایل‌های صوتی
     ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a'}
     

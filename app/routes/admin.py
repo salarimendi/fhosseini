@@ -225,7 +225,6 @@ def reject_comment(comment_id):
         db.session.rollback()
         return jsonify({'success': False, 'message': 'خطا در رد نظر'})
 
-
 @admin_bp.route('/recordings')
 @login_required
 @admin_required
@@ -270,8 +269,6 @@ def recordings():
 
     return render_template('admin/recordings.html', recordings=recordings, stats=stats)
 
-
-
 @admin_bp.route('/recordings/<int:recording_id>/delete', methods=['POST'])
 @login_required
 @admin_required
@@ -295,3 +292,28 @@ def delete_recording(recording_id):
         flash('خطا در حذف ضبط صوتی', 'error')
     
     return redirect(url_for('admin.recordings'))
+
+@admin_bp.route('/users/<int:user_id>/toggle_status', methods=['POST'])
+@login_required
+@admin_required
+def toggle_user_status(user_id):
+    """فعال/غیرفعال کردن کاربر"""
+    user = User.query.get_or_404(user_id)
+    
+    # مدیر نمی‌تواند خودش را غیرفعال کند
+    if user.id == current_user.id:
+        flash('شما نمی‌توانید وضعیت خود را تغییر دهید.', 'error')
+        return redirect(url_for('admin.users'))
+    
+    # تغییر وضعیت کاربر
+    user.is_active = not user.is_active
+    status = 'فعال' if user.is_active else 'غیرفعال'
+    
+    try:
+        db.session.commit()
+        flash(f'کاربر {user.username} با موفقیت {status} شد.', 'success')
+    except:
+        db.session.rollback()
+        flash('خطا در تغییر وضعیت کاربر.', 'error')
+    
+    return redirect(url_for('admin.users'))

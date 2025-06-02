@@ -12,7 +12,7 @@ from flask_mail import Message
 from werkzeug.security import generate_password_hash
 from app import db, mail
 from app.models import User
-from app.forms import LoginForm, ChangePasswordForm
+from app.forms import LoginForm, ChangePasswordForm, RegisterForm
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -56,97 +56,62 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
     
-    if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        email = request.form.get('email', '').strip().lower()
-        password = request.form.get('password', '')
-        password_confirm = request.form.get('password_confirm', '')
-        role = request.form.get('role', 'user')
+    form = RegisterForm()
+    if form.validate_on_submit():
+        # بررسی تکراری نبودن نام کاربری و ایمیل
+        if User.query.filter_by(username=form.username.data).first():
+            flash('نام کاربری قبلاً استفاده شده است. ❌', 'error')
+            return render_template('auth/register.html', form=form)
         
-        # اعتبارسنجی
-        errors = []
-        
-        if not username or len(username) < 3:
-            errors.append('نام کاربری باید حداقل ۳ کاراکتر باشد.')
-        
-        if not email or '@' not in email:
-            errors.append('ایمیل معتبر وارد کنید.')
-        
-        if not password or len(password) < 6:
-            errors.append('رمز عبور باید حداقل ۶ کاراکتر باشد.')
-        
-        if password != password_confirm:
-            errors.append('تکرار رمز عبور مطابقت ندارد.')
-        
-        # بررسی نقش‌های مجاز (بر اساس models.py)
-        if role not in ['user', 'researcher', 'reader']:
-            role = 'user'
-        
-        # بررسی تکراری نبودن
-        if User.query.filter_by(username=username).first():
-            errors.append('نام کاربری قبلاً استفاده شده است.')
-        
-        if User.query.filter_by(email=email).first():
-            errors.append('ایمیل قبلاً ثبت شده است.')
-        
-        if errors:
-            for error in errors:
-                flash(error, 'error')
-            return render_template('auth/register.html')
+        if User.query.filter_by(email=form.email.data).first():
+            flash('ایمیل قبلاً ثبت شده است. ❌', 'error')
+            return render_template('auth/register.html', form=form)
         
         # ایجاد کاربر جدید
         user = User(
-            username=username,
-            email=email,
-            role=role
+            username=form.username.data,
+            email=form.email.data.lower(),
+            role=form.role.data,
+            is_active=False  # کاربر جدید به صورت پیش‌فرض غیرفعال است
         )
-        user.set_password(password)
+        user.set_password(form.password.data)
         
         try:
             db.session.add(user)
             db.session.commit()
-            
-            flash('ثبت نام با موفقیت انجام شد. می‌توانید وارد شوید.', 'success')
+            flash('ثبت نام با موفقیت انجام شد. حساب کاربری شما پس از تایید مدیر فعال خواهد شد. 🎉', 'success')
             return redirect(url_for('auth.login'))
         
         except Exception as e:
             db.session.rollback()
-            flash('خطا در ثبت نام. لطفاً دوباره تلاش کنید.', 'error')
+            flash('خطا در ثبت نام. لطفاً دوباره تلاش کنید. ❌', 'error')
     
-    return render_template('auth/register.html')
+    return render_template('auth/register.html', form=form)
 
 @auth_bp.route('/logout')
 @login_required
 def logout():
     """خروج کاربر"""
     logout_user()
-    flash('با موفقیت خارج شدید.', 'info')
+    flash('با موفقیت خارج شدید.', 'success')
     return redirect(url_for('main.home'))
 
 @auth_bp.route('/profile')
 @login_required
 def profile():
     """پروفایل کاربر"""
-    
-    # آمار کاربر بر اساس روابط تعریف شده در models.py
-    stats = {
-        'comments_count': current_user.comments.count(),
-        'recordings_count': current_user.recordings.count(),
-        'approved_comments': current_user.comments.filter_by(is_approved=True).count(),
-        'approved_recordings': current_user.recordings.filter_by(is_approved=True).count(),
-    }
-    
-    return render_template('auth/profile.html', stats=stats)
+    return render_template('auth/profile.html')
 
 @auth_bp.route('/change_password', methods=['GET', 'POST'])
 @login_required
 def change_password():
+    """تغییر رمز عبور"""
     form = ChangePasswordForm()
     if form.validate_on_submit():
         if current_user.check_password(form.current_password.data):
             current_user.set_password(form.new_password.data)
             db.session.commit()
-            flash('رمز عبور شما با موفقیت تغییر کرد.', 'success')
+            flash('رمز عبور با موفقیت تغییر کرد.', 'success')
             return redirect(url_for('auth.profile'))
         else:
             flash('رمز عبور فعلی اشتباه است.', 'error')
@@ -217,32 +182,21 @@ def reset_password(token):
         return redirect(url_for('auth.forgot_password'))
     
     if request.method == 'POST':
-        new_password = request.form.get('new_password', '')
-        confirm_password = request.form.get('confirm_password', '')
+        password = request.form.get('password')
+        password_confirm = request.form.get('password_confirm')
         
-        if len(new_password) < 6:
+        if not password or len(password) < 6:
             flash('رمز عبور باید حداقل ۶ کاراکتر باشد.', 'error')
-            return render_template('auth/reset_password.html', token=token)
-        
-        if new_password != confirm_password:
-            flash('تکرار رمز عبور مطابقت ندارد.', 'error')
-            return render_template('auth/reset_password.html', token=token)
-        
-        # تغییر رمز عبور
-        user.set_password(new_password)
-        
-        try:
+        elif password != password_confirm:
+            flash('رمز عبور و تکرار آن باید یکسان باشند.', 'error')
+        else:
+            user.set_password(password)
             db.session.commit()
             session.pop(f'reset_token_{token}', None)
-            
-            flash('رمز عبور با موفقیت تغییر کرد. می‌توانید وارد شوید.', 'success')
+            flash('رمز عبور با موفقیت تغییر کرد. اکنون می‌توانید وارد شوید.', 'success')
             return redirect(url_for('auth.login'))
-        
-        except Exception as e:
-            db.session.rollback()
-            flash('خطا در تغییر رمز عبور.', 'error')
     
-    return render_template('auth/reset_password.html', token=token)
+    return render_template('auth/reset_password.html')
 
 @auth_bp.route('/users')
 @login_required
@@ -285,13 +239,36 @@ def toggle_user_status(user_id):
 
 def send_reset_email(user, token):
     """ارسال ایمیل بازیابی رمز عبور"""
+    reset_link = url_for('auth.reset_password', token=token, _external=True)
     
     msg = Message(
-        subject='بازیابی رمز عبور - فردوسی حسینی',
-        recipients=[user.email],
-        html=render_template('emails/reset_password.html', 
-                           user=user, 
-                           token=token)
+        'بازیابی رمز عبور - سایت فردوسی حسینی',
+        sender=('فردوسی حسینی', 'noreply@ferdowsihosseini.ir'),
+        recipients=[user.email]
     )
+    
+    msg.body = f'''برای بازیابی رمز عبور خود، روی لینک زیر کلیک کنید:
+
+{reset_link}
+
+اگر شما درخواست بازیابی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید.
+
+با احترام،
+تیم فردوسی حسینی
+'''
+    
+    msg.html = f'''
+<p>برای بازیابی رمز عبور خود، روی دکمه زیر کلیک کنید:</p>
+
+<p><a href="{reset_link}" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">بازیابی رمز عبور</a></p>
+
+<p>یا می‌توانید لینک زیر را در مرورگر خود کپی کنید:</p>
+<p><small>{reset_link}</small></p>
+
+<p>اگر شما درخواست بازیابی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید.</p>
+
+<p>با احترام،<br>
+تیم فردوسی حسینی</p>
+'''
     
     mail.send(msg)
