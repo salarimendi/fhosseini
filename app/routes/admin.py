@@ -5,6 +5,7 @@ from app.models import User, Comment, Recording
 from app import db
 from functools import wraps
 import os
+import secrets
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -46,6 +47,33 @@ def users():
     )
     return render_template('admin/users.html', users=users)
 
+@admin_bp.route('/users/<int:user_id>/change-role', methods=['POST'])
+@login_required
+@admin_required
+def change_user_role(user_id):
+    """تغییر نقش کاربر"""
+    user = User.query.get_or_404(user_id)
+    new_role = request.form.get('new_role')
+    
+    if new_role not in ['user', 'researcher', 'reader', 'admin']:
+        flash('نقش نامعتبر است', 'error')
+        return redirect(url_for('admin.users'))
+    
+    # جلوگیری از تغییر نقش خود
+    if user.id == current_user.id:
+        flash('نمی‌توانید نقش خود را تغییر دهید', 'error')
+        return redirect(url_for('admin.users'))
+    
+    try:
+        user.role = new_role
+        db.session.commit()
+        flash('نقش کاربر با موفقیت تغییر کرد', 'success')
+    except:
+        db.session.rollback()
+        flash('خطا در تغییر نقش کاربر', 'error')
+    
+    return redirect(url_for('admin.users'))
+
 @admin_bp.route('/users/<int:user_id>/edit', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -73,6 +101,23 @@ def edit_user(user_id):
     
     return render_template('admin/edit_user.html', user=user)
 
+@admin_bp.route('/users/<int:user_id>/reset-password', methods=['POST'])
+@login_required
+@admin_required
+def reset_password(user_id):
+    """بازنشانی رمز عبور کاربر"""
+    user = User.query.get_or_404(user_id)
+    
+    try:
+        # تولید رمز عبور تصادفی
+        new_password = secrets.token_urlsafe(8)
+        user.set_password(new_password)
+        db.session.commit()
+        return jsonify({'success': True, 'message': f'رمز عبور جدید: {new_password}'})
+    except:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'خطا در بازنشانی رمز عبور'})
+
 @admin_bp.route('/users/<int:user_id>/delete', methods=['POST'])
 @login_required
 @admin_required
@@ -81,15 +126,13 @@ def delete_user(user_id):
     user = User.query.get_or_404(user_id)
     
     if user.id == current_user.id:
-        flash('نمی‌توانید خودتان را حذف کنید', 'error')
-        return redirect(url_for('admin.users'))
+        return jsonify({'success': False, 'message': 'نمی‌توانید خودتان را حذف کنید'})
     
     try:
         # حذف فایل‌های صوتی قبل از حذف رکوردها
         recordings = Recording.query.filter_by(user_id=user.id).all()
         for recording in recordings:
             try:
-                # استفاده از property file_path از مدل Recording
                 if os.path.exists(recording.file_path):
                     os.remove(recording.file_path)
             except:
@@ -99,12 +142,10 @@ def delete_user(user_id):
         db.session.delete(user)
         db.session.commit()
         
-        flash('کاربر با موفقیت حذف شد', 'success')
+        return jsonify({'success': True, 'message': 'کاربر با موفقیت حذف شد'})
     except Exception as e:
         db.session.rollback()
-        flash('خطا در حذف کاربر', 'error')
-    
-    return redirect(url_for('admin.users'))
+        return jsonify({'success': False, 'message': 'خطا در حذف کاربر'})
 
 @admin_bp.route('/comments')
 @login_required
@@ -154,16 +195,82 @@ def delete_comment(comment_id):
     
     return redirect(url_for('admin.comments'))
 
+@admin_bp.route('/comments/<int:comment_id>/approve', methods=['POST'])
+@login_required
+@admin_required
+def approve_comment(comment_id):
+    """تأیید نظر"""
+    comment = Comment.query.get_or_404(comment_id)
+    
+    try:
+        comment.status = 'approved'
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'نظر با موفقیت تأیید شد'})
+    except:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'خطا در تأیید نظر'})
+
+@admin_bp.route('/comments/<int:comment_id>/reject', methods=['POST'])
+@login_required
+@admin_required
+def reject_comment(comment_id):
+    """رد نظر"""
+    comment = Comment.query.get_or_404(comment_id)
+    
+    try:
+        comment.status = 'rejected'
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'نظر با موفقیت رد شد'})
+    except:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'خطا در رد نظر'})
+
+
 @admin_bp.route('/recordings')
 @login_required
 @admin_required
 def recordings():
     """مدیریت ضبط‌های صوتی"""
     page = request.args.get('page', 1, type=int)
-    recordings = Recording.query.order_by(Recording.created_at.desc()).paginate(
+    
+    # اعمال فیلترها
+    query = Recording.query
+    
+    # فیلتر بر اساس جستجو
+    search = request.args.get('search', '')
+    if search:
+        query = query.join(User).filter(User.username.ilike(f'%{search}%'))
+    
+    # فیلتر بر اساس باغ
+    garden = request.args.get('garden')
+    if garden:
+        query = query.join(Title).filter(Title.garden == garden)
+    
+    # دریافت رکوردها با ترتیب نزولی تاریخ
+    recordings = query.order_by(Recording.created_at.desc()).paginate(
         page=page, per_page=20, error_out=False
     )
-    return render_template('admin/recordings.html', recordings=recordings)
+
+    # محاسبه آمار
+    total_recordings = Recording.query.count()
+    
+    # محاسبه مجموع حجم فایل‌ها به صورت دستی
+    all_recordings = Recording.query.all()
+    total_size_mb = sum(rec.file_size_mb for rec in all_recordings if rec.file_size_mb is not None)
+    
+    active_readers = db.session.query(db.func.count(db.distinct(Recording.user_id))).scalar()
+    recorded_poems = db.session.query(db.func.count(db.distinct(Recording.title_id))).scalar()
+
+    stats = {
+        'total_recordings': total_recordings,
+        'total_size_mb': round(total_size_mb, 1),  # گرد کردن تا یک رقم اعشار
+        'active_readers': active_readers,
+        'recorded_poems': recorded_poems
+    }
+
+    return render_template('admin/recordings.html', recordings=recordings, stats=stats)
+
+
 
 @admin_bp.route('/recordings/<int:recording_id>/delete', methods=['POST'])
 @login_required
@@ -187,22 +294,4 @@ def delete_recording(recording_id):
         db.session.rollback()
         flash('خطا در حذف ضبط صوتی', 'error')
     
-    return redirect(url_for('admin.recordings'))@admin_bp.route('/reset-password/<int:user_id>', methods=['POST'])
-@login_required
-@admin_required
-def reset_user_password(user_id):
-    """بازنشانی رمز عبور کاربر"""
-    user = User.query.get_or_404(user_id)
-    new_password = request.form.get('new_password')
-    
-    if not new_password:
-        return jsonify({'success': False, 'message': 'رمز عبور جدید الزامی است'})
-    
-    try:
-        user.set_password(new_password)
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'رمز عبور با موفقیت تغییر یافت'})
-    except:
-        db.session.rollback()
-        return jsonify({'success': False, 'message': 'خطا در تغییر رمز عبور'})
-
+    return redirect(url_for('admin.recordings'))

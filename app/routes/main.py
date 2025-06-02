@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, request, jsonify, current_app, fla
 from flask_login import current_user
 from sqlalchemy import or_, func
 from app.models import Title, Verse, Comment, Recording, User, SearchResult
+from app.forms import CommentForm
 from app import db
 
 main_bp = Blueprint('main', __name__)
@@ -149,6 +150,9 @@ def title(title_id):
         'recording_count': len(recordings)
     }
     
+    # ایجاد فرم نظر
+    comment_form = CommentForm()
+    
     return render_template('poem.html',
                          title=title_obj,
                          verses=verses,
@@ -156,8 +160,8 @@ def title(title_id):
                          recordings=recordings,
                          prev_title=prev_title,
                          next_title=next_title,
-                         poem_stats=poem_stats)
-
+                         poem_stats=poem_stats,
+                         comment_form=comment_form)
 
 @main_bp.route('/search')
 def search():
@@ -197,163 +201,133 @@ def search():
     
     # جستجو در ابیات
     if search_type in ['all', 'verse']:
-        verse_query = Verse.query.filter(
-            or_(Verse.verse_1.contains(query), 
-                Verse.verse_2.contains(query))
+        verse_query = Verse.query.join(Title).filter(
+            or_(
+                Verse.text.contains(query),
+                Verse.text_fa.contains(query)
+            )
         )
         
         if garden_filter:
-            verse_query = verse_query.join(Title).filter(Title.garden == garden_filter)
+            verse_query = verse_query.filter(Title.garden == garden_filter)
         
-        verse_results = verse_query.limit(20).all()
+        verse_results = verse_query.all()
         
         for verse in verse_results:
-            # نمایش بیت حاوی کلمه جستجو
-            content = verse.verse_1
-            if verse.verse_2 and query.lower() in verse.verse_2.lower():
-                content = verse.verse_2
-            
-            # هایلایت کلمه جستجو
-            highlighted_content = content.replace(query, f'<mark>{query}</mark>')
-            
             results.append(SearchResult(
                 title=verse.title.title,
-                content=highlighted_content,
-                url=f"/title/{verse.title_id}",
-                type_name="بیت شعر"
+                content=verse.text_fa or verse.text,
+                url=f"/title/{verse.title_id}#verse-{verse.id}",
+                type_name="بیت"
             ))
     
-    # تبدیل به دیکشنری برای JSON
-    results_data = []
-    for result in results:
-        results_data.append({
-            'title': result.title,
-            'content': result.content,
-            'url': result.url,
-            'type': result.type_name
-        })
-    
     return jsonify({
-        'results': results_data,
-        'count': len(results_data),
-        'query': query,
-        'search_type': search_type,
-        'garden': garden_filter
+        'results': [result.to_dict() for result in results],
+        'count': len(results)
     })
 
 @main_bp.route('/advanced_search')
 def advanced_search():
     """صفحه جستجوی پیشرفته"""
-    return render_template('search/advanced.html')
+    return render_template('advanced_search.html')
 
 @main_bp.route('/random_poem')
 def random_poem():
-    """نمایش شعر تصادفی"""
-    
-    # انتخاب شعر تصادفی
-    title_obj = Title.query.order_by(func.random()).first()
-    
-    if not title_obj:
-        flash('هیچ شعری یافت نشد.', 'error')
-        return redirect(url_for('main.home'))
-    
-    return redirect(url_for('main.title', title_id=title_obj.id))
+    """انتخاب تصادفی یک شعر"""
+    random_title = Title.query.order_by(func.random()).first()
+    if random_title:
+        return redirect(url_for('main.title', title_id=random_title.id))
+    return redirect(url_for('main.home'))
 
 @main_bp.route('/api/gardens')
 def api_gardens():
     """API برای دریافت لیست باغ‌ها"""
-    
     gardens = []
-    for garden_num in range(1, 5):
-        title_count = Title.query.filter_by(garden=garden_num).count()
-        
-        # استفاده از property garden_name
-        sample_title = Title.query.filter_by(garden=garden_num).first()
-        garden_name = sample_title.garden_name if sample_title else f'باغ {garden_num}'
-        
-        gardens.append({
-            'id': garden_num,
-            'name': garden_name,
-            'title_count': title_count,
-            'url': f'/garden/{garden_num}'
-        })
     
-    return jsonify({'gardens': gardens})
+    for garden_num in range(1, 5):
+        garden_titles = Title.query.filter_by(garden=garden_num).count()
+        sample_title = Title.query.filter_by(garden=garden_num).first()
+        
+        if sample_title:
+            gardens.append({
+                'number': garden_num,
+                'name': sample_title.garden_name,
+                'title_count': garden_titles
+            })
+    
+    return jsonify({
+        'gardens': gardens,
+        'count': len(gardens)
+    })
 
 @main_bp.route('/api/titles/<int:garden_num>')
 def api_titles(garden_num):
     """API برای دریافت عناوین یک باغ"""
-    
     if garden_num < 1 or garden_num > 4:
-        return jsonify({'error': 'باغ مورد نظر یافت نشد.'}), 404
+        return jsonify({
+            'error': 'شماره باغ نامعتبر است.',
+            'titles': [],
+            'count': 0
+        }), 400
     
     titles = Title.query.filter_by(garden=garden_num)\
                        .order_by(Title.order_in_garden)\
                        .all()
     
-    titles_data = []
-    for title in titles:
-        verse_count = title.verses.count()
-        comment_count = title.comments.filter_by(is_approved=True).count()
-        recording_count = title.recordings.filter_by(is_approved=True).count()
-        
-        titles_data.append({
+    return jsonify({
+        'titles': [{
             'id': title.id,
             'title': title.title,
-            'verse_count': verse_count,
-            'comment_count': comment_count,
-            'recording_count': recording_count,
-            'url': f'/title/{title.id}'
-        })
-    
-    return jsonify({'titles': titles_data})
+            'order': title.order_in_garden,
+            'verse_count': len(title.verses)
+        } for title in titles],
+        'count': len(titles)
+    })
 
 @main_bp.route('/api/title/<int:title_id>')
 def api_title(title_id):
-    """API برای دریافت اطلاعات یک شعر"""
+    """API برای دریافت جزئیات یک شعر"""
+    title = Title.query.get_or_404(title_id)
     
-    title_obj = Title.query.get_or_404(title_id)
-    
-    verses_data = []
-    for verse in title_obj.get_verses_ordered():
-        verses_data.append({
+    verses = []
+    for verse in title.get_verses_ordered():
+        verses.append({
             'id': verse.id,
-            'order': verse.order_in_title,
-            'verse_1': verse.verse_1,
-            'verse_2': verse.verse_2,
-            'full_verse': verse.full_verse
+            'text': verse.text,
+            'text_fa': verse.text_fa,
+            'order': verse.order_in_title
         })
     
-    comments_data = []
-    for comment in title_obj.get_comments():
+    comments = []
+    for comment in title.get_comments():
         if comment.is_approved:
-            comments_data.append({
+            comments.append({
                 'id': comment.id,
-                'author': comment.author.username,
-                'comment': comment.comment,
+                'text': comment.text,
+                'user': comment.user.username,
                 'created_at': comment.created_at.isoformat()
             })
     
-    recordings_data = []
-    for recording in title_obj.recordings.filter_by(is_approved=True):
-        recordings_data.append({
+    recordings = []
+    for recording in title.recordings.filter_by(is_approved=True):
+        recordings.append({
             'id': recording.id,
             'reader': recording.user.username,
             'filename': recording.filename,
-            'file_path': recording.file_path,
+            'file_size': recording.file_size_mb,
             'duration': recording.duration,
-            'file_size_mb': recording.file_size_mb
+            'created_at': recording.created_at.isoformat()
         })
     
     return jsonify({
-        'id': title_obj.id,
-        'title': title_obj.title,
-        'garden': title_obj.garden,
-        'garden_name': title_obj.garden_name,
-        'order_in_garden': title_obj.order_in_garden,
-        'verses': verses_data,
-        'comments': comments_data,
-        'recordings': recordings_data
+        'id': title.id,
+        'title': title.title,
+        'garden': title.garden,
+        'garden_name': title.garden_name,
+        'order': title.order_in_garden,
+        'verses': verses,
+        'comments': comments,
+        'recordings': recordings
     })
 
 @main_bp.route('/statistics')
@@ -361,48 +335,54 @@ def statistics():
     """صفحه آمار کلی سایت"""
     
     # آمار کلی
-    general_stats = {
-        'total_poems': Title.query.count(),
-        'total_verses': Verse.query.count(),
-        'total_comments': Comment.query.filter_by(is_approved=True).count(),
-        'total_recordings': Recording.query.filter_by(is_approved=True).count(),
-        'total_users': User.query.filter_by(is_active=True).count(),
-        'researchers': User.query.filter_by(role='researcher', is_active=True).count(),
-        'readers': User.query.filter_by(role='reader', is_active=True).count()
+    total_stats = {
+        'poems': Title.query.count(),
+        'verses': Verse.query.count(),
+        'comments': Comment.query.filter_by(is_approved=True).count(),
+        'recordings': Recording.query.filter_by(is_approved=True).count(),
+        'users': User.query.filter_by(is_active=True).count()
     }
     
-    # آمار باغ‌ها
+    # آمار هر باغ
     garden_stats = []
     for garden_num in range(1, 5):
+        garden_titles = Title.query.filter_by(garden=garden_num).count()
         sample_title = Title.query.filter_by(garden=garden_num).first()
         garden_name = sample_title.garden_name if sample_title else f'باغ {garden_num}'
         
-        stats = {
+        garden_verses = db.session.query(func.count(Verse.id))\
+                                 .join(Title)\
+                                 .filter(Title.garden == garden_num)\
+                                 .scalar()
+        
+        garden_comments = db.session.query(func.count(Comment.id))\
+                                   .join(Title)\
+                                   .filter(Title.garden == garden_num,
+                                         Comment.is_approved == True)\
+                                   .scalar()
+        
+        garden_recordings = db.session.query(func.count(Recording.id))\
+                                     .join(Title)\
+                                     .filter(Title.garden == garden_num,
+                                           Recording.is_approved == True)\
+                                     .scalar()
+        
+        garden_stats.append({
             'number': garden_num,
             'name': garden_name,
-            'title_count': Title.query.filter_by(garden=garden_num).count(),
-            'verse_count': db.session.query(func.count(Verse.id))\
-                                    .join(Title)\
-                                    .filter(Title.garden == garden_num)\
-                                    .scalar(),
-            'comment_count': db.session.query(func.count(Comment.id))\
-                                      .join(Title)\
-                                      .filter(Title.garden == garden_num, Comment.is_approved == True)\
-                                      .scalar(),
-            'recording_count': db.session.query(func.count(Recording.id))\
-                                        .join(Title)\
-                                        .filter(Title.garden == garden_num, Recording.is_approved == True)\
-                                        .scalar()
-        }
-        garden_stats.append(stats)
+            'titles': garden_titles,
+            'verses': garden_verses,
+            'comments': garden_comments,
+            'recordings': garden_recordings
+        })
     
     return render_template('statistics.html',
-                         general_stats=general_stats,
+                         total_stats=total_stats,
                          garden_stats=garden_stats)
 
 @main_bp.route('/about')
 def about():
-    """درباره سایت و شاعر"""
+    """صفحه درباره ما"""
     return render_template('about.html')
 
 @main_bp.errorhandler(404)

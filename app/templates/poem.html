@@ -307,12 +307,18 @@
                 {% for verse in verses %}
                 <div class="verse-row">
                     <div class="row">
+                        {% if verse.verse_2 %}
                         <div class="col-md-6">
                             <div class="verse-text verse-1">{{ verse.verse_1 }}</div>
                         </div>
                         <div class="col-md-6">
                             <div class="verse-text verse-2">{{ verse.verse_2 }}</div>
                         </div>
+                        {% else %}
+                        <div class="col-12">
+                            <div class="verse-text">{{ verse.verse_1 }}</div>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="verse-number">بیت {{ loop.index|persian_number }}</div>
                 </div>
@@ -476,6 +482,7 @@ function handleFileSelect(file) {
 function uploadAudioFile() {
     const formData = new FormData();
     const fileInput = document.getElementById('audioFile');
+    const titleId = '{{ title.id }}';  // تعریف متغیر برای title.id
     
     if (!fileInput.files[0]) {
         alert('لطفاً ابتدا فایل صوتی را انتخاب کنید');
@@ -483,14 +490,13 @@ function uploadAudioFile() {
     }
     
     formData.append('audio_file', fileInput.files[0]);
-    formData.append('title_id', {{ title.id }});
+    formData.append('title_id', titleId);
     
     const uploadProgress = document.getElementById('uploadProgress');
     const progressBar = uploadProgress.querySelector('.progress-bar');
     
     uploadProgress.style.display = 'block';
     
-
     fetch('{{ url_for("verses.record_audio", title_id=title.id) }}', {
         method: 'POST',
         body: formData
