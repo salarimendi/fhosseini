@@ -195,65 +195,45 @@ def title(title_id):
 @main_bp.route('/search')
 def search():
     """جستجو در عناوین و ابیات"""
-    
     query = request.args.get('q', '').strip()
-    search_type = request.args.get('type', 'all')  # all, title, verse
-    garden = request.args.get('garden', '')
     
     if not query:
-        return jsonify({'results': [], 'message': 'لطفاً کلمه کلیدی وارد کنید.'})
+        return jsonify([])
     
     results = []
     
-    # فیلتر باغ
-    garden_filter = None
-    if garden and garden.isdigit():
-        garden_num = int(garden)
-        if 1 <= garden_num <= 4:
-            garden_filter = garden_num
-    
     # جستجو در عناوین
-    if search_type in ['all', 'title']:
-        title_query = Title.query.filter(Title.title.contains(query))
-        if garden_filter:
-            title_query = title_query.filter(Title.garden == garden_filter)
-        
-        title_results = title_query.all()
-        
-        for title in title_results:
-            results.append(SearchResult(
-                title=title.title,
-                content=f"از {title.garden_name}",
-                url=f"/title/{title.id}",
-                type_name="عنوان شعر"
-            ))
+    titles = Title.query.filter(Title.title.contains(query)).all()
+    for title in titles:
+        results.append({
+            'type': 'title',
+            'title_id': title.id,
+            'title': title.title,
+            'garden': title.garden,
+            'verse_preview': None
+        })
     
     # جستجو در ابیات
-    if search_type in ['all', 'verse']:
-        verse_query = Verse.query.join(Title).filter(
-            or_(
-                Verse.text.contains(query),
-                Verse.text_fa.contains(query)
-            )
+    verses = Verse.query.join(Title).filter(
+        or_(
+            Verse.verse_1.contains(query),
+            Verse.verse_2.contains(query)
         )
-        
-        if garden_filter:
-            verse_query = verse_query.filter(Title.garden == garden_filter)
-        
-        verse_results = verse_query.all()
-        
-        for verse in verse_results:
-            results.append(SearchResult(
-                title=verse.title.title,
-                content=verse.text_fa or verse.text,
-                url=f"/title/{verse.title_id}#verse-{verse.id}",
-                type_name="بیت"
-            ))
+    ).all()
     
-    return jsonify({
-        'results': [result.to_dict() for result in results],
-        'count': len(results)
-    })
+    for verse in verses:
+        # تعیین کدام مصرع شامل عبارت جستجو است
+        verse_preview = verse.verse_1 if query.lower() in verse.verse_1.lower() else verse.verse_2
+        
+        results.append({
+            'type': 'verse',
+            'title_id': verse.title_id,
+            'title': verse.title.title,
+            'garden': verse.title.garden,
+            'verse_preview': verse_preview
+        })
+    
+    return jsonify(results)
 
 @main_bp.route('/advanced_search')
 def advanced_search():

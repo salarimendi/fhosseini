@@ -78,6 +78,21 @@ class Title(db.Model):
         }
         return garden_names.get(self.garden, f'باغ {self.garden}')
     
+    @property
+    def verses_count(self):
+        """تعداد کل ابیات"""
+        return self.verses.count()
+    
+    @property
+    def approved_comments_count(self):
+        """تعداد نظرات تایید شده"""
+        return self.comments.filter_by(status='approved').count()
+    
+    @property
+    def approved_recordings_count(self):
+        """تعداد فایل‌های صوتی تایید شده"""
+        return self.recordings.filter_by(is_approved=True).count()
+    
     def get_verses_ordered(self):
         """دریافت ابیات مرتب شده"""
         return self.verses.order_by(Verse.order_in_title).all()

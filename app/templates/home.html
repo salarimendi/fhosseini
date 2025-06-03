@@ -136,16 +136,16 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <h4 class="text-center mb-4">جستجو در اشعار</h4>
-                    <form id="searchForm" class="d-flex gap-2">
+                    <div class="d-flex gap-2">
                         <input type="text" 
                                id="searchInput" 
                                class="form-control form-control-lg" 
                                placeholder="جستجو در عناوین و ابیات..."
                                autocomplete="off">
-                        <button type="submit" class="btn btn-light btn-lg px-4">
+                        <button type="button" class="btn btn-light btn-lg px-4" id="searchButton">
                             <i class="fas fa-search"></i>
                         </button>
-                    </form>
+                    </div>
                     <div id="searchResults" class="search-results"></div>
                 </div>
             </div>
@@ -207,19 +207,19 @@
     <div class="container">
         <div class="row text-center">
             <div class="col-md-3 mb-4">
-                <div class="h2 text-primary fw-bold">{{ total_titles|default(0)|persian_number }}</div>
+                <div class="h2 text-primary fw-bold">{{ stats.total_poems|default(0)|persian_number }}</div>
                 <p class="text-muted mb-0">عنوان شعر</p>
             </div>
             <div class="col-md-3 mb-4">
-                <div class="h2 text-success fw-bold">{{ total_verses|default(0)|persian_number }}</div>
+                <div class="h2 text-success fw-bold">{{ stats.total_verses|default(0)|persian_number }}</div>
                 <p class="text-muted mb-0">بیت شعر</p>
             </div>
             <div class="col-md-3 mb-4">
-                <div class="h2 text-warning fw-bold">{{ total_comments|default(0)|persian_number }}</div>
+                <div class="h2 text-warning fw-bold">{{ stats.total_comments|default(0)|persian_number }}</div>
                 <p class="text-muted mb-0">نظر پژوهشی</p>
             </div>
             <div class="col-md-3 mb-4">
-                <div class="h2 text-info fw-bold">{{ total_recordings|default(0)|persian_number }}</div>
+                <div class="h2 text-info fw-bold">{{ stats.total_recordings|default(0)|persian_number }}</div>
                 <p class="text-muted mb-0">ضبط صوتی</p>
             </div>
         </div>
@@ -230,8 +230,8 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const searchForm = document.getElementById('searchForm');
     const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
     const searchResults = document.getElementById('searchResults');
     let searchTimeout;
     let lastSearchTerm = '';
@@ -261,28 +261,43 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300);
     });
 
-    // Form submission
-    searchForm.addEventListener('submit', function(e) {
-        e.preventDefault();
+    // Search button click
+    searchButton.addEventListener('click', function() {
         const searchTerm = searchInput.value.trim();
         if (searchTerm.length >= 2) {
             performSearch(searchTerm);
         }
     });
 
+    // Handle Enter key
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const searchTerm = searchInput.value.trim();
+            if (searchTerm.length >= 2) {
+                performSearch(searchTerm);
+            }
+        }
+    });
+
     function performSearch(searchTerm) {
-        fetch(`/search?q=${encodeURIComponent(searchTerm)}`)
-            .then(response => response.json())
-            .then(data => {
-                cachedResults[searchTerm] = data;
-                lastSearchTerm = searchTerm;
-                displayResults(data);
-            })
-            .catch(error => {
-                console.error('خطا در جستجو:', error);
-                searchResults.innerHTML = '<div class="p-3 text-center text-danger">خطا در جستجو</div>';
-                searchResults.style.display = 'block';
-            });
+        fetch(`/search?q=${encodeURIComponent(searchTerm)}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            cachedResults[searchTerm] = data;
+            lastSearchTerm = searchTerm;
+            displayResults(data);
+        })
+        .catch(error => {
+            console.error('خطا در جستجو:', error);
+            searchResults.innerHTML = '<div class="p-3 text-center text-danger">خطا در جستجو</div>';
+            searchResults.style.display = 'block';
+        });
     }
 
     function displayResults(results) {
@@ -303,14 +318,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Hide results when clicking outside
     document.addEventListener('click', function(e) {
-        if (!searchForm.contains(e.target)) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target) && !searchButton.contains(e.target)) {
             searchResults.style.display = 'none';
         }
     });
 });
 
 function goToPoem(titleId) {
-    window.location.href = `/poem/${titleId}`;
+    window.location.href = `/title/${titleId}`;
 }
 </script>
 {% endblock %}

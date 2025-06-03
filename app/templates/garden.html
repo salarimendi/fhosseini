@@ -245,18 +245,18 @@
                                 <div class="title-stats">
                                     <div class="stat-item">
                                         <i class="fas fa-quote-right"></i>
-                                        <span>{{ title.verses_count|default(0)|persian_number }} بیت</span>
+                                        <span>{{ title.verses_count|persian_number }} بیت</span>
                                     </div>
-                                    {% if title.comments_count %}
+                                    {% if title.approved_comments_count > 0 %}
                                     <div class="stat-item">
                                         <i class="fas fa-comment-alt"></i>
-                                        <span>{{ title.comments_count|persian_number }} نظر</span>
+                                        <span>{{ title.approved_comments_count|persian_number }} نظر تحقیقی</span>
                                     </div>
                                     {% endif %}
-                                    {% if title.recordings_count %}
+                                    {% if title.approved_recordings_count > 0 %}
                                     <div class="stat-item">
                                         <i class="fas fa-microphone"></i>
-                                        <span>{{ title.recordings_count|persian_number }} ضبط صوتی</span>
+                                        <span>{{ title.approved_recordings_count|persian_number }} قرائت صوتی</span>
                                     </div>
                                     {% endif %}
                                 </div>
