@@ -11,6 +11,9 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
 from flask_migrate import Migrate
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
 from config import config
 
 # ایجاد نمونه‌های اصلی
@@ -19,6 +22,8 @@ login_manager = LoginManager()
 mail = Mail()
 csrf = CSRFProtect()
 migrate = Migrate()
+limiter = Limiter(key_func=get_remote_address)
+talisman = Talisman()
 
 def create_app(config_name=None):
     """ایجاد و تنظیم اپلیکیشن Flask"""
@@ -30,7 +35,6 @@ def create_app(config_name=None):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
-
     # اطمینان از وجود پوشه instance
     os.makedirs(app.instance_path, exist_ok=True)
     
@@ -41,6 +45,17 @@ def create_app(config_name=None):
     mail.init_app(app)
     csrf.init_app(app)
     migrate.init_app(app, db)
+    
+    # راه‌اندازی Rate Limiter
+    limiter.init_app(app)
+    
+    # راه‌اندازی Talisman با تنظیمات امنیتی
+    if not app.debug:  # فقط در محیط تولید فعال شود
+        talisman.init_app(app,
+                         force_https=app.config.get('PREFERRED_URL_SCHEME') == 'https',
+                         strict_transport_security=True,
+                         session_cookie_secure=True,
+                         content_security_policy=app.config['SECURE_HEADERS'].get('Content-Security-Policy'))
     
     # تنظیمات Login Manager
     login_manager.login_view = 'auth.login'
@@ -79,6 +94,7 @@ def create_app(config_name=None):
             admin_user = User(
                 username='admin',
                 email='admin@ferdowsihosseini.ir',
+                fullname='مدیر سایت',
                 role='admin'
             )
             admin_user.set_password('admin123')  # رمز پیش‌فرض - باید تغییر کند

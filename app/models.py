@@ -4,7 +4,7 @@
 مدل‌های پایگاه داده پروژه فردوسی حسینی
 """
 
-from datetime import datetime
+from datetime import datetime, UTC
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,13 +15,13 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    fullname = db.Column(db.String(40), nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(20), nullable=False, default='user')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    is_active = db.Column(db.Boolean, default=True)
+    fullname = db.Column(db.String(120), nullable=False)
+    password_hash = db.Column(db.String(128))
+    role = db.Column(db.String(20), default='user')
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    is_active = db.Column(db.Boolean, default=False)
     
     # روابط
     comments = db.relationship('Comment', backref='author', lazy='dynamic', cascade='all, delete-orphan')

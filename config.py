@@ -6,51 +6,50 @@
 
 import os
 from pathlib import Path
-from datetime import timedelta
+from datetime import timedelta, UTC
 
 # مسیر اصلی پروژه
-
 basedir = Path(__file__).resolve().parent
-print(f"Base directory: {basedir}")
-
-
-
 
 class Config:
     """تنظیمات پایه"""
     
-    db_path = basedir / "instance" / "ferdosi.db"
-    print(f"Database path: {db_path}")
-    
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///app.db'
-    print(f"Database URI: {SQLALCHEMY_DATABASE_URI}")
-
-
     # تنظیمات امنیتی
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-secret-key-here'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-key-123'
     WTF_CSRF_SECRET_KEY = os.environ.get('WTF_CSRF_SECRET_KEY') or 'your-csrf-secret-key'
     
+    # تنظیمات Rate Limiting
+    RATELIMIT_ENABLED = True
+    RATELIMIT_STORAGE_URL = "redis://localhost:6379/0"  # استفاده از Redis برای ذخیره‌سازی
+    RATELIMIT_DEFAULT = "200 per day;50 per hour;10 per minute"  # محدودیت پیش‌فرض
+    RATELIMIT_LOGIN = "5 per minute"  # محدودیت برای لاگین
+    RATELIMIT_HEADERS_ENABLED = True
+    
+    # تنظیمات هدرهای امنیتی
+    SECURE_HEADERS = {
+        'Content-Security-Policy': "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline';",
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'SAMEORIGIN',
+        'X-XSS-Protection': '1; mode=block'
+    }
+    
     # تنظیمات پایگاه داده
-    #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///instance/ferdosi.db'
-    # یا به شکل زیر:
-    #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f"sqlite:///{basedir}/instance/ferdosi.db"
-   # اگر از os.path استفاده می‌کنید:
-    #SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(basedir, 'instance', 'ferdosi.db')}"
-
-
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        f'sqlite:///{os.path.join(basedir, "instance", "ferdosi.db")}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # تنظیمات فایل آپلود
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app/static/uploads')
-    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB محدودیت برای فایل‌های صوتی
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or \
+        os.path.join(basedir, 'app/static/uploads')
+    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_UPLOAD_SIZE', 5 * 1024 * 1024))  # 5MB محدودیت برای فایل‌های صوتی
     ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a'}
     
     # تنظیمات Session
     PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
     
-    # تنظیمات ایمیل - برای Gmail در محیط محلی
-    MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.gmail.com'
-    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 587)
+    # تنظیمات ایمیل
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
@@ -58,26 +57,49 @@ class Config:
     
     # تنظیمات سایت
     SITE_NAME = 'فردوسی حسینی'
-    SITE_URL = 'https://ferdowsihosseini.ir'
-    INSTAGRAM_URL = 'https://instagram.com/Ferdowsi_Hosseini'
-    TELEGRAM_URL = 'https://t.me/Ferdowsi_Hosseini'
+    SITE_URL = os.environ.get('SITE_URL', 'https://ferdowsihosseini.ir')
+    INSTAGRAM_URL = 'https://instagram.com/ferdowsihosseini'
+    TELEGRAM_URL = 'https://t.me/ferdowsihosseini'
     
     # تنظیمات جستجو
     SEARCH_RESULTS_PER_PAGE = 10
+    
+    # تنظیمات سایت
+    PREFERRED_URL_SCHEME = 'https'
+    SESSION_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_HTTPONLY = True
     
     @staticmethod
     def init_app(app):
         """اعمال تنظیمات روی اپلیکیشن"""
         # ایجاد پوشه آپلود در صورت عدم وجود
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        # ایجاد پوشه instance در صورت عدم وجود
+        os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
 
 class DevelopmentConfig(Config):
     """تنظیمات محیط توسعه"""
     DEBUG = True
+    # در محیط توسعه از مسیر نسبی استفاده می‌کنیم
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        f'sqlite:///{os.path.join(basedir, "instance", "ferdosi.db")}'
+    PREFERRED_URL_SCHEME = 'http'
+    SESSION_COOKIE_SECURE = False
+    REMEMBER_COOKIE_SECURE = False
 
 class ProductionConfig(Config):
     """تنظیمات محیط تولید"""
     DEBUG = False
+    
+    # در محیط تولید از مسیر مطلق استفاده می‌کنیم
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:////home/qouyvwti/myflaskapp/instance/ferdosi.db'
+    
+    # تنظیمات مسیرها در محیط تولید
+    UPLOAD_FOLDER = '/home/qouyvwti/myflaskapp/app/static/uploads'
+    LOG_FOLDER = '/home/qouyvwti/myflaskapp/logs'
     
     # تنظیمات SSL برای محیط تولید
     PREFERRED_URL_SCHEME = 'https'
@@ -90,7 +112,15 @@ class ProductionConfig(Config):
         import logging
         from logging.handlers import RotatingFileHandler
         
-        file_handler = RotatingFileHandler('logs/ferdowsi_hosseini.log', maxBytes=10240, backupCount=10)
+        # ایجاد پوشه logs در صورت عدم وجود
+        if not os.path.exists(cls.LOG_FOLDER):
+            os.makedirs(cls.LOG_FOLDER, exist_ok=True)
+            
+        file_handler = RotatingFileHandler(
+            os.path.join(cls.LOG_FOLDER, 'ferdowsi_hosseini.log'),
+            maxBytes=10240, 
+            backupCount=10
+        )
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
         ))
@@ -99,8 +129,19 @@ class ProductionConfig(Config):
         app.logger.setLevel(logging.INFO)
         app.logger.info('Ferdowsi Hosseini startup')
 
+class TestingConfig(Config):
+    """تنظیمات محیط تست"""
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # استفاده از دیتابیس موقت در حافظه
+    WTF_CSRF_ENABLED = False  # غیرفعال کردن CSRF برای تست‌ها
+    SERVER_NAME = 'localhost:5000'  # تنظیم نام سرور برای تست‌ها
+    PREFERRED_URL_SCHEME = 'http'
+    SESSION_COOKIE_SECURE = False
+    REMEMBER_COOKIE_SECURE = False
+
 config = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
+    'testing': TestingConfig,
     'default': DevelopmentConfig
 }

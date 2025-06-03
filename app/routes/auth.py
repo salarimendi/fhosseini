@@ -6,17 +6,18 @@
 
 import secrets
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_mail import Message
 from werkzeug.security import generate_password_hash
-from app import db, mail
+from app import db, mail, limiter
 from app.models import User
 from app.forms import LoginForm, ChangePasswordForm, RegisterForm
 
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")  # محدودیت 5 درخواست در دقیقه
 def login():
     """ورود کاربر"""
     
