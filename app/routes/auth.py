@@ -71,6 +71,7 @@ def register():
         user = User(
             username=form.username.data,
             email=form.email.data.lower(),
+            fullname=form.fullname.data,  # این خط را اضافه کنید
             role=form.role.data,
             is_active=False  # کاربر جدید به صورت پیش‌فرض غیرفعال است
         )

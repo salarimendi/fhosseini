@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}فرم پژوهشی - {{ poem_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-search-plus me-2"></i>
+                        فرم پژوهشی {{ poem_title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="researchForm">
+                        <!-- زیرموضوع‌ها -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">زیرموضوع‌ها</label>
+                            <div id="subtopics-container">
+                                <div class="subtopic-box">
+                                    <button type="button" class="remove-subtopic" onclick="removeSubtopic(this)" style="display: none;">×</button>
+                                    <div class="mb-3">
+                                        <label class="form-label">عنوان زیرموضوع</label>
+                                        <input type="text" name="subtopics[0][title]" class="form-control" required>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">منابع مرتبط</label>
+                                        <input type="text" name="subtopics[0][sources]" class="form-control" 
+                                               placeholder="منابع را با کاما از هم جدا کنید">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary mt-2" onclick="addSubtopic()">
+                                + افزودن زیرموضوع
+                            </button>
+                        </div>
+
+                        <!-- توضیحات تکمیلی -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">توضیحات تکمیلی</label>
+                            <textarea name="extra_info" class="form-control" rows="4"></textarea>
+                        </div>
+
+                        <!-- نثر موضوع -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">نثر موضوع</label>
+                            <textarea name="topic_narrative" class="form-control" rows="4"></textarea>
+                        </div>
+
+                        <!-- نقص تاریخی -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">نقص تاریخی</label>
+                            <textarea name="historical_flaw" class="form-control" rows="4"></textarea>
+                        </div>
+
+                        <!-- نظریه اصلاحی -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">نظریه اصلاحی</label>
+                            <textarea name="reform_theory" class="form-control" rows="4"></textarea>
+                        </div>
+
+                        <div class="text-end">
+                            <a href="{{ url_for('main.title', title_id=title_id) }}" class="btn btn-secondary ms-2">
+                                <i class="fas fa-arrow-right ms-1"></i>
+                                بازگشت
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save ms-1"></i>
+                                ثبت فرم پژوهشی
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .subtopic-box {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        position: relative;
+    }
+    
+    .remove-subtopic {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: none;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        font-size: 20px;
+        line-height: 1;
+        padding: 0 5px;
+    }
+    
+    .remove-subtopic:hover {
+        color: #bb2d3b;
+    }
+    
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let subtopicIndex = 1;
+
+    function addSubtopic() {
+        const container = document.getElementById('subtopics-container');
+        const box = document.createElement('div');
+        box.className = 'subtopic-box';
+        box.innerHTML = `
+            <button type="button" class="remove-subtopic" onclick="removeSubtopic(this)">×</button>
+            <div class="mb-3">
+                <label class="form-label">عنوان زیرموضوع</label>
+                <input type="text" name="subtopics[${subtopicIndex}][title]" class="form-control" required>
+            </div>
+            <div class="mb-2">
+                <label class="form-label">منابع مرتبط</label>
+                <input type="text" name="subtopics[${subtopicIndex}][sources]" class="form-control" 
+                       placeholder="منابع را با کاما از هم جدا کنید">
+            </div>
+        `;
+        container.appendChild(box);
+        subtopicIndex++;
+        
+        // نمایش دکمه حذف برای اولین زیرموضوع اگر بیش از یک زیرموضوع وجود دارد
+        if (container.children.length > 1) {
+            container.querySelector('.remove-subtopic').style.display = 'block';
+        }
+    }
+
+    function removeSubtopic(button) {
+        const container = document.getElementById('subtopics-container');
+        button.closest('.subtopic-box').remove();
+        
+        // پنهان کردن دکمه حذف اگر فقط یک زیرموضوع باقی مانده
+        if (container.children.length === 1) {
+            container.querySelector('.remove-subtopic').style.display = 'none';
+        }
+    }
+
+    document.getElementById('researchForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // جمع‌آوری داده‌های فرم
+        const formData = {
+            subtopics: [],
+            extra_info: document.querySelector('textarea[name="extra_info"]').value,
+            topic_narrative: document.querySelector('textarea[name="topic_narrative"]').value,
+            historical_flaw: document.querySelector('textarea[name="historical_flaw"]').value,
+            reform_theory: document.querySelector('textarea[name="reform_theory"]').value
+        };
+
+        // جمع‌آوری زیرموضوع‌ها
+        document.querySelectorAll('.subtopic-box').forEach(box => {
+            const title = box.querySelector('input[type="text"][name*="[title]"]').value;
+            const sources = box.querySelector('input[type="text"][name*="[sources]"]').value;
+            formData.subtopics.push({ title, sources });
+        });
+
+        // ارسال به سرور
+        const titleId = '{{ title_id }}';
+        
+        fetch(`/verses/submit_research_form/${titleId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(formData),
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 400) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'خطا در اعتبارسنجی فرم');
+                    });
+                }
+                throw new Error(`خطای ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert(data.message || 'فرم با موفقیت ثبت شد');
+                window.location.href = '{{ url_for('main.title', title_id=title_id) }}';
+            } else {
+                throw new Error(data.message || 'خطا در ثبت فرم');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message || 'خطا در ارسال فرم');
+        });
+    });
+</script>
+{% endblock %}

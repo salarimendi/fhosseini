@@ -37,6 +37,17 @@
                         </div>
                         
                         <div class="mb-3">
+                            {{ form.fullname.label(class="form-label") }}
+                            {{ form.fullname(class="form-control", placeholder="نام و نام خانوادگی") }}
+                            <small class="form-text text-muted">حداکثر ۴۰ کاراکتر</small>
+                            {% if form.fullname.errors %}
+                                {% for error in form.fullname.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
                             {{ form.email.label(class="form-label") }}
                             {{ form.email(class="form-control", placeholder="example@domain.com") }}
                             <small class="form-text text-muted">فقط حروف لاتین مجاز است</small>

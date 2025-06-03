@@ -148,9 +148,11 @@ def title(title_id):
         # نمایش فایل‌های تأیید شده برای همه
         # نمایش فایل‌های تأیید نشده فقط برای ادمین‌ها
         if recording.is_approved or (current_user.is_authenticated and current_user.is_admin):
+            # دریافت اطلاعات کاربر
+            user = User.query.get(recording.user_id)
             recordings.append({
                 'id': recording.id,
-                'reader_name': recording.user.username,
+                'reader_name': user.fullname if user else recording.user.username,  # استفاده از نام کامل
                 'filename': recording.filename,
                 'file_path': recording.file_path,
                 'file_size_mb': recording.file_size_mb,

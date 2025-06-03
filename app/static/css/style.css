@@ -549,18 +549,75 @@ button,
     color: #5a6fd8;
 }
 
-/* فوتر */
+/* فوتر جدید */
 .footer {
-    background: #333;
-    color: white;
-    text-align: center;
+    background: #1a1a1a;
+    color: #fff;
     padding: 2rem 0;
     margin-top: 3rem;
+    border-top: 1px solid #2a2a2a;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.footer-info {
+    flex: 1;
+    min-width: 200px;
+}
+
+.footer-title {
+    font-family: 'Sahel', Tahoma, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #fff;
+}
+
+.footer-description {
+    font-size: 0.85rem;
+    color: #999;
+    margin: 0;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+    margin: 0;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.social-link:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
 .copyright {
-    font-size: 0.9rem;
-    opacity: 0.8;
+    width: 100%;
+    font-size: 0.8rem;
+    color: #777;
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #2a2a2a;
 }
 
 /* ناوبری */
@@ -701,6 +758,19 @@ button,
     .poet-image img {
         width: 150px;
         height: 150px;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .footer-info {
+        margin-bottom: 1rem;
+    }
+    
+    .social-links {
+        justify-content: center;
     }
 }
 

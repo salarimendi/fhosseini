@@ -21,6 +21,10 @@ class RegisterForm(FlaskForm):
         Length(min=3, message='نام کاربری باید حداقل ۳ کاراکتر باشد'),
         latin_only
     ])
+    fullname = StringField('نام کامل', validators=[
+        DataRequired(message='نام کامل الزامی است'),
+        Length(max=40, message='نام کامل نباید بیشتر از ۴۰ کاراکتر باشد')
+    ])
     email = StringField('ایمیل', validators=[
         DataRequired(message='ایمیل الزامی است'),
         Email(message='لطفاً یک ایمیل معتبر وارد کنید')

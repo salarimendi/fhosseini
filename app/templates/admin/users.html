@@ -97,6 +97,7 @@
                                 <tr>
                                     <th>شناسه</th>
                                     <th>نام کاربری</th>
+                                    <th>نام کامل</th>
                                     <th>ایمیل</th>
                                     <th>نقش</th>
                                     <th>تاریخ ثبت نام</th>
@@ -109,6 +110,7 @@
                                 <tr>
                                     <td>{{ user.id }}</td>
                                     <td>{{ user.username }}</td>
+                                    <td>{{ user.fullname }}</td>
                                     <td>{{ user.email }}</td>
                                     <td>
                                         <span class="badge bg-{{ 'danger' if user.role == 'admin' else 'primary' if user.role == 'researcher' else 'success' if user.role == 'reader' else 'secondary' }}">
