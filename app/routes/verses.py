@@ -288,11 +288,15 @@ def get_research_form():
             comment_data = json.loads(existing_comment.comment)
         except:
             comment_data = None
+    
+    # دریافت مسیر بازگشت از پارامترهای URL
+    return_url = request.args.get('return_url') or url_for('main.title', title_id=title_id)
         
     return render_template('researchform.html', 
                          title_id=title_id,
                          poem_title=title.title,
-                         comment_data=comment_data)
+                         comment_data=comment_data,
+                         return_url=return_url)
 
 @verses_bp.route('/submit_research_form/<int:title_id>', methods=['POST'])
 @login_required
@@ -314,6 +318,9 @@ def submit_research_form(title_id):
         data = request.get_json()
         if not data:
             return jsonify({'success': False, 'message': 'داده‌ای دریافت نشد'}), 400
+        
+        # دریافت مسیر بازگشت
+        return_url = data.get('return_url') or url_for('main.title', title_id=title_id)
         
         # اعتبارسنجی داده‌ها
         if not isinstance(data.get('subtopics'), list):
@@ -364,7 +371,8 @@ def submit_research_form(title_id):
             db.session.commit()
             return jsonify({
                 'success': True, 
-                'message': message
+                'message': message,
+                'return_url': return_url
             })
             
         except Exception as e:

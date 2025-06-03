@@ -25,20 +25,20 @@
         font-size: 2.5rem;
         font-weight: 700;
         text-align: center;
-        padding: 30px;
+        padding: 25px;
         border-bottom: 2px solid #f8f9fa;
         margin-bottom: 0;
     }
     
     .verses-container {
-        padding: 30px;
+        padding: 25px;
     }
     
     .verse-row {
-        margin-bottom: 15px;
-        padding: 15px;
-        border-radius: 10px;
-        transition: all 0.3s ease;
+        margin-bottom: 8px;
+        padding: 8px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
         border-right: 3px solid transparent;
     }
     
@@ -49,22 +49,22 @@
     
     .verse-text {
         font-family: 'Vazir', Tahoma, sans-serif;
-        font-size: 1.4rem;
-        line-height: 2;
+        font-size: 1.3rem;
+        line-height: 1.8;
         color: #2c3e50;
         text-align: center;
-        margin-bottom: 5px;
+        margin-bottom: 2px;
     }
     
     .verse-1, .verse-2 {
-        padding: 0 10px;
+        padding: 0 8px;
     }
     
     .verse-number {
         color: #95a5a6;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         text-align: center;
-        margin-top: 10px;
+        margin-top: 3px;
     }
     
     .audio-controls {
@@ -727,15 +727,24 @@ function uploadAudioFile() {
 // Verse animation on load
 document.addEventListener('DOMContentLoaded', function() {
     const verses = document.querySelectorAll('.verse-row');
-    verses.forEach((verse, index) => {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '50px'
+    });
+
+    verses.forEach(verse => {
         verse.style.opacity = '0';
-        verse.style.transform = 'translateY(20px)';
-        
-        setTimeout(() => {
-            verse.style.transition = 'all 0.6s ease';
-            verse.style.opacity = '1';
-            verse.style.transform = 'translateY(0)';
-        }, index * 200);
+        verse.style.transform = 'translateY(10px)';
+        verse.style.transition = 'all 0.2s ease';
+        observer.observe(verse);
     });
 });
 

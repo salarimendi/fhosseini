@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const subtopicsContainer = document.getElementById('subtopicsContainer');
     const addSubtopicBtn = document.getElementById('addSubtopic');
     const cancelButton = document.getElementById('cancelButton');
-    const returnUrl = "{{ url_for('main.title', title_id=title_id) }}";
+    const returnUrl = "{{ return_url }}";
 
     // تابع تنظیم خودکار ارتفاع
     function autoResizeTextarea(element) {
@@ -187,7 +187,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 extra_info: document.getElementById('extraInfo').value.trim(),
                 topic_narrative: document.getElementById('topicNarrative').value.trim(),
                 historical_flaw: document.getElementById('historicalFlaw').value.trim(),
-                reform_theory: document.getElementById('reformTheory').value.trim()
+                reform_theory: document.getElementById('reformTheory').value.trim(),
+                return_url: "{{ return_url }}"
             };
 
             const response = await fetch(`/verses/submit_research_form/{{ title_id }}`, {
@@ -209,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (data.success) {
                 alert(data.message);
-                window.location.href = returnUrl;
+                window.location.href = data.return_url;
             } else {
                 alert(data.message || 'خطا در ثبت فرم پژوهشی');
             }

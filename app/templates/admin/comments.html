@@ -153,10 +153,10 @@
                                 </button>
                                 {% endif %}
                                 
-                                <button class="btn btn-outline-primary btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#editCommentModal{{ comment.id }}">
+                                <a href="{{ url_for('admin.edit_comment_research', comment_id=comment.id) }}" class="btn btn-outline-primary btn-sm mb-2">
                                     <i class="fas fa-edit me-1"></i>
-                                    ویرایش
-                                </button>
+                                    ویرایش نظر پژوهشی
+                                </a>
                                 
                                 <button class="btn btn-outline-danger btn-sm" onclick="deleteComment({{ comment.id }})">
                                     <i class="fas fa-trash me-1"></i>
@@ -167,33 +167,22 @@
                     </div>
                 </div>
 
-                <!-- مودال ویرایش نظر -->
-                <div class="modal fade" id="editCommentModal{{ comment.id }}" tabindex="-1">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">ویرایش نظر</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <form method="POST" action="{{ url_for('admin.edit_comment', comment_id=comment.id) }}">
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <label for="comment{{ comment.id }}" class="form-label">متن نظر</label>
-                                        <textarea class="form-control" id="comment{{ comment.id }}" name="comment" rows="4" dir="rtl" required>{{ comment.comment }}</textarea>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label for="research_note{{ comment.id }}" class="form-label">یادداشت پژوهشی</label>
-                                        <textarea class="form-control" id="research_note{{ comment.id }}" name="research_note" rows="3" dir="rtl">{{ comment.research_note or '' }}</textarea>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
-                                    <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
-                                </div>
-                            </form>
+                <!-- فرم ویرایش نظر (به صورت مخفی) -->
+                <div id="editForm{{ comment.id }}" class="card-footer bg-light" style="display: none;">
+                    <form onsubmit="return handleEditSubmit(event, {{ comment.id }})">
+                        <div class="mb-3">
+                            <label class="form-label">متن نظر:</label>
+                            <textarea class="form-control" id="editCommentText{{ comment.id }}" rows="4" dir="rtl" required>{{ comment.comment }}</textarea>
                         </div>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label">یادداشت پژوهشی:</label>
+                            <textarea class="form-control" id="editResearchNote{{ comment.id }}" rows="3" dir="rtl">{{ comment.research_note or '' }}</textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" onclick="toggleEditForm({{ comment.id }})">انصراف</button>
+                            <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
+                        </div>
+                    </form>
                 </div>
             </div>
             {% endfor %}
@@ -258,14 +247,21 @@ function rejectComment(commentId) {
 
 function deleteComment(commentId) {
     if (confirm('آیا از حذف این نظر اطمینان دارید؟ این عمل قابل بازگشت نیست.')) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         fetch(`/admin/comments/delete/${commentId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
-            }
+                'X-CSRFToken': csrfToken
+            },
+            credentials: 'same-origin'
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`خطا در حذف نظر (کد ${response.status})`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 location.reload();
@@ -275,27 +271,48 @@ function deleteComment(commentId) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('خطا در حذف نظر');
+            alert(error.message || 'خطا در حذف نظر');
         });
     }
 }
 
-function editComment(commentId) {
-    const newText = document.querySelector(`#editCommentText${commentId}`).value;
-    if (!newText.trim()) {
+function toggleEditForm(commentId) {
+    const editForm = document.getElementById(`editForm${commentId}`);
+    if (editForm.style.display === 'none') {
+        editForm.style.display = 'block';
+    } else {
+        editForm.style.display = 'none';
+    }
+}
+
+function handleEditSubmit(event, commentId) {
+    event.preventDefault();
+    
+    const commentText = document.getElementById(`editCommentText${commentId}`).value;
+    const researchNote = document.getElementById(`editResearchNote${commentId}`).value;
+    
+    if (!commentText.trim()) {
         alert('متن نظر نمی‌تواند خالی باشد');
-        return;
+        return false;
     }
 
-    fetch(`/admin/comments/edit/${commentId}`, {
+    const formData = new FormData();
+    formData.append('comment', commentText);
+    formData.append('research_note', researchNote);
+
+    fetch(`/admin/comments/${commentId}/edit`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': '{{ csrf_token() }}'
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
-        body: `comment=${encodeURIComponent(newText)}`
+        body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`خطا در ویرایش نظر (کد ${response.status})`);
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             location.reload();
@@ -305,8 +322,10 @@ function editComment(commentId) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('خطا در ویرایش نظر');
+        alert(error.message || 'خطا در ویرایش نظر');
     });
+
+    return false;
 }
 </script>
 {% endblock %} 

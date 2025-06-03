@@ -6,6 +6,7 @@ from app import db, csrf
 from functools import wraps
 import os
 import secrets
+import json
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -184,22 +185,31 @@ def edit_comment(comment_id):
     
     return render_template('admin/edit_comment.html', comment=comment)
 
-@admin_bp.route('/comments/<int:comment_id>/delete', methods=['POST'])
+@admin_bp.route('/comments/delete/<int:comment_id>', methods=['POST'])
 @login_required
 @admin_required
 def delete_comment(comment_id):
     """حذف نظر"""
-    comment = Comment.query.get_or_404(comment_id)
-    
     try:
+        comment = Comment.query.get(comment_id)
+        if not comment:
+            return jsonify({
+                'success': False, 
+                'message': 'نظر مورد نظر یافت نشد'
+            }), 404
+        
         db.session.delete(comment)
         db.session.commit()
-        flash('نظر با موفقیت حذف شد', 'success')
-    except:
+        return jsonify({
+            'success': True, 
+            'message': 'نظر با موفقیت حذف شد'
+        })
+    except Exception as e:
         db.session.rollback()
-        flash('خطا در حذف نظر', 'error')
-    
-    return redirect(url_for('admin.comments'))
+        return jsonify({
+            'success': False, 
+            'message': 'خطا در حذف نظر: ' + str(e)
+        }), 500
 
 @admin_bp.route('/comments/<int:comment_id>/approve', methods=['POST'])
 @login_required
@@ -351,3 +361,45 @@ def reject_recording(recording_id):
     except:
         db.session.rollback()
         return jsonify({'success': False, 'message': 'خطا در رد ضبط صوتی'})
+
+@admin_bp.route('/comments/<int:comment_id>/research-edit')
+@login_required
+@admin_required
+def edit_comment_research(comment_id):
+    """ویرایش نظر با فرم پژوهشی"""
+    comment = Comment.query.get_or_404(comment_id)
+    title = Title.query.get(comment.title_id) if comment.title_id else None
+    
+    try:
+        comment_data = json.loads(comment.comment) if comment.comment else None
+    except:
+        comment_data = None
+    
+    return render_template('researchform.html', 
+                         title_id=comment.title_id,
+                         poem_title=title.title if title else 'نظر عمومی',
+                         comment_data=comment_data,
+                         view_mode=False,
+                         is_admin=True,
+                         return_url=url_for('admin.comments'))
+
+@admin_bp.route('/comments/<int:comment_id>/research-update', methods=['POST'])
+@login_required
+@admin_required
+def update_comment_research(comment_id):
+    """به‌روزرسانی نظر از فرم پژوهشی"""
+    comment = Comment.query.get_or_404(comment_id)
+    
+    try:
+        comment.comment = request.form.get('comment', '').strip()
+        comment.research_note = request.form.get('research_note', '').strip()
+        comment.research_category = request.form.get('research_category')
+        comment.research_tags = request.form.get('research_tags', '').strip()
+        
+        db.session.commit()
+        flash('نظر با موفقیت به‌روزرسانی شد', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'خطا در به‌روزرسانی نظر: {str(e)}', 'error')
+    
+    return redirect(url_for('admin.comments'))
