@@ -31,16 +31,14 @@
                                     {% for subtopic in comment_data.subtopics %}
                                         <div class="row mb-2 subtopic-row">
                                             <div class="col-md-5">
-                                                <input type="text" class="form-control subtopic-title" 
+                                                <textarea class="form-control auto-resize subtopic-title" 
                                                        placeholder="زیرموضوع" 
-                                                       value="{{ subtopic.title if subtopic.title else '' }}"
-                                                       {% if view_mode %}readonly{% else %}required{% endif %}>
+                                                       {% if view_mode %}readonly{% else %}required{% endif %}>{{ subtopic.title if subtopic.title else '' }}</textarea>
                                             </div>
                                             <div class="col-md-6">
-                                                <input type="text" class="form-control subtopic-sources" 
+                                                <textarea class="form-control auto-resize subtopic-sources" 
                                                        placeholder="منابع تاریخی"
-                                                       value="{{ subtopic.sources if subtopic.sources else '' }}"
-                                                       {% if view_mode %}readonly{% endif %}>
+                                                       {% if view_mode %}readonly{% endif %}>{{ subtopic.sources if subtopic.sources else '' }}</textarea>
                                             </div>
                                             {% if not view_mode %}
                                                 <div class="col-md-1">
@@ -52,12 +50,12 @@
                                 {% elif not view_mode %}
                                     <div class="row mb-2 subtopic-row">
                                         <div class="col-md-5">
-                                            <input type="text" class="form-control subtopic-title" 
-                                                   placeholder="زیرموضوع" required>
+                                            <textarea class="form-control auto-resize subtopic-title" 
+                                                   placeholder="زیرموضوع" required></textarea>
                                         </div>
                                         <div class="col-md-6">
-                                            <input type="text" class="form-control subtopic-sources" 
-                                                   placeholder="منابع تاریخی">
+                                            <textarea class="form-control auto-resize subtopic-sources" 
+                                                   placeholder="منابع تاریخی"></textarea>
                                         </div>
                                         <div class="col-md-1">
                                             <button type="button" class="btn btn-danger remove-subtopic">×</button>
@@ -72,25 +70,25 @@
 
                         <div class="mb-3">
                             <label for="extraInfo" class="form-label">اطلاعات تکمیلی</label>
-                            <textarea class="form-control" id="extraInfo" name="extra_info" rows="3"
+                            <textarea class="form-control auto-resize" id="extraInfo" name="extra_info"
                                     {% if view_mode %}readonly{% endif %}>{{ comment_data.extra_info if comment_data else '' }}</textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label for="topicNarrative" class="form-label">روایت موضوع</label>
-                            <textarea class="form-control" id="topicNarrative" name="topic_narrative" rows="3"
+                            <label for="topicNarrative" class="form-label">نثر موضوع</label>
+                            <textarea class="form-control auto-resize" id="topicNarrative" name="topic_narrative"
                                     {% if view_mode %}readonly{% endif %}>{{ comment_data.topic_narrative if comment_data else '' }}</textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label for="historicalFlaw" class="form-label">اشکال تاریخی</label>
-                            <textarea class="form-control" id="historicalFlaw" name="historical_flaw" rows="3"
+                            <label for="historicalFlaw" class="form-label">نقص تاریخی</label>
+                            <textarea class="form-control auto-resize" id="historicalFlaw" name="historical_flaw"
                                     {% if view_mode %}readonly{% endif %}>{{ comment_data.historical_flaw if comment_data else '' }}</textarea>
                         </div>
 
                         <div class="mb-3">
                             <label for="reformTheory" class="form-label">نظریه اصلاحی</label>
-                            <textarea class="form-control" id="reformTheory" name="reform_theory" rows="3"
+                            <textarea class="form-control auto-resize" id="reformTheory" name="reform_theory"
                                     {% if view_mode %}readonly{% endif %}>{{ comment_data.reform_theory if comment_data else '' }}</textarea>
                         </div>
 
@@ -119,6 +117,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelButton = document.getElementById('cancelButton');
     const returnUrl = "{{ url_for('main.title', title_id=title_id) }}";
 
+    // تابع تنظیم خودکار ارتفاع
+    function autoResizeTextarea(element) {
+        element.style.height = 'auto';
+        element.style.height = (element.scrollHeight) + 'px';
+    }
+
+    // اعمال auto-resize به همه textarea های موجود
+    document.querySelectorAll('textarea.auto-resize').forEach(textarea => {
+        autoResizeTextarea(textarea);
+        textarea.addEventListener('input', function() {
+            autoResizeTextarea(this);
+        });
+    });
+
     {% if not view_mode %}
     // افزودن زیر موضوع جدید
     addSubtopicBtn.addEventListener('click', function() {
@@ -126,16 +138,23 @@ document.addEventListener('DOMContentLoaded', function() {
         div.className = 'row mb-2 subtopic-row';
         div.innerHTML = `
             <div class="col-md-5">
-                <input type="text" class="form-control subtopic-title" placeholder="زیرموضوع" required>
+                <textarea class="form-control auto-resize subtopic-title" placeholder="زیرموضوع" required></textarea>
             </div>
             <div class="col-md-6">
-                <input type="text" class="form-control subtopic-sources" placeholder="منابع تاریخی">
+                <textarea class="form-control auto-resize subtopic-sources" placeholder="منابع تاریخی"></textarea>
             </div>
             <div class="col-md-1">
                 <button type="button" class="btn btn-danger remove-subtopic">×</button>
             </div>
         `;
         subtopicsContainer.appendChild(div);
+        
+        // اعمال auto-resize به textarea های جدید
+        div.querySelectorAll('textarea.auto-resize').forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                autoResizeTextarea(this);
+            });
+        });
     });
 
     // حذف زیر موضوع
@@ -217,11 +236,19 @@ document.addEventListener('DOMContentLoaded', function() {
     line-height: 1;
 }
 
-{% if view_mode %}
 .form-control[readonly] {
     background-color: #f8f9fa;
     opacity: 1;
 }
-{% endif %}
+
+textarea.form-control {
+    min-height: 38px;
+    overflow: hidden;
+    resize: none;
+}
+
+.form-control {
+    margin-bottom: 0.5rem;
+}
 </style>
 {% endblock %}
