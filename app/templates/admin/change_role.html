@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}تغییر نقش کاربر - سایت فردوسی حسینی{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">تغییر نقش کاربر</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.change_user_role', user_id=user.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="mb-3">
+                            <p>نقش جدید برای <strong>{{ user.username }}</strong> را انتخاب کنید:</p>
+                            <select name="new_role" class="form-select" dir="rtl" required>
+                                <option value="user" {% if user.role == 'user' %}selected{% endif %}>کاربر عادی</option>
+                                <option value="researcher" {% if user.role == 'researcher' %}selected{% endif %}>محقق</option>
+                                <option value="reader" {% if user.role == 'reader' %}selected{% endif %}>خواننده</option>
+                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>مدیر</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">تأیید تغییر</button>
+                            <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">انصراف</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -12,7 +12,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from app import db
-from app.models import Title, Verse, Recording, Comment
+from app.models import Title, Verse, Recording, Comment, User
 
 verses_bp = Blueprint('verses', __name__)
 
@@ -275,63 +275,122 @@ def get_research_form():
         return jsonify({'error': 'شناسه شعر یافت نشد'}), 400
         
     title = Title.query.get_or_404(title_id)
-        
-    return render_template('researchform.html', 
-                         title_id=title_id,
-                         poem_title=title.title)
-
-@verses_bp.route('/submit_research_form/<int:title_id>', methods=['POST'])
-@login_required
-def submit_research_form(title_id):
-    """ثبت فرم پژوهشی"""
-    if not current_user.can_comment():
-        return jsonify({'success': False, 'message': 'شما مجاز به ثبت فرم پژوهشی نیستید'})
     
-    # بررسی وجود شعر
-    title = Title.query.get_or_404(title_id)
-    
-    # بررسی اینکه آیا محقق قبلاً نظر داده یا نه
+    # بازیابی نظر قبلی کاربر
     existing_comment = Comment.query.filter_by(
         user_id=current_user.id,
         title_id=title_id
     ).first()
     
+    comment_data = None
     if existing_comment:
-        return jsonify({'success': False, 'message': 'شما قبلاً فرم پژوهشی را برای این شعر ثبت کرده‌اید'})
-    
-    # دریافت داده‌های فرم
-    data = request.get_json()
-    if not data:
-        return jsonify({'success': False, 'message': 'داده‌ای دریافت نشد'})
-    
-    # تبدیل داده‌های فرم به JSON
-    research_data = {
-        'main_topic': data.get('main_topic'),
-        'subtopics': data.get('subtopics', []),
-        'extra_info': data.get('extra_info'),
-        'topic_narrative': data.get('topic_narrative'),
-        'historical_flaw': data.get('historical_flaw'),
-        'reform_theory': data.get('reform_theory'),
-        'form_type': 'research_form'  # برای تشخیص نوع فرم
-    }
-    
-    # ایجاد نظر جدید با داده‌های فرم
-    new_comment = Comment(
-        user_id=current_user.id,
-        title_id=title_id,
-        comment=json.dumps(research_data, ensure_ascii=False),
-        status='approved' if current_user.is_admin() else 'pending'
-    )
-    
+        try:
+            comment_data = json.loads(existing_comment.comment)
+        except:
+            comment_data = None
+        
+    return render_template('researchform.html', 
+                         title_id=title_id,
+                         poem_title=title.title,
+                         comment_data=comment_data)
+
+@verses_bp.route('/submit_research_form/<int:title_id>', methods=['POST'])
+@login_required
+def submit_research_form(title_id):
+    """ثبت فرم پژوهشی"""
     try:
-        db.session.add(new_comment)
-        db.session.commit()
-        return jsonify({
-            'success': True, 
-            'message': 'فرم پژوهشی با موفقیت ثبت شد' + 
-                      ('' if current_user.is_admin() else ' و پس از تأیید نمایش داده خواهد شد')
-        })
+        if not current_user.can_comment():
+            return jsonify({'success': False, 'message': 'شما مجاز به ثبت فرم پژوهشی نیستید'}), 403
+        
+        # بررسی وجود شعر
+        title = Title.query.get(title_id)
+        if not title:
+            return jsonify({'success': False, 'message': 'شعر مورد نظر یافت نشد'}), 404
+        
+        # دریافت داده‌های فرم
+        if not request.is_json:
+            return jsonify({'success': False, 'message': 'درخواست باید به صورت JSON باشد'}), 400
+            
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'message': 'داده‌ای دریافت نشد'}), 400
+        
+        # اعتبارسنجی داده‌ها
+        if not isinstance(data.get('subtopics'), list):
+            return jsonify({'success': False, 'message': 'فرمت داده‌های ارسالی نامعتبر است'}), 400
+            
+        if not data.get('subtopics'):
+            return jsonify({'success': False, 'message': 'حداقل یک زیر موضوع باید وارد شود'}), 400
+        
+        for subtopic in data['subtopics']:
+            if not isinstance(subtopic, dict):
+                return jsonify({'success': False, 'message': 'فرمت زیر موضوع نامعتبر است'}), 400
+            if not subtopic.get('title'):
+                return jsonify({'success': False, 'message': 'عنوان زیر موضوع نمی‌تواند خالی باشد'}), 400
+        
+        # بررسی اینکه آیا محقق قبلاً نظر داده یا نه
+        existing_comment = Comment.query.filter_by(
+            user_id=current_user.id,
+            title_id=title_id
+        ).first()
+        
+        # تبدیل داده‌های فرم به JSON
+        research_data = {
+            'subtopics': data.get('subtopics', []),
+            'extra_info': data.get('extra_info', ''),
+            'topic_narrative': data.get('topic_narrative', ''),
+            'historical_flaw': data.get('historical_flaw', ''),
+            'reform_theory': data.get('reform_theory', ''),
+            'form_type': 'research_form'  # برای تشخیص نوع فرم
+        }
+        
+        try:
+            if existing_comment:
+                # ویرایش نظر موجود
+                existing_comment.comment = json.dumps(research_data, ensure_ascii=False)
+                existing_comment.updated_at = datetime.utcnow()
+                message = 'فرم پژوهشی با موفقیت ویرایش شد'
+            else:
+                # ایجاد نظر جدید
+                new_comment = Comment(
+                    user_id=current_user.id,
+                    title_id=title_id,
+                    comment=json.dumps(research_data, ensure_ascii=False),
+                    status='approved' if current_user.is_admin() else 'pending'
+                )
+                db.session.add(new_comment)
+                message = 'فرم پژوهشی با موفقیت ثبت شد' + ('' if current_user.is_admin() else ' و پس از تأیید نمایش داده خواهد شد')
+            
+            db.session.commit()
+            return jsonify({
+                'success': True, 
+                'message': message
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error saving research form: {e}")
+            return jsonify({'success': False, 'message': 'خطا در ثبت فرم پژوهشی'}), 500
+            
     except Exception as e:
-        db.session.rollback()
-        current_app.logger.error(f"Error saving research form: {e}")
-        return jsonify({'success': False, 'message': 'خطا در ثبت فرم پژوهشی'})
+        current_app.logger.error(f"Error in submit_research_form: {e}")
+        return jsonify({'success': False, 'message': 'خطای سیستمی رخ داده است'}), 500
+
+@verses_bp.route('/view_research_comment/<int:comment_id>')
+def view_research_comment(comment_id):
+    """نمایش نظر پژوهشی"""
+    comment = Comment.query.get_or_404(comment_id)
+    
+    # تبدیل JSON نظر به دیکشنری
+    try:
+        comment_data = json.loads(comment.comment)
+    except:
+        flash('خطا در بازیابی اطلاعات نظر', 'error')
+        return redirect(url_for('main.title', title_id=comment.title_id))
+    
+    return render_template('researchform.html', 
+                         title_id=comment.title_id,
+                         poem_title=comment.poem_title.title,
+                         view_mode=True,
+                         comment_data=comment_data,
+                         username=comment.author_name)

@@ -1,75 +1,106 @@
 {% extends "base.html" %}
 
-{% block title %}فرم پژوهشی - {{ poem_title }}{% endblock %}
+{% block title %}فرم پژوهشی - سایت فردوسی حسینی{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5 pt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-search-plus me-2"></i>
-                        فرم پژوهشی {{ poem_title }}
-                    </h4>
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        {% if view_mode %}
+                            مشاهده نظر پژوهشی برای شعر: {{ poem_title }}
+                            <small class="text-muted">(نظر {{ username }})</small>
+                        {% else %}
+                            فرم پژوهشی برای شعر: {{ poem_title }}
+                        {% endif %}
+                    </h5>
                 </div>
                 <div class="card-body">
                     <form id="researchForm">
-                        <!-- زیرموضوع‌ها -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">زیرموضوع‌ها</label>
-                            <div id="subtopics-container">
-                                <div class="subtopic-box">
-                                    <button type="button" class="remove-subtopic" onclick="removeSubtopic(this)" style="display: none;">×</button>
-                                    <div class="mb-3">
-                                        <label class="form-label">عنوان زیرموضوع</label>
-                                        <input type="text" name="subtopics[0][title]" class="form-control" required>
+                        {% if not view_mode %}
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="return_url" value="{{ url_for('main.title', title_id=title_id) }}">
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">زیر موضوعات</label>
+                            <div id="subtopicsContainer">
+                                {% if comment_data and comment_data.subtopics %}
+                                    {% for subtopic in comment_data.subtopics %}
+                                        <div class="row mb-2 subtopic-row">
+                                            <div class="col-md-5">
+                                                <input type="text" class="form-control subtopic-title" 
+                                                       placeholder="زیرموضوع" 
+                                                       value="{{ subtopic.title if subtopic.title else '' }}"
+                                                       {% if view_mode %}readonly{% else %}required{% endif %}>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input type="text" class="form-control subtopic-sources" 
+                                                       placeholder="منابع تاریخی"
+                                                       value="{{ subtopic.sources if subtopic.sources else '' }}"
+                                                       {% if view_mode %}readonly{% endif %}>
+                                            </div>
+                                            {% if not view_mode %}
+                                                <div class="col-md-1">
+                                                    <button type="button" class="btn btn-danger remove-subtopic">×</button>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                {% elif not view_mode %}
+                                    <div class="row mb-2 subtopic-row">
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control subtopic-title" 
+                                                   placeholder="زیرموضوع" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control subtopic-sources" 
+                                                   placeholder="منابع تاریخی">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-danger remove-subtopic">×</button>
+                                        </div>
                                     </div>
-                                    <div class="mb-2">
-                                        <label class="form-label">منابع مرتبط</label>
-                                        <input type="text" name="subtopics[0][sources]" class="form-control" 
-                                               placeholder="منابع را با کاما از هم جدا کنید">
-                                    </div>
-                                </div>
+                                {% endif %}
                             </div>
-                            <button type="button" class="btn btn-outline-primary mt-2" onclick="addSubtopic()">
-                                + افزودن زیرموضوع
-                            </button>
+                            {% if not view_mode %}
+                                <button type="button" class="btn btn-secondary mt-2" id="addSubtopic">افزودن زیر موضوع</button>
+                            {% endif %}
                         </div>
 
-                        <!-- توضیحات تکمیلی -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">توضیحات تکمیلی</label>
-                            <textarea name="extra_info" class="form-control" rows="4"></textarea>
+                        <div class="mb-3">
+                            <label for="extraInfo" class="form-label">اطلاعات تکمیلی</label>
+                            <textarea class="form-control" id="extraInfo" name="extra_info" rows="3"
+                                    {% if view_mode %}readonly{% endif %}>{{ comment_data.extra_info if comment_data else '' }}</textarea>
                         </div>
 
-                        <!-- نثر موضوع -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">نثر موضوع</label>
-                            <textarea name="topic_narrative" class="form-control" rows="4"></textarea>
+                        <div class="mb-3">
+                            <label for="topicNarrative" class="form-label">روایت موضوع</label>
+                            <textarea class="form-control" id="topicNarrative" name="topic_narrative" rows="3"
+                                    {% if view_mode %}readonly{% endif %}>{{ comment_data.topic_narrative if comment_data else '' }}</textarea>
                         </div>
 
-                        <!-- نقص تاریخی -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">نقص تاریخی</label>
-                            <textarea name="historical_flaw" class="form-control" rows="4"></textarea>
+                        <div class="mb-3">
+                            <label for="historicalFlaw" class="form-label">اشکال تاریخی</label>
+                            <textarea class="form-control" id="historicalFlaw" name="historical_flaw" rows="3"
+                                    {% if view_mode %}readonly{% endif %}>{{ comment_data.historical_flaw if comment_data else '' }}</textarea>
                         </div>
 
-                        <!-- نظریه اصلاحی -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">نظریه اصلاحی</label>
-                            <textarea name="reform_theory" class="form-control" rows="4"></textarea>
+                        <div class="mb-3">
+                            <label for="reformTheory" class="form-label">نظریه اصلاحی</label>
+                            <textarea class="form-control" id="reformTheory" name="reform_theory" rows="3"
+                                    {% if view_mode %}readonly{% endif %}>{{ comment_data.reform_theory if comment_data else '' }}</textarea>
                         </div>
 
-                        <div class="text-end">
-                            <a href="{{ url_for('main.title', title_id=title_id) }}" class="btn btn-secondary ms-2">
-                                <i class="fas fa-arrow-right ms-1"></i>
-                                بازگشت
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save ms-1"></i>
-                                ثبت فرم پژوهشی
-                            </button>
+                        <div class="d-grid gap-2">
+                            {% if not view_mode %}
+                                <button type="submit" class="btn btn-primary">
+                                    {{ 'ویرایش نظر' if comment_data else 'ثبت نظر' }}
+                                </button>
+                            {% endif %}
+                            <button type="button" class="btn btn-secondary" id="cancelButton">بازگشت</button>
                         </div>
                     </form>
                 </div>
@@ -79,133 +110,118 @@
 </div>
 {% endblock %}
 
-{% block styles %}
-<style>
-    .subtopic-box {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-        position: relative;
-    }
-    
-    .remove-subtopic {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: none;
-        border: none;
-        color: #dc3545;
-        cursor: pointer;
-        font-size: 20px;
-        line-height: 1;
-        padding: 0 5px;
-    }
-    
-    .remove-subtopic:hover {
-        color: #bb2d3b;
-    }
-    
-    textarea {
-        resize: vertical;
-        min-height: 100px;
-    }
-</style>
-{% endblock %}
-
 {% block scripts %}
 <script>
-    let subtopicIndex = 1;
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('researchForm');
+    const subtopicsContainer = document.getElementById('subtopicsContainer');
+    const addSubtopicBtn = document.getElementById('addSubtopic');
+    const cancelButton = document.getElementById('cancelButton');
+    const returnUrl = "{{ url_for('main.title', title_id=title_id) }}";
 
-    function addSubtopic() {
-        const container = document.getElementById('subtopics-container');
-        const box = document.createElement('div');
-        box.className = 'subtopic-box';
-        box.innerHTML = `
-            <button type="button" class="remove-subtopic" onclick="removeSubtopic(this)">×</button>
-            <div class="mb-3">
-                <label class="form-label">عنوان زیرموضوع</label>
-                <input type="text" name="subtopics[${subtopicIndex}][title]" class="form-control" required>
+    {% if not view_mode %}
+    // افزودن زیر موضوع جدید
+    addSubtopicBtn.addEventListener('click', function() {
+        const div = document.createElement('div');
+        div.className = 'row mb-2 subtopic-row';
+        div.innerHTML = `
+            <div class="col-md-5">
+                <input type="text" class="form-control subtopic-title" placeholder="زیرموضوع" required>
             </div>
-            <div class="mb-2">
-                <label class="form-label">منابع مرتبط</label>
-                <input type="text" name="subtopics[${subtopicIndex}][sources]" class="form-control" 
-                       placeholder="منابع را با کاما از هم جدا کنید">
+            <div class="col-md-6">
+                <input type="text" class="form-control subtopic-sources" placeholder="منابع تاریخی">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger remove-subtopic">×</button>
             </div>
         `;
-        container.appendChild(box);
-        subtopicIndex++;
-        
-        // نمایش دکمه حذف برای اولین زیرموضوع اگر بیش از یک زیرموضوع وجود دارد
-        if (container.children.length > 1) {
-            container.querySelector('.remove-subtopic').style.display = 'block';
-        }
-    }
+        subtopicsContainer.appendChild(div);
+    });
 
-    function removeSubtopic(button) {
-        const container = document.getElementById('subtopics-container');
-        button.closest('.subtopic-box').remove();
-        
-        // پنهان کردن دکمه حذف اگر فقط یک زیرموضوع باقی مانده
-        if (container.children.length === 1) {
-            container.querySelector('.remove-subtopic').style.display = 'none';
+    // حذف زیر موضوع
+    subtopicsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-subtopic')) {
+            const subtopicRows = document.querySelectorAll('.subtopic-row');
+            if (subtopicRows.length > 1) {
+                e.target.closest('.subtopic-row').remove();
+            } else {
+                alert('حداقل یک زیر موضوع باید وجود داشته باشد');
+            }
         }
-    }
+    });
 
-    document.getElementById('researchForm').addEventListener('submit', function(e) {
+    // ارسال فرم
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // جمع‌آوری داده‌های فرم
-        const formData = {
-            subtopics: [],
-            extra_info: document.querySelector('textarea[name="extra_info"]').value,
-            topic_narrative: document.querySelector('textarea[name="topic_narrative"]').value,
-            historical_flaw: document.querySelector('textarea[name="historical_flaw"]').value,
-            reform_theory: document.querySelector('textarea[name="reform_theory"]').value
-        };
+        try {
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            
+            const subtopics = Array.from(document.querySelectorAll('.subtopic-row')).map(row => ({
+                title: row.querySelector('.subtopic-title').value.trim(),
+                sources: row.querySelector('.subtopic-sources').value.trim()
+            }));
+            
+            const formData = {
+                subtopics: subtopics,
+                extra_info: document.getElementById('extraInfo').value.trim(),
+                topic_narrative: document.getElementById('topicNarrative').value.trim(),
+                historical_flaw: document.getElementById('historicalFlaw').value.trim(),
+                reform_theory: document.getElementById('reformTheory').value.trim()
+            };
 
-        // جمع‌آوری زیرموضوع‌ها
-        document.querySelectorAll('.subtopic-box').forEach(box => {
-            const title = box.querySelector('input[type="text"][name*="[title]"]').value;
-            const sources = box.querySelector('input[type="text"][name*="[sources]"]').value;
-            formData.subtopics.push({ title, sources });
-        });
+            const response = await fetch(`/verses/submit_research_form/{{ title_id }}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData),
+                credentials: 'same-origin'
+            });
 
-        // ارسال به سرور
-        const titleId = '{{ title_id }}';
-        
-        fetch(`/verses/submit_research_form/${titleId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify(formData),
-            credentials: 'same-origin'
-        })
-        .then(response => {
+            const data = await response.json();
+            
             if (!response.ok) {
-                if (response.status === 400) {
-                    return response.json().then(data => {
-                        throw new Error(data.message || 'خطا در اعتبارسنجی فرم');
-                    });
-                }
-                throw new Error(`خطای ${response.status}: ${response.statusText}`);
+                throw new Error(data.message || 'خطا در ارسال فرم');
             }
-            return response.json();
-        })
-        .then(data => {
+
             if (data.success) {
-                alert(data.message || 'فرم با موفقیت ثبت شد');
-                window.location.href = '{{ url_for('main.title', title_id=title_id) }}';
+                alert(data.message);
+                window.location.href = returnUrl;
             } else {
-                throw new Error(data.message || 'خطا در ثبت فرم');
+                alert(data.message || 'خطا در ثبت فرم پژوهشی');
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error:', error);
             alert(error.message || 'خطا در ارسال فرم');
-        });
+        } finally {
+            form.querySelector('button[type="submit"]').disabled = false;
+        }
     });
+    {% endif %}
+
+    // دکمه بازگشت
+    cancelButton.addEventListener('click', function() {
+        window.location.href = returnUrl;
+    });
+});
 </script>
+
+<style>
+.remove-subtopic {
+    padding: 0.375rem 0.75rem;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+{% if view_mode %}
+.form-control[readonly] {
+    background-color: #f8f9fa;
+    opacity: 1;
+}
+{% endif %}
+</style>
 {% endblock %}

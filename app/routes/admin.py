@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
-from app.models import User, Comment, Recording
+from app.models import User, Comment, Recording, Title
 from app import db, csrf
 from functools import wraps
 import os
@@ -27,11 +27,13 @@ def dashboard():
     users_count = User.query.count()
     comments_count = Comment.query.count()
     recordings_count = Recording.query.count()
+    poems_count = Title.query.count()
     
     stats = {
         'users': users_count,
         'comments': comments_count,
-        'recordings': recordings_count
+        'recordings': recordings_count,
+        'poems': poems_count
     }
     
     return render_template('admin/dashboard.html', stats=stats)
@@ -47,32 +49,36 @@ def users():
     )
     return render_template('admin/users.html', users=users)
 
-@admin_bp.route('/users/<int:user_id>/change-role', methods=['POST'])
+@admin_bp.route('/users/<int:user_id>/change-role', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def change_user_role(user_id):
     """تغییر نقش کاربر"""
     user = User.query.get_or_404(user_id)
-    new_role = request.form.get('new_role')
-    
-    if new_role not in ['user', 'researcher', 'reader', 'admin']:
-        flash('نقش نامعتبر است', 'error')
-        return redirect(url_for('admin.users'))
     
     # جلوگیری از تغییر نقش خود
     if user.id == current_user.id:
         flash('نمی‌توانید نقش خود را تغییر دهید', 'error')
         return redirect(url_for('admin.users'))
     
-    try:
-        user.role = new_role
-        db.session.commit()
-        flash('نقش کاربر با موفقیت تغییر کرد', 'success')
-    except:
-        db.session.rollback()
-        flash('خطا در تغییر نقش کاربر', 'error')
+    if request.method == 'POST':
+        new_role = request.form.get('new_role')
+        
+        if new_role not in ['user', 'researcher', 'reader', 'admin']:
+            flash('نقش نامعتبر است', 'error')
+            return redirect(url_for('admin.users'))
+        
+        try:
+            user.role = new_role
+            db.session.commit()
+            flash('نقش کاربر با موفقیت تغییر کرد', 'success')
+            return redirect(url_for('admin.users'))
+        except:
+            db.session.rollback()
+            flash('خطا در تغییر نقش کاربر', 'error')
+            return redirect(url_for('admin.users'))
     
-    return redirect(url_for('admin.users'))
+    return render_template('admin/change_role.html', user=user)
 
 @admin_bp.route('/users/<int:user_id>/edit', methods=['GET', 'POST'])
 @login_required

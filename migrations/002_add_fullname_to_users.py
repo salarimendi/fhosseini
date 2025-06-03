@@ -1,6 +1,6 @@
 from yoyo import step
 
-__depends__ = {'001_initial'}
+#__depends__ = {'001_initial'}
 
 def apply_step(conn):
     cursor = conn.cursor()
