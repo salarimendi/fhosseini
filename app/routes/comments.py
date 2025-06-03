@@ -5,23 +5,25 @@ from datetime import datetime
 
 comments_bp = Blueprint('comments', __name__)
 
-@comments_bp.route('/add_comment', methods=['POST'])
+@comments_bp.route('/add_comment/<int:title_id>', methods=['POST'])
 @login_required
-def add_comment():
+def add_comment(title_id):
     """افزودن نظر محقق"""
     if not current_user.can_comment():
         flash('شما مجاز به ثبت نظر نیستید', 'error')
         return redirect(request.referrer or url_for('main.home'))
     
     data = request.get_json() if request.is_json else request.form
-    title_id = data.get('title_id')
     comment_text = data.get('comment')
     
-    if not comment_text or not title_id:
+    if not comment_text:
         if request.is_json:
-            return jsonify({'success': False, 'message': 'اطلاعات ناقص است'})
-        flash('اطلاعات ناقص است', 'error')
+            return jsonify({'success': False, 'message': 'متن نظر نمی‌تواند خالی باشد'})
+        flash('متن نظر نمی‌تواند خالی باشد', 'error')
         return redirect(request.referrer)
+    
+    # بررسی وجود شعر
+    title = Title.query.get_or_404(title_id)
     
     # بررسی اینکه آیا محقق قبلاً نظر داده یا نه
     existing_comment = Comment.query.filter_by(
@@ -35,11 +37,12 @@ def add_comment():
         flash('شما قبلاً نظر خود را ثبت کرده‌اید', 'error')
         return redirect(request.referrer)
     
-    # ایجاد نظر جدید
+    # ایجاد نظر جدید - نظرات ادمین مستقیماً تأیید می‌شوند
     new_comment = Comment(
         user_id=current_user.id,
         title_id=title_id,
-        comment=comment_text
+        comment=comment_text,
+        status='approved' if current_user.is_admin() else 'pending'
     )
     
     try:
@@ -47,8 +50,8 @@ def add_comment():
         db.session.commit()
         
         if request.is_json:
-            return jsonify({'success': True, 'message': 'نظر شما با موفقیت ثبت شد'})
-        flash('نظر شما با موفقیت ثبت شد', 'success')
+            return jsonify({'success': True, 'message': 'نظر شما با موفقیت ثبت شد' + ('' if current_user.is_admin() else ' و پس از تأیید نمایش داده خواهد شد')})
+        flash('نظر شما با موفقیت ثبت شد' + ('' if current_user.is_admin() else ' و پس از تأیید نمایش داده خواهد شد'), 'success')
         return redirect(request.referrer)
         
     except Exception as e:

@@ -122,12 +122,17 @@ class Comment(db.Model):
     status = db.Column(db.String(20), default='pending')  # وضعیت: pending, approved, rejected
     
     @property
+    def author_name(self):
+        """نام نویسنده نظر"""
+        return self.author.username if self.author else 'ناشناس'
+    
+    @property
     def is_approved(self):
         """برای حفظ سازگاری با کد قبلی"""
         return self.status == 'approved'
     
     def __repr__(self):
-        return f'<Comment by {self.author.username}>'
+        return f'<Comment by {self.author_name}>'
 
 class Recording(db.Model):
     """مدل ضبط‌های صوتی"""
@@ -146,7 +151,8 @@ class Recording(db.Model):
     @property
     def file_path(self):
         """مسیر کامل فایل"""
-        return f"static/uploads/{self.filename}"
+        from flask import current_app
+        return current_app.config['UPLOAD_FOLDER'] + '/' + self.filename
     
     @property
     def file_size_mb(self):

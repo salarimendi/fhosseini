@@ -5,11 +5,12 @@
 """
 
 from flask import Blueprint, render_template, request, jsonify, current_app, flash, redirect, url_for
-from flask_login import current_user
+from flask_login import current_user, login_required
 from sqlalchemy import or_, func
 from app.models import Title, Verse, Comment, Recording, User, SearchResult
 from app.forms import CommentForm
 from app import db
+from datetime import datetime
 
 main_bp = Blueprint('main', __name__)
 
@@ -21,7 +22,7 @@ def home():
     stats = {
         'total_poems': Title.query.count(),
         'total_verses': Verse.query.count(),
-        'total_comments': Comment.query.filter_by(is_approved=True).count(),
+        'total_comments': Comment.query.filter_by(status='approved').count(),
         'total_recordings': Recording.query.filter_by(is_approved=True).count(),
         'total_users': User.query.filter_by(is_active=True).count(),
         'gardens': []
@@ -49,7 +50,7 @@ def home():
         })
     
     # آخرین نظرات تأیید شده
-    recent_comments = Comment.query.filter_by(is_approved=True)\
+    recent_comments = Comment.query.filter_by(status='approved')\
                                   .order_by(Comment.created_at.desc())\
                                   .limit(5).all()
     
@@ -116,21 +117,46 @@ def title(title_id):
     verses = title_obj.get_verses_ordered()
     
     # دریافت نظرات تأیید شده
-    comments = title_obj.get_comments()
-    approved_comments = [c for c in comments if c.is_approved]
+    comments = Comment.query.filter_by(title_id=title_id, status='approved').order_by(Comment.created_at.desc()).all()
+    
+    # بررسی اینکه آیا کاربر قبلاً نظر داده است
+    user_has_comment = False
+    if current_user.is_authenticated:
+        user_has_comment = Comment.query.filter_by(
+            user_id=current_user.id,
+            title_id=title_id
+        ).first() is not None
+    
+    # ایجاد فرم نظر
+    comment_form = CommentForm() if current_user.is_authenticated and current_user.can_comment() else None
+    
+    # بررسی اینکه آیا کاربر ضبط دارد و وضعیت تأیید آن
+    user_has_recording = False
+    user_recording_approved = False
+    if current_user.is_authenticated:
+        user_recording = Recording.query.filter_by(
+            user_id=current_user.id,
+            title_id=title_id
+        ).first()
+        if user_recording:
+            user_has_recording = True
+            user_recording_approved = user_recording.is_approved
     
     # دریافت ضبط‌های صوتی تأیید شده
     recordings = []
-    for recording in title_obj.recordings.filter_by(is_approved=True):
-        recordings.append({
-            'id': recording.id,
-            'reader_name': recording.user.username,
-            'filename': recording.filename,
-            'file_path': recording.file_path,
-            'file_size_mb': recording.file_size_mb,
-            'duration': recording.duration,
-            'created_at': recording.created_at
-        })
+    for recording in title_obj.recordings:
+        if recording.is_approved or (current_user.is_authenticated and current_user.is_admin()):
+            recordings.append({
+                'id': recording.id,
+                'reader_name': recording.user.username,
+                'filename': recording.filename,
+                'file_path': recording.file_path,
+                'file_size_mb': recording.file_size_mb,
+                'duration': recording.duration,
+                'created_at': recording.created_at,
+                'is_approved': recording.is_approved,
+                'user_id': recording.user_id
+            })
     
     # شعر قبلی و بعدی در همان باغ
     prev_title = Title.query.filter(
@@ -146,22 +172,23 @@ def title(title_id):
     # آمار شعر
     poem_stats = {
         'verse_count': len(verses),
-        'comment_count': len(approved_comments),
+        'comment_count': len(comments),
         'recording_count': len(recordings)
     }
     
-    # ایجاد فرم نظر
-    comment_form = CommentForm()
-    
     return render_template('poem.html',
-                         title=title_obj,
-                         verses=verses,
-                         comments=approved_comments,
-                         recordings=recordings,
-                         prev_title=prev_title,
-                         next_title=next_title,
-                         poem_stats=poem_stats,
-                         comment_form=comment_form)
+        title=title_obj,
+        verses=verses,
+        comments=comments,
+        recordings=recordings,
+        prev_title=prev_title,
+        next_title=next_title,
+        stats=poem_stats,
+        user_has_comment=user_has_comment,
+        comment_form=comment_form,
+        user_has_recording=user_has_recording,
+        user_recording_approved=user_recording_approved
+    )
 
 @main_bp.route('/search')
 def search():

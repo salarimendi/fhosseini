@@ -3,6 +3,9 @@
 {% block title %}مدیریت ضبط‌های صوتی - سایت فردوسی حسینی{% endblock %}
 
 {% block content %}
+<!-- اضافه کردن توکن CSRF -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <div class="container-fluid">
     <div class="row">
         <!-- منوی کناری -->
@@ -87,6 +90,7 @@
                                     <th>باغ</th>
                                     <th>تاریخ ضبط</th>
                                     <th>حجم فایل</th>
+                                    <th>وضعیت</th>
                                     <th>پخش</th>
                                     <th>عملیات</th>
                                 </tr>
@@ -109,9 +113,16 @@
                                         <span class="text-muted">{{ recording.file_size_mb }} مگابایت</span>
                                     </td>
                                     <td>
+                                        {% if recording.is_approved %}
+                                            <span class="badge bg-success">تأیید شده</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">در انتظار تأیید</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
                                         {% if recording.filename %}
                                         <audio controls preload="none" class="audio-small">
-                                            <source src="{{ url_for('static', filename='recordings/' + recording.filename) }}" type="audio/mpeg">
+                                            <source src="{{ url_for('verses.play_audio', recording_id=recording.id) }}" type="audio/mpeg">
                                             مرورگر شما از پخش صوت پشتیبانی نمی‌کند.
                                         </audio>
                                         {% else %}
@@ -121,14 +132,27 @@
                                     <td>
                                         <div class="btn-group" role="group">
                                             {% if recording.filename %}
-                                            <a href="{{ url_for('static', filename='recordings/' + recording.filename) }}" 
-                                               class="btn btn-sm btn-outline-primary" download>
+                                            <a href="/static/uploads/{{ recording.filename }}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               download="{{ recording.original_filename }}">
                                                 دانلود
                                             </a>
                                             {% endif %}
                                             
-                                            <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                    onclick="deleteRecording({{ recording.id }})">
+                                            {% if not recording.is_approved %}
+                                            <button type="button" class="btn btn-sm btn-success approve-btn" 
+                                                    data-recording-id="{{ recording.id }}">
+                                                تأیید
+                                            </button>
+                                            {% else %}
+                                            <button type="button" class="btn btn-sm btn-warning reject-btn" 
+                                                    data-recording-id="{{ recording.id }}">
+                                                رد
+                                            </button>
+                                            {% endif %}
+                                            
+                                            <button type="button" class="btn btn-sm btn-outline-danger delete-btn" 
+                                                    data-recording-id="{{ recording.id }}">
                                                 حذف
                                             </button>
                                         </div>
@@ -194,27 +218,186 @@
 </style>
 
 <script>
-function deleteRecording(recordingId) {
-    if (confirm('آیا مطمئن هستید که می‌خواهید این ضبط صوتی را حذف کنید؟ این عمل قابل بازگشت نیست.')) {
-        fetch(`/admin/recordings/${recordingId}/delete`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('ضبط صوتی با موفقیت حذف شد.');
-                location.reload();
-            } else {
-                alert('خطا در حذف ضبط صوتی.');
-            }
-        })
-        .catch(error => {
-            alert('خطا در ارتباط با سرور.');
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    // دریافت توکن CSRF
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // تابع نمایش پیام به کاربر
+    function showMessage(message, type = 'success') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.row'));
+        
+        // حذف خودکار پیام بعد از ۵ ثانیه
+        setTimeout(() => alertDiv.remove(), 5000);
     }
-}
+    
+    // تابع نمایش/مخفی کردن نشانگر بارگذاری
+    function toggleLoading(button, show) {
+        if (show) {
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> در حال پردازش...';
+        } else {
+            button.disabled = false;
+            button.innerHTML = button.dataset.originalText;
+        }
+    }
+    
+    // تنظیمات پیش‌فرض برای همه درخواست‌های fetch
+    const fetchConfig = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        }
+    };
+    
+    // ذخیره متن اصلی دکمه‌ها
+    document.querySelectorAll('.approve-btn, .reject-btn, .delete-btn').forEach(button => {
+        button.dataset.originalText = button.innerHTML;
+    });
+    
+    // تأیید ضبط
+    document.querySelectorAll('.approve-btn').forEach(button => {
+        button.addEventListener('click', async function() {
+            const recordingId = this.dataset.recordingId;
+            if (confirm('آیا مطمئن هستید که می‌خواهید این ضبط صوتی را تأیید کنید؟')) {
+                try {
+                    toggleLoading(this, true);
+                    const response = await fetch(`/admin/recordings/${recordingId}/approve`, fetchConfig);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showMessage('ضبط صوتی با موفقیت تأیید شد');
+                        // به‌روزرسانی وضعیت در صفحه
+                        const row = this.closest('tr');
+                        row.querySelector('td:nth-child(7)').innerHTML = '<span class="badge bg-success">تأیید شده</span>';
+                        // جایگزینی دکمه‌ها
+                        const btnGroup = this.closest('.btn-group');
+                        const downloadBtn = btnGroup.querySelector('a.btn-outline-primary');
+                        const deleteBtn = btnGroup.querySelector('.delete-btn');
+                        btnGroup.innerHTML = `
+                            ${downloadBtn ? downloadBtn.outerHTML : ''}
+                            <button type="button" class="btn btn-sm btn-warning reject-btn" data-recording-id="${recordingId}">
+                                رد
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger delete-btn" data-recording-id="${recordingId}">
+                                حذف
+                            </button>
+                        `;
+                        
+                        // اضافه کردن مجدد event listener به دکمه‌های جدید
+                        const newRejectBtn = btnGroup.querySelector('.reject-btn');
+                        const newDeleteBtn = btnGroup.querySelector('.delete-btn');
+                        if (newRejectBtn) {
+                            newRejectBtn.dataset.originalText = newRejectBtn.innerHTML;
+                            newRejectBtn.addEventListener('click', rejectHandler);
+                        }
+                        if (newDeleteBtn) {
+                            newDeleteBtn.dataset.originalText = newDeleteBtn.innerHTML;
+                            newDeleteBtn.addEventListener('click', deleteHandler);
+                        }
+                    } else {
+                        showMessage(data.message || 'خطا در تأیید ضبط صوتی', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showMessage('خطا در ارتباط با سرور', 'danger');
+                } finally {
+                    toggleLoading(this, false);
+                }
+            }
+        });
+    });
+
+    // تابع رد ضبط
+    const rejectHandler = async function() {
+        const recordingId = this.dataset.recordingId;
+        if (confirm('آیا مطمئن هستید که می‌خواهید این ضبط صوتی را رد کنید؟')) {
+            try {
+                toggleLoading(this, true);
+                const response = await fetch(`/admin/recordings/${recordingId}/reject`, fetchConfig);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('ضبط صوتی با موفقیت رد شد');
+                    // به‌روزرسانی وضعیت در صفحه
+                    const row = this.closest('tr');
+                    row.querySelector('td:nth-child(7)').innerHTML = '<span class="badge bg-warning">در انتظار تأیید</span>';
+                    // جایگزینی دکمه‌ها
+                    const btnGroup = this.closest('.btn-group');
+                    const downloadBtn = btnGroup.querySelector('a.btn-outline-primary');
+                    const deleteBtn = btnGroup.querySelector('.delete-btn');
+                    btnGroup.innerHTML = `
+                        ${downloadBtn ? downloadBtn.outerHTML : ''}
+                        <button type="button" class="btn btn-sm btn-success approve-btn" data-recording-id="${recordingId}">
+                            تأیید
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger delete-btn" data-recording-id="${recordingId}">
+                            حذف
+                        </button>
+                    `;
+                    
+                    // اضافه کردن مجدد event listener به دکمه‌های جدید
+                    const newApproveBtn = btnGroup.querySelector('.approve-btn');
+                    const newDeleteBtn = btnGroup.querySelector('.delete-btn');
+                    if (newApproveBtn) {
+                        newApproveBtn.dataset.originalText = newApproveBtn.innerHTML;
+                        newApproveBtn.addEventListener('click', approveHandler);
+                    }
+                    if (newDeleteBtn) {
+                        newDeleteBtn.dataset.originalText = newDeleteBtn.innerHTML;
+                        newDeleteBtn.addEventListener('click', deleteHandler);
+                    }
+                } else {
+                    showMessage(data.message || 'خطا در رد ضبط صوتی', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('خطا در ارتباط با سرور', 'danger');
+            } finally {
+                toggleLoading(this, false);
+            }
+        }
+    };
+
+    // تابع حذف ضبط
+    const deleteHandler = async function() {
+        const recordingId = this.dataset.recordingId;
+        if (confirm('آیا مطمئن هستید که می‌خواهید این ضبط صوتی را حذف کنید؟ این عمل قابل بازگشت نیست.')) {
+            try {
+                toggleLoading(this, true);
+                const response = await fetch(`/admin/recordings/${recordingId}/delete`, fetchConfig);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('ضبط صوتی با موفقیت حذف شد');
+                    // حذف ردیف از جدول
+                    this.closest('tr').remove();
+                } else {
+                    showMessage(data.message || 'خطا در حذف ضبط صوتی', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('خطا در ارتباط با سرور', 'danger');
+            } finally {
+                toggleLoading(this, false);
+            }
+        }
+    };
+
+    // اضافه کردن event listeners به دکمه‌های موجود
+    document.querySelectorAll('.reject-btn').forEach(button => {
+        button.addEventListener('click', rejectHandler);
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', deleteHandler);
+    });
+});
 </script>
 {% endblock %}

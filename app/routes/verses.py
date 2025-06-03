@@ -68,7 +68,8 @@ def record_audio(title_id):
         try:
             # ایجاد نام فایل یکتا
             file_extension = file.filename.rsplit('.', 1)[1].lower()
-            unique_filename = f"{uuid.uuid4().hex}.{file_extension}"
+            timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+            unique_filename = f"garden{title_obj.garden}_poem{title_id}_{current_user.username}_{timestamp}.{file_extension}"
             
             # مسیر ذخیره فایل
             upload_folder = current_app.config['UPLOAD_FOLDER']
@@ -90,11 +91,12 @@ def record_audio(title_id):
                 existing_recording.original_filename = secure_filename(file.filename)
                 existing_recording.file_size = file_size
                 existing_recording.created_at = datetime.utcnow()
+                existing_recording.is_approved = False  # ریست کردن وضعیت تأیید
                 
                 db.session.commit()
                 return jsonify({
                     'success': True,
-                    'message': 'ضبط صوتی با موفقیت به‌روزرسانی شد.'
+                    'message': 'ضبط صوتی جدید با موفقیت جایگزین شد و در انتظار تأیید است.'
                 })
             
             else:
@@ -137,7 +139,8 @@ def play_audio(recording_id):
     
     recording = Recording.query.get_or_404(recording_id)
     
-    if not recording.is_approved:
+    # اجازه پخش برای ادمین‌ها و فایل‌های تأیید شده
+    if not recording.is_approved and not (current_user.is_authenticated and current_user.is_admin()):
         flash('این ضبط صوتی هنوز تأیید نشده است.', 'error')
         return redirect(url_for('main.home'))
     

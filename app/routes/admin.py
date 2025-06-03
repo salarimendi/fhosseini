@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from app.models import User, Comment, Recording
-from app import db
+from app import db, csrf
 from functools import wraps
 import os
 import secrets
@@ -286,12 +286,10 @@ def delete_recording(recording_id):
         
         db.session.delete(recording)
         db.session.commit()
-        flash('ضبط صوتی با موفقیت حذف شد', 'success')
+        return jsonify({'success': True, 'message': 'ضبط صوتی با موفقیت حذف شد'})
     except:
         db.session.rollback()
-        flash('خطا در حذف ضبط صوتی', 'error')
-    
-    return redirect(url_for('admin.recordings'))
+        return jsonify({'success': False, 'message': 'خطا در حذف ضبط صوتی'})
 
 @admin_bp.route('/users/<int:user_id>/toggle_status', methods=['POST'])
 @login_required
@@ -317,3 +315,33 @@ def toggle_user_status(user_id):
         flash('خطا در تغییر وضعیت کاربر.', 'error')
     
     return redirect(url_for('admin.users'))
+
+@admin_bp.route('/recordings/<int:recording_id>/approve', methods=['POST'])
+@login_required
+@admin_required
+def approve_recording(recording_id):
+    """تأیید ضبط صوتی"""
+    recording = Recording.query.get_or_404(recording_id)
+    
+    try:
+        recording.is_approved = True
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'ضبط صوتی با موفقیت تأیید شد'})
+    except:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'خطا در تأیید ضبط صوتی'})
+
+@admin_bp.route('/recordings/<int:recording_id>/reject', methods=['POST'])
+@login_required
+@admin_required
+def reject_recording(recording_id):
+    """رد ضبط صوتی"""
+    recording = Recording.query.get_or_404(recording_id)
+    
+    try:
+        recording.is_approved = False
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'ضبط صوتی با موفقیت رد شد'})
+    except:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'خطا در رد ضبط صوتی'})

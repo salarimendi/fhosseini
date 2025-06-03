@@ -78,7 +78,7 @@
             <div class="card mb-3 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
-                        <strong>{{ comment.user.username }}</strong>
+                        <strong>{{ comment.author_name }}</strong>
                         <span class="text-muted">- {{ comment.created_at.strftime('%Y/%m/%d %H:%M') }}</span>
                     </div>
                     <div>
@@ -110,29 +110,56 @@
                         </div>
                         
                         <div class="col-md-4">
-                            <div class="d-flex flex-column gap-2">
+                            <div class="text-muted mb-2">
+                                <i class="fas fa-user me-2"></i>
+                                <strong>{{ comment.author_name }}</strong>
+                            </div>
+                            <div class="text-muted mb-2">
+                                <i class="fas fa-calendar me-2"></i>
+                                {{ comment.created_at.strftime('%Y/%m/%d - %H:%M') }}
+                            </div>
+                            <div class="text-muted mb-2">
+                                <i class="fas fa-check-circle me-2"></i>
+                                وضعیت: 
+                                {% if comment.status == 'approved' %}
+                                <span class="badge bg-success">تأیید شده</span>
+                                {% elif comment.status == 'pending' %}
+                                <span class="badge bg-warning">در انتظار تأیید</span>
+                                {% else %}
+                                <span class="badge bg-danger">رد شده</span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- دکمه‌های مدیریت نظر -->
+                            <div class="btn-group-vertical w-100 mt-3">
                                 {% if comment.status == 'pending' %}
-                                <button class="btn btn-success btn-sm" onclick="approveComment({{ comment.id }})">
+                                <button class="btn btn-success btn-sm mb-2" onclick="approveComment({{ comment.id }})">
+                                    <i class="fas fa-check me-1"></i>
                                     تأیید نظر
                                 </button>
-                                <button class="btn btn-danger btn-sm" onclick="rejectComment({{ comment.id }})">
+                                <button class="btn btn-danger btn-sm mb-2" onclick="rejectComment({{ comment.id }})">
+                                    <i class="fas fa-times me-1"></i>
                                     رد نظر
                                 </button>
                                 {% elif comment.status == 'approved' %}
-                                <button class="btn btn-warning btn-sm" onclick="rejectComment({{ comment.id }})">
+                                <button class="btn btn-warning btn-sm mb-2" onclick="rejectComment({{ comment.id }})">
+                                    <i class="fas fa-ban me-1"></i>
                                     لغو تأیید
                                 </button>
                                 {% else %}
-                                <button class="btn btn-success btn-sm" onclick="approveComment({{ comment.id }})">
+                                <button class="btn btn-success btn-sm mb-2" onclick="approveComment({{ comment.id }})">
+                                    <i class="fas fa-check me-1"></i>
                                     تأیید مجدد
                                 </button>
                                 {% endif %}
                                 
-                                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editCommentModal{{ comment.id }}">
+                                <button class="btn btn-outline-primary btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#editCommentModal{{ comment.id }}">
+                                    <i class="fas fa-edit me-1"></i>
                                     ویرایش
                                 </button>
                                 
                                 <button class="btn btn-outline-danger btn-sm" onclick="deleteComment({{ comment.id }})">
+                                    <i class="fas fa-trash me-1"></i>
                                     حذف
                                 </button>
                             </div>
@@ -182,51 +209,12 @@
 
 <script>
 function approveComment(commentId) {
-    fetch(`/admin/comments/${commentId}/approve`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('خطا در تأیید نظر.');
-        }
-    })
-    .catch(error => {
-        alert('خطا در ارتباط با سرور.');
-    });
-}
-
-function rejectComment(commentId) {
-    fetch(`/admin/comments/${commentId}/reject`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('خطا در رد نظر.');
-        }
-    })
-    .catch(error => {
-        alert('خطا در ارتباط با سرور.');
-    });
-}
-
-function deleteComment(commentId) {
-    if (confirm('آیا مطمئن هستید که می‌خواهید این نظر را حذف کنید؟ این عمل قابل بازگشت نیست.')) {
-        fetch(`/admin/comments/${commentId}/delete`, {
+    if (confirm('آیا از تأیید این نظر اطمینان دارید؟')) {
+        fetch(`/admin/comments/approve/${commentId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
             }
         })
         .then(response => response.json())
@@ -234,13 +222,91 @@ function deleteComment(commentId) {
             if (data.success) {
                 location.reload();
             } else {
-                alert('خطا در حذف نظر.');
+                alert(data.message || 'خطا در تأیید نظر');
             }
         })
         .catch(error => {
-            alert('خطا در ارتباط با سرور.');
+            console.error('Error:', error);
+            alert('خطا در تأیید نظر');
         });
     }
+}
+
+function rejectComment(commentId) {
+    if (confirm('آیا از رد این نظر اطمینان دارید؟')) {
+        fetch(`/admin/comments/reject/${commentId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'خطا در رد نظر');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('خطا در رد نظر');
+        });
+    }
+}
+
+function deleteComment(commentId) {
+    if (confirm('آیا از حذف این نظر اطمینان دارید؟ این عمل قابل بازگشت نیست.')) {
+        fetch(`/admin/comments/delete/${commentId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'خطا در حذف نظر');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('خطا در حذف نظر');
+        });
+    }
+}
+
+function editComment(commentId) {
+    const newText = document.querySelector(`#editCommentText${commentId}`).value;
+    if (!newText.trim()) {
+        alert('متن نظر نمی‌تواند خالی باشد');
+        return;
+    }
+
+    fetch(`/admin/comments/edit/${commentId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: `comment=${encodeURIComponent(newText)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'خطا در ویرایش نظر');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('خطا در ویرایش نظر');
+    });
 }
 </script>
 {% endblock %} 
