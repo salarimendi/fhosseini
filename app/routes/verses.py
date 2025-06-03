@@ -113,7 +113,7 @@ def record_audio(title_id):
                 db.session.commit()
                 return jsonify({
                     'success': True,
-                    'message': 'ضبط صوتی با موفقیت ذخیره شد.'
+                    'message': 'ضبط صوتی با موفقیت ذخیره شد و در انتظار تأیید مدیر است.'
                 })
             
         except Exception as e:
@@ -139,10 +139,11 @@ def play_audio(recording_id):
     
     recording = Recording.query.get_or_404(recording_id)
     
-    # اجازه پخش برای ادمین‌ها و فایل‌های تأیید شده
-    if not recording.is_approved and not (current_user.is_authenticated and current_user.is_admin()):
+    # فقط فایل‌های تأیید شده برای همه قابل پخش هستند
+    # فایل‌های تأیید نشده فقط برای ادمین‌ها قابل پخش هستند
+    if not recording.is_approved and not (current_user.is_authenticated and current_user.is_admin):
         flash('این ضبط صوتی هنوز تأیید نشده است.', 'error')
-        return redirect(url_for('main.home'))
+        return redirect(url_for('main.title', title_id=recording.title_id))
     
     file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], recording.filename)
     

@@ -121,7 +121,7 @@
                                     </td>
                                     <td>
                                         {% if recording.filename %}
-                                        <audio controls preload="none" class="audio-small">
+                                        <audio controls preload="metadata" class="audio-small">
                                             <source src="{{ url_for('verses.play_audio', recording_id=recording.id) }}" type="audio/mpeg">
                                             مرورگر شما از پخش صوت پشتیبانی نمی‌کند.
                                         </audio>
@@ -213,7 +213,31 @@
 <style>
 .audio-small {
     width: 200px;
-    height: 30px;
+    height: 40px;
+}
+
+/* استایل‌های جدید برای پلیر صوتی در پنل مدیریت */
+audio {
+    width: 100%;
+    height: 40px;
+}
+
+audio::-webkit-media-controls-panel {
+    background-color: #f8f9fa;
+}
+
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+    color: #495057;
+}
+
+audio::-webkit-media-controls-timeline {
+    border-radius: 10px;
+    margin: 0 10px;
+}
+
+audio::-webkit-media-controls-timeline-container {
+    padding: 5px;
 }
 </style>
 

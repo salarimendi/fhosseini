@@ -142,10 +142,12 @@ def title(title_id):
             user_has_recording = True
             user_recording_approved = user_recording.is_approved
     
-    # دریافت ضبط‌های صوتی تأیید شده
+    # دریافت ضبط‌های صوتی
     recordings = []
     for recording in title_obj.recordings:
-        if recording.is_approved or (current_user.is_authenticated and current_user.is_admin()):
+        # نمایش فایل‌های تأیید شده برای همه
+        # نمایش فایل‌های تأیید نشده فقط برای ادمین‌ها
+        if recording.is_approved or (current_user.is_authenticated and current_user.is_admin):
             recordings.append({
                 'id': recording.id,
                 'reader_name': recording.user.username,
@@ -153,9 +155,9 @@ def title(title_id):
                 'file_path': recording.file_path,
                 'file_size_mb': recording.file_size_mb,
                 'duration': recording.duration,
-                    'created_at': recording.created_at,
-                    'is_approved': recording.is_approved,
-                    'user_id': recording.user_id
+                'created_at': recording.created_at,
+                'is_approved': recording.is_approved,
+                'user_id': recording.user_id
             })
     
     # شعر قبلی و بعدی در همان باغ
