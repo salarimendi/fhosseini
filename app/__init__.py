@@ -50,12 +50,19 @@ def create_app(config_name=None):
     limiter.init_app(app)
     
     # راه‌اندازی Talisman با تنظیمات امنیتی
-    if not app.debug:  # فقط در محیط تولید فعال شود
-        talisman.init_app(app,
-                         force_https=app.config.get('PREFERRED_URL_SCHEME') == 'https',
-                         strict_transport_security=True,
-                         session_cookie_secure=True,
-                         content_security_policy=app.config['SECURE_HEADERS'].get('Content-Security-Policy'))
+    talisman.init_app(app,
+                     force_https=True,
+                     strict_transport_security=True,
+                     strict_transport_security_max_age=31536000,
+                     strict_transport_security_include_subdomains=True,
+                     session_cookie_secure=True,
+                     content_security_policy={
+                         'default-src': "'self'",
+                         'img-src': ["'self'", 'data:', 'https:'],
+                         'script-src': ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+                         'style-src': ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+                         'font-src': ["'self'", 'https://cdnjs.cloudflare.com']
+                     })
     
     # تنظیمات Login Manager
     login_manager.login_view = 'auth.login'

@@ -40,8 +40,8 @@ class Config:
     
     # تنظیمات فایل آپلود
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or \
-        os.path.join(basedir, 'app/static/uploads')
-    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_UPLOAD_SIZE', 5 * 1024 * 1024))  # 5MB محدودیت برای فایل‌های صوتی
+        os.path.join(basedir, 'static/uploads')
+    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_UPLOAD_SIZE', 10 * 1024 * 1024))  # افزایش به 10MB
     ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a'}
     
     # تنظیمات Session
