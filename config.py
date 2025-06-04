@@ -39,9 +39,10 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # تنظیمات فایل آپلود
+    UPLOAD_MAX_SIZE_MB = 11  # تنظیم حجم مجاز فایل به مگابایت
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or \
         os.path.join(basedir, 'static/uploads')
-    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_UPLOAD_SIZE', 10 * 1024 * 1024))  # افزایش به 10MB
+    MAX_CONTENT_LENGTH = UPLOAD_MAX_SIZE_MB * 1024 * 1024  # تبدیل به بایت
     ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a'}
     
     # تنظیمات Session
@@ -78,6 +79,11 @@ class Config:
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
         # ایجاد پوشه instance در صورت عدم وجود
         os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
+
+    @staticmethod
+    def get_upload_max_size_formatted():
+        """دریافت حجم مجاز فایل به صورت فرمت شده"""
+        return f"{Config.UPLOAD_MAX_SIZE_MB}M"
 
 class DevelopmentConfig(Config):
     """تنظیمات محیط توسعه"""

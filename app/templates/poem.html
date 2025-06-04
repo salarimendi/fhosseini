@@ -547,11 +547,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function handleFileSelect(file) {
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = parseInt("{{ config.UPLOAD_MAX_SIZE_MB }}") * 1024 * 1024; // از تنظیمات فلسک
     const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/mp3'];
     
     if (file.size > maxSize) {
-        alert('حجم فایل نباید بیش از 5 مگابایت باشد');
+        alert(`حجم فایل نباید بیش از {{ config.UPLOAD_MAX_SIZE_MB }} مگابایت باشد`);
         return;
     }
     

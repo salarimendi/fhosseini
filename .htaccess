@@ -16,8 +16,9 @@ Header always set Referrer-Policy "strict-origin-when-cross-origin"
 Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdnjs.cloudflare.com"
 
 # PHP Upload Limits
-php_value upload_max_filesize 10M
-php_value post_max_size 10M
+SetEnv UPLOAD_MAX_SIZE ${UPLOAD_MAX_SIZE}
+php_value upload_max_filesize ${UPLOAD_MAX_SIZE}
+php_value post_max_size ${UPLOAD_MAX_SIZE}
 php_value max_execution_time 300
 php_value max_input_time 300
 
