@@ -61,7 +61,7 @@ def create_app(config_name=None):
                          'default-src': "'self'",
                          'img-src': ["'self'", 'data:', 'https:'],
                          'script-src': ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
-                         'style-src': ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+                         'style-src': ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'],
                          'font-src': ["'self'", 'https://cdnjs.cloudflare.com']
                      })
     
