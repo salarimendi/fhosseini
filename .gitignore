@@ -166,5 +166,4 @@ logs/
 steps/
 deploy/
 *.zip
-static/
 uploads/
