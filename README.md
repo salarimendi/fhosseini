@@ -54,15 +54,34 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-5. تنظیم متغیرهای محیطی:
-فایل `.env` در ریشه پروژه ایجاد کنید:
-```
+5. تنظیمات محیطی:
+
+**برای محیط توسعه (Development):**
+- نیازی به تنظیم متغیرهای محیطی نیست
+- همه تنظیمات با مقادیر پیش‌فرض در `config.py` تعریف شده‌اند
+- برنامه به صورت خودکار در حالت development اجرا می‌شود
+
+**برای محیط تولید (Production):**
+متغیرهای محیطی زیر باید در سرور تنظیم شوند:
+```bash
+# تنظیمات امنیتی
 SECRET_KEY=your_secret_key_here
+WTF_CSRF_SECRET_KEY=your_csrf_secret_key
+
+# تنظیمات پایگاه داده
+DATABASE_URL=your_database_url
+
+# تنظیمات ایمیل
 MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USE_TLS=True
 MAIL_USERNAME=your_email@gmail.com
 MAIL_PASSWORD=your_app_password
+MAIL_DEFAULT_SENDER=your_email@gmail.com
+
+# تنظیمات سایت
+SITE_URL=https://ferdowsihosseini.ir
+UPLOAD_FOLDER=/path/to/upload/folder
 ```
 
 6. راه‌اندازی پایگاه داده:
@@ -108,11 +127,13 @@ http://localhost:5000
 
 ## پیکربندی ایمیل
 
-برای استفاده از قابلیت بازیابی رمز عبور، تنظیمات SMTP را در فایل `.env` وارد کنید. برای استفاده از Gmail:
+برای استفاده از قابلیت بازیابی رمز عبور در محیط توسعه، تنظیمات پیش‌فرض در `config.py` کافی است.
 
-1. فعال‌سازی Two-Factor Authentication
+برای محیط تولید، برای استفاده از Gmail:
+
+1. فعال‌سازی Two-Factor Authentication در حساب Gmail
 2. ایجاد App Password
-3. استفاده از App Password به جای رمز اصلی
+3. تنظیم متغیرهای محیطی مربوط به ایمیل در سرور با استفاده از App Password به جای رمز اصلی
 
 ## توسعه
 
