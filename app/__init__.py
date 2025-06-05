@@ -50,12 +50,13 @@ def create_app(config_name=None):
     limiter.init_app(app)
     
     # راه‌اندازی Talisman با تنظیمات امنیتی
+    force_https = config_name == 'production'
     talisman.init_app(app,
-                     force_https=True,
-                     strict_transport_security=True,
+                     force_https=force_https,
+                     strict_transport_security=force_https,
                      strict_transport_security_max_age=31536000,
-                     strict_transport_security_include_subdomains=True,
-                     session_cookie_secure=True,
+                     strict_transport_security_include_subdomains=force_https,
+                     session_cookie_secure=force_https,
                      content_security_policy={
                          'default-src': "'self'",
                          'img-src': ["'self'", 'data:', 'https:'],
