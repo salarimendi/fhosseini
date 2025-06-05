@@ -9,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
+import os
 
 class User(UserMixin, db.Model):
     """مدل کاربران"""
@@ -168,7 +169,7 @@ class Recording(db.Model):
     def file_path(self):
         """مسیر کامل فایل"""
         from flask import current_app
-        return current_app.config['UPLOAD_FOLDER'] + '/' + self.filename
+        return os.path.join(current_app.config['UPLOAD_FOLDER'], self.filename)
     
     @property
     def file_size_mb(self):

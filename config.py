@@ -41,7 +41,7 @@ class Config:
     # تنظیمات فایل آپلود
     UPLOAD_MAX_SIZE_MB = 11  # تنظیم حجم مجاز فایل به مگابایت
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or \
-        os.path.join(basedir, 'static/uploads')
+        os.path.join(basedir, 'uploads')  # مسیر نسبی ./uploads/
     MAX_CONTENT_LENGTH = UPLOAD_MAX_SIZE_MB * 1024 * 1024  # تبدیل به بایت
     ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a'}
     
@@ -103,8 +103,8 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:////home/qouyvwti/myflaskapp/instance/ferdosi.db'
     
-    # تنظیمات مسیرها در محیط تولید
-    UPLOAD_FOLDER = '/home/qouyvwti/myflaskapp/app/static/uploads'
+    # تنظیمات مسیرها در محیط تولید - استفاده از مسیر نسبی برای آپلود
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads')
     LOG_FOLDER = '/home/qouyvwti/myflaskapp/logs'
     
     # تنظیمات SSL برای محیط تولید

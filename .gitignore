@@ -167,3 +167,4 @@ steps/
 deploy/
 *.zip
 static/
+uploads/

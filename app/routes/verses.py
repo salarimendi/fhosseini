@@ -21,8 +21,7 @@ def ensure_upload_folder():
     upload_folder = current_app.config['UPLOAD_FOLDER']
     if not os.path.isabs(upload_folder):
         # اگر مسیر نسبی است، آن را نسبت به مسیر اصلی پروژه تبدیل به مسیر مطلق می‌کنیم
-        upload_folder = os.path.join(current_app.root_path, '..', upload_folder)
-        upload_folder = os.path.abspath(upload_folder)
+        upload_folder = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'uploads'))
     
     os.makedirs(upload_folder, exist_ok=True)
     current_app.logger.info(f"Upload folder path: {upload_folder}")
