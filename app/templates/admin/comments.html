@@ -199,14 +199,21 @@
 <script>
 function approveComment(commentId) {
     if (confirm('آیا از تأیید این نظر اطمینان دارید؟')) {
-        fetch(`/admin/comments/approve/${commentId}`, {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        fetch(`/admin/comments/${commentId}/approve`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
-            }
+                'X-CSRFToken': csrfToken
+            },
+            credentials: 'same-origin'
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`خطا در تأیید نظر (کد ${response.status})`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 location.reload();
@@ -216,7 +223,7 @@ function approveComment(commentId) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('خطا در تأیید نظر');
+            alert(error.message || 'خطا در تأیید نظر');
         });
     }
 }
