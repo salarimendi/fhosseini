@@ -11,6 +11,8 @@ from app.models import Title, Verse, Comment, Recording, User, SearchResult
 from app.forms import CommentForm
 from app import db
 from datetime import datetime
+from flask_mail import Message
+from app import mail
 
 main_bp = Blueprint('main', __name__)
 
@@ -395,6 +397,57 @@ def statistics():
 def about():
     """صفحه درباره ما"""
     return render_template('about.html')
+
+@main_bp.route('/articles')
+def articles():
+    """صفحه مقالات"""
+    return render_template('articles.html')
+
+@main_bp.route('/research-collaboration')
+def research_collaboration():
+    """صفحه فراخوان همکاری پژوهشی"""
+    return render_template('research_collaboration.html')
+
+@main_bp.route('/contact')
+def contact():
+    """صفحه تماس با ما"""
+    return render_template('contact.html')
+
+@main_bp.route('/send-message', methods=['POST'])
+def send_message():
+    """ارسال پیام از فرم تماس"""
+    name = request.form.get('name')
+    email = request.form.get('email')
+    subject = request.form.get('subject')
+    message = request.form.get('message')
+    
+    # اعتبارسنجی فیلدها
+    if not all([name, email, subject, message]):
+        flash('لطفاً تمام فیلدها را پر کنید.', 'error')
+        return redirect(url_for('main.contact'))
+    
+    try:
+        msg = Message(
+            subject=f'پیام جدید از {name}: {subject}',
+            sender=app.config['MAIL_DEFAULT_SENDER'],
+            recipients=[app.config['MAIL_DEFAULT_SENDER']],  # ارسال به آدرس پیش‌فرض
+            body=f'''پیام جدید از طریق فرم تماس:
+
+نام و نام خانوادگی: {name}
+ایمیل: {email}
+موضوع: {subject}
+
+متن پیام:
+{message}
+'''
+        )
+        mail.send(msg)
+        flash('پیام شما با موفقیت ارسال شد.', 'success')
+    except Exception as e:
+        current_app.logger.error(f'خطا در ارسال ایمیل: {str(e)}')
+        flash('خطا در ارسال پیام. لطفاً دوباره تلاش کنید.', 'error')
+    
+    return redirect(url_for('main.contact'))
 
 @main_bp.errorhandler(404)
 def not_found_error(error):

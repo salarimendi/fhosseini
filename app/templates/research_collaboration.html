@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}فراخوان همکاری پژوهشی - سایت فردوسی حسینی{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="text-center mb-5">فراخوان همکاری پژوهشی</h1>
+            
+            <!-- معرفی پروژه -->
+            <div class="card mb-5">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">پژوهش جامع کتاب «چهار خیابان باغ فردوس»</h2>
+                    <p class="lead">از همه پژوهشگران، محققان ادبیات فارسی، اساتید دانشگاه و علاقه‌مندان به ادبیات کلاسیک دعوت می‌کنیم تا در پروژه بزرگ پژوهش و تحقیق درباره کتاب «چهار خیابان باغ فردوس» اثر حکیم میرزا احمد الهامی کرمانشاهی مشارکت کنند.</p>
+                </div>
+            </div>
+            
+            <!-- محورهای پژوهشی -->
+            <div class="mb-5">
+                <h3 class="mb-4">محورهای پژوهشی</h3>
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-search fa-3x mb-3 text-primary"></i>
+                                <h5 class="card-title">تحقیق و بررسی</h5>
+                                <p class="card-text">تحلیل متون و مفاهیم کتاب</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-edit fa-3x mb-3 text-primary"></i>
+                                <h5 class="card-title">تصحیح و ویرایش</h5>
+                                <p class="card-text">بررسی نسخه‌های خطی</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-comments fa-3x mb-3 text-primary"></i>
+                                <h5 class="card-title">تفسیر و شرح</h5>
+                                <p class="card-text">تبیین مفاهیم و مقاصد</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- فرم همکاری -->
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">فرم درخواست همکاری</h3>
+                    <form>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">نام و نام خانوادگی</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">ایمیل</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="field" class="form-label">حوزه تخصصی</label>
+                            <input type="text" class="form-control" id="field" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cv" class="form-label">رزومه علمی</label>
+                            <textarea class="form-control" id="cv" rows="5" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="proposal" class="form-label">طرح پیشنهادی برای همکاری</label>
+                            <textarea class="form-control" id="proposal" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">ارسال درخواست</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -202,6 +202,123 @@
     </div>
 </section>
 
+<!-- Articles Section -->
+<section class="articles-section py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-4" style="font-family: 'Sahel', Tahoma, sans-serif;">مقالات فردوسی حسینی</h2>
+                <p class="text-muted">پژوهش‌ها و مطالعات در خصوص حکیم میرزا احمد الهامی کرمانشاهی</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <i class="fas fa-newspaper fa-3x text-primary"></i>
+                        </div>
+                        <h4 class="mb-3" style="font-family: 'Sahel', Tahoma, sans-serif;">مقالات علمی</h4>
+                        <p class="text-muted mb-4">
+                            مطالعات تخصصی در مورد زندگی، آثار و اندیشه‌های حکیم میرزا احمد الهامی کرمانشاهی و تأثیر او بر ادبیات فارسی
+                        </p>
+                        <a href="{{ url_for('main.articles') }}" class="btn btn-primary">
+                            <i class="fas fa-book-reader me-2"></i>
+                            مطالعه مقالات
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <i class="fas fa-lightbulb fa-3x text-primary"></i>
+                        </div>
+                        <h4 class="mb-3" style="font-family: 'Sahel', Tahoma, sans-serif;">نوشته‌های پژوهشی</h4>
+                        <p class="text-muted mb-4">
+                            تحلیل‌ها و بررسی‌های ادبی از اشعار چهار خیابان باغ فردوس و جایگاه آن در ادبیات کلاسیک فارسی
+                        </p>
+                        <a href="{{ url_for('main.articles') }}#research" class="btn btn-primary">
+                            <i class="fas fa-microscope me-2"></i>
+                            مشاهده پژوهش‌ها
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Research Collaboration Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <i class="fas fa-users fa-4x text-primary"></i>
+                        </div>
+                        <h2 class="mb-4" style="font-family: 'Sahel', Tahoma, sans-serif;">
+                            فراخوان همکاری پژوهشی
+                        </h2>
+                        <h5 class="mb-4">
+                            پژوهش جامع کتاب «چهار خیابان باغ فردوس»
+                        </h5>
+                        <p class="lead mb-4">
+                            از همه پژوهشگران، محققان ادبیات فارسی، اساتید دانشگاه و علاقه‌مندان به ادبیات کلاسیک دعوت می‌کنیم تا در پروژه بزرگ پژوهش و تحقیق درباره کتاب «چهار خیابان باغ فردوس» اثر حکیم میرزا احمد الهامی کرمانشاهی مشارکت کنند.
+                        </p>
+                        
+                        <div class="row mt-4 mb-4">
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-search fa-2x me-3"></i>
+                                    <div class="text-start">
+                                        <h6 class="mb-1">تحقیق و بررسی</h6>
+                                        <small>تحلیل متون و مفاهیم</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-edit fa-2x me-3"></i>
+                                    <div class="text-start">
+                                        <h6 class="mb-1">تصحیح و ویرایش</h6>
+                                        <small>بررسی نسخه‌های خطی</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-comments fa-2x me-3"></i>
+                                    <div class="text-start">
+                                        <h6 class="mb-1">تفسیر و شرح</h6>
+                                        <small>تبیین مفاهیم و مقاصد</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <a href="{{ url_for('main.research_collaboration') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-hand-holding-heart me-2"></i>
+                                شرکت در پروژه
+                            </a>
+                            <a href="{{ url_for('main.contact') }}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-info-circle me-2"></i>
+                                تماس با ما
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Statistics Section -->
 <section class="py-5 bg-light">
     <div class="container">
