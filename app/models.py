@@ -181,6 +181,22 @@ class Recording(db.Model):
     def __repr__(self):
         return f'<Recording {self.filename} by {self.user.username}>'
 
+class ResearchImage(db.Model):
+    __tablename__ = 'research_images'
+    id = db.Column(db.Integer, primary_key=True)
+    comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'), nullable=False)
+    subtopic_index = db.Column(db.Integer, nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    original_filename = db.Column(db.String(255))
+    caption = db.Column(db.String(500))
+    file_size = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    comment = db.relationship('Comment', backref=db.backref('research_images', lazy='dynamic'))
+
+    def __repr__(self):
+        return f'<ResearchImage {self.filename} for comment {self.comment_id}>'
+
 # کلاس کمکی برای جستجو
 class SearchResult:
     """کلاس نتایج جستجو"""

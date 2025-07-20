@@ -29,7 +29,7 @@
                             <div id="subtopicsContainer">
                                 {% if comment_data and comment_data.subtopics %}
                                     {% for subtopic in comment_data.subtopics %}
-                                        <div class="row mb-2 subtopic-row">
+                                        <div class="row mb-2 subtopic-row" data-index="{{ loop.index0 }}">
                                             <div class="col-md-5">
                                                 <textarea class="form-control auto-resize subtopic-title" 
                                                        placeholder="زیرموضوع" 
@@ -45,10 +45,19 @@
                                                     <button type="button" class="btn btn-danger remove-subtopic">×</button>
                                                 </div>
                                             {% endif %}
+                                            <div class="col-12 mt-2">
+                                                <div class="research-images-block" data-subtopic-index="{{ loop.index0 }}">
+                                                    <div class="research-images-list mb-2"></div>
+                                                    {% if not view_mode %}
+                                                        <input type="file" class="form-control research-image-input" accept="image/*" multiple style="max-width:300px;display:inline-block;">
+                                                        <small class="text-muted">حداکثر حجم هر عکس: {{ config.RESEARCH_IMAGE_MAX_SIZE_MB }} مگابایت</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
                                         </div>
                                     {% endfor %}
                                 {% elif not view_mode %}
-                                    <div class="row mb-2 subtopic-row">
+                                    <div class="row mb-2 subtopic-row" data-index="0">
                                         <div class="col-md-5">
                                             <textarea class="form-control auto-resize subtopic-title" 
                                                    placeholder="زیرموضوع" required></textarea>
@@ -59,6 +68,13 @@
                                         </div>
                                         <div class="col-md-1">
                                             <button type="button" class="btn btn-danger remove-subtopic">×</button>
+                                        </div>
+                                        <div class="col-12 mt-2">
+                                            <div class="research-images-block" data-subtopic-index="0">
+                                                <div class="research-images-list mb-2"></div>
+                                                <input type="file" class="form-control research-image-input" accept="image/*" multiple style="max-width:300px;display:inline-block;">
+                                                <small class="text-muted">حداکثر حجم هر عکس: {{ config.RESEARCH_IMAGE_MAX_SIZE_MB }} مگابایت</small>
+                                            </div>
                                         </div>
                                     </div>
                                 {% endif %}
@@ -220,6 +236,115 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             form.querySelector('button[type="submit"]').disabled = false;
         }
+    });
+    {% endif %}
+
+    // --- Research Images Logic ---
+    const commentId = {{ (comment.id if comment else None) | tojson }};
+    const isViewMode = {{ (True if view_mode else False) | tojson }};
+    const titleId = {{ title_id | tojson }};
+    // Helper to fetch and render images for a subtopic
+    async function loadResearchImages(commentId, subtopicIndex, container) {
+        if (!commentId) return;
+        const listDiv = container.querySelector('.research-images-list');
+        listDiv.innerHTML = '<span class="text-muted">در حال بارگذاری تصاویر...</span>';
+        try {
+            const resp = await fetch(`/verses/get_research_images/${commentId}/${subtopicIndex}`);
+            const data = await resp.json();
+            listDiv.innerHTML = '';
+            if (data.images && data.images.length > 0) {
+                data.images.forEach(img => {
+                    const imgDiv = document.createElement('div');
+                    imgDiv.className = 'd-inline-block m-1 position-relative';
+                    imgDiv.innerHTML = `
+                        <img src="/uploads/research_images/${img.filename}" alt="${img.original_filename}" style="max-width:100px;max-height:100px;border:1px solid #ccc;border-radius:4px;">
+                        ${!isViewMode ? `<button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-image-btn" data-image-id="${img.id}" style="z-index:2;">×</button>` : ''}
+                        <div class="small text-center text-muted">${img.caption ? img.caption : ''}</div>
+                    `;
+                    listDiv.appendChild(imgDiv);
+                });
+            } else {
+                listDiv.innerHTML = '<span class="text-muted">تصویری ثبت نشده است.</span>';
+            }
+        } catch (e) {
+            listDiv.innerHTML = '<span class="text-danger">خطا در بارگذاری تصاویر</span>';
+        }
+    }
+
+    // Initial load for existing subtopics
+    if (commentId) {
+        document.querySelectorAll('.research-images-block').forEach(block => {
+            const subtopicIndex = block.getAttribute('data-subtopic-index');
+            loadResearchImages(commentId, subtopicIndex, block);
+        });
+    }
+
+    // Upload handler
+    if (!isViewMode) {
+        document.addEventListener('change', async function(e) {
+            if (e.target.classList.contains('research-image-input')) {
+                const block = e.target.closest('.research-images-block');
+                const subtopicIndex = block.getAttribute('data-subtopic-index');
+                if (!commentId) {
+                    alert('ابتدا فرم پژوهشی را ثبت کنید تا امکان افزودن عکس فراهم شود.');
+                    e.target.value = '';
+                    return;
+                }
+                const files = Array.from(e.target.files);
+                for (const file of files) {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    try {
+                        const resp = await fetch(`/verses/upload_research_image/${commentId}/${subtopicIndex}`, {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'same-origin'
+                        });
+                        const data = await resp.json();
+                        if (!data.success) {
+                            alert(data.message || 'خطا در آپلود عکس');
+                        }
+                    } catch (err) {
+                        alert('خطا در ارتباط با سرور');
+                    }
+                }
+                loadResearchImages(commentId, subtopicIndex, block);
+                e.target.value = '';
+            }
+        });
+
+        // Delete handler
+        document.addEventListener('click', async function(e) {
+            if (e.target.classList.contains('remove-image-btn')) {
+                if (!confirm('آیا از حذف این عکس مطمئن هستید؟')) return;
+                const imageId = e.target.getAttribute('data-image-id');
+                try {
+                    const resp = await fetch(`/verses/delete_research_image/${imageId}`, {
+                        method: 'POST',
+                        credentials: 'same-origin'
+                    });
+                    const data = await resp.json();
+                    if (data.success) {
+                        e.target.parentElement.remove();
+                    } else {
+                        alert(data.message || 'خطا در حذف عکس');
+                    }
+                } catch (err) {
+                    alert('خطا در ارتباط با سرور');
+                }
+            }
+        });
+    }
+
+    // When adding a new subtopic, add image block as well
+    {% if not view_mode %}
+    addSubtopicBtn.addEventListener('click', function() {
+        const subtopicRows = document.querySelectorAll('.subtopic-row');
+        const newIndex = subtopicRows.length;
+        const lastRow = subtopicsContainer.lastElementChild;
+        const newBlock = lastRow.querySelector('.research-images-block');
+        newBlock.setAttribute('data-subtopic-index', newIndex);
+        newBlock.querySelector('.research-images-list').innerHTML = '';
     });
     {% endif %}
 

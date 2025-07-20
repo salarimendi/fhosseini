@@ -39,6 +39,88 @@ def get_file_size(file_path):
     except:
         return 0
 
+def allowed_research_image(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in current_app.config['RESEARCH_IMAGE_ALLOWED_EXTENSIONS']
+
+def get_research_image_upload_folder():
+    folder = current_app.config['RESEARCH_IMAGE_UPLOAD_FOLDER']
+    os.makedirs(folder, exist_ok=True)
+    return folder
+
+from app.models import ResearchImage
+
+@verses_bp.route('/upload_research_image/<int:comment_id>/<int:subtopic_index>', methods=['POST'])
+@login_required
+def upload_research_image(comment_id, subtopic_index):
+    comment = Comment.query.get_or_404(comment_id)
+    if not (current_user.id == comment.user_id or current_user.is_admin()):
+        return jsonify({'success': False, 'message': 'شما مجوز ندارید.'}), 403
+
+    if 'image' not in request.files:
+        return jsonify({'success': False, 'message': 'فایل انتخاب نشده است.'}), 400
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'success': False, 'message': 'فایل انتخاب نشده است.'}), 400
+
+    if not allowed_research_image(file.filename):
+        return jsonify({'success': False, 'message': 'فرمت فایل مجاز نیست.'}), 400
+
+    file.seek(0, os.SEEK_END)
+    file_size = file.tell()
+    file.seek(0)
+    max_size = current_app.config['RESEARCH_IMAGE_MAX_SIZE_MB'] * 1024 * 1024
+    if file_size > max_size:
+        return jsonify({'success': False, 'message': f'حجم فایل نباید بیشتر از {current_app.config["RESEARCH_IMAGE_MAX_SIZE_MB"]} مگابایت باشد.'}), 400
+
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    unique_filename = f"comment{comment_id}_subtopic{subtopic_index}_{uuid.uuid4().hex}.{ext}"
+    upload_folder = get_research_image_upload_folder()
+    file_path = os.path.join(upload_folder, unique_filename)
+    file.save(file_path)
+
+    image = ResearchImage(
+        comment_id=comment_id,
+        subtopic_index=subtopic_index,
+        filename=unique_filename,
+        original_filename=secure_filename(file.filename),
+        file_size=file_size,
+        created_at=datetime.utcnow()
+    )
+    db.session.add(image)
+    db.session.commit()
+    return jsonify({'success': True, 'image_id': image.id, 'filename': unique_filename})
+
+@verses_bp.route('/delete_research_image/<int:image_id>', methods=['POST'])
+@login_required
+def delete_research_image(image_id):
+    image = ResearchImage.query.get_or_404(image_id)
+    comment = image.comment
+    if not (current_user.id == comment.user_id or current_user.is_admin()):
+        return jsonify({'success': False, 'message': 'شما مجوز ندارید.'}), 403
+
+    file_path = os.path.join(current_app.config['RESEARCH_IMAGE_UPLOAD_FOLDER'], image.filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    db.session.delete(image)
+    db.session.commit()
+    return jsonify({'success': True})
+
+@verses_bp.route('/get_research_images/<int:comment_id>/<int:subtopic_index>')
+@login_required
+def get_research_images(comment_id, subtopic_index):
+    images = ResearchImage.query.filter_by(comment_id=comment_id, subtopic_index=subtopic_index).all()
+    images_data = [{
+        'id': img.id,
+        'filename': img.filename,
+        'original_filename': img.original_filename,
+        'caption': img.caption,
+        'file_size': img.file_size,
+        'created_at': img.created_at.strftime('%Y-%m-%d %H:%M')
+    } for img in images]
+    return jsonify({'images': images_data})
+
 @verses_bp.route('/record/<int:title_id>', methods=['GET', 'POST'])
 @login_required
 def record_audio(title_id):
@@ -306,7 +388,9 @@ def get_research_form():
                          title_id=title_id,
                          poem_title=title.title,
                          comment_data=comment_data,
-                         return_url=return_url)
+                         comment=existing_comment,
+                         return_url=return_url,
+                         config=current_app.config)
 
 @verses_bp.route('/submit_research_form/<int:title_id>', methods=['POST'])
 @login_required
@@ -415,4 +499,6 @@ def view_research_comment(comment_id):
                          view_mode=True,
                          comment_data=comment_data,
                          username=comment.author_name,
-                         return_url=return_url)
+                         comment=comment,
+                         return_url=return_url,
+                         config=current_app.config)
