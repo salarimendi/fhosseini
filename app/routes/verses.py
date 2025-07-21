@@ -544,3 +544,8 @@ def view_research_comment(comment_id):
                          comment=comment,
                          return_url=return_url,
                          config=current_app.config)
+
+@verses_bp.route('/research_images/<path:filename>')
+def research_image_file(filename):
+    folder = current_app.config['RESEARCH_IMAGE_UPLOAD_FOLDER']
+    return send_from_directory(folder, filename)
