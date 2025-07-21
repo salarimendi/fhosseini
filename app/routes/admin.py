@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from app.models import User, Comment, Recording, Title
@@ -7,6 +7,7 @@ from functools import wraps
 import os
 import secrets
 import json
+from app.utils.database import save_research_form
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -381,25 +382,40 @@ def edit_comment_research(comment_id):
                          comment_data=comment_data,
                          view_mode=False,
                          is_admin=True,
+                         username=comment.author.username if comment.author else '',
+                         comment=comment,
                          return_url=url_for('admin.comments'))
 
 @admin_bp.route('/comments/<int:comment_id>/research-update', methods=['POST'])
 @login_required
 @admin_required
 def update_comment_research(comment_id):
-    """به‌روزرسانی نظر از فرم پژوهشی"""
+    """به‌روزرسانی نظر از فرم پژوهشی توسط ادمین (بدون تغییر user_id)"""
     comment = Comment.query.get_or_404(comment_id)
-    
     try:
-        comment.comment = request.form.get('comment', '').strip()
-        comment.research_note = request.form.get('research_note', '').strip()
-        comment.research_category = request.form.get('research_category')
-        comment.research_tags = request.form.get('research_tags', '').strip()
-        
-        db.session.commit()
-        flash('نظر با موفقیت به‌روزرسانی شد', 'success')
+        if request.content_type and request.content_type.startswith('multipart/form-data'):
+            data = request.form.to_dict(flat=False)
+            for k, v in data.items():
+                if isinstance(v, list) and len(v) == 1:
+                    data[k] = v[0]
+            subtopics = json.loads(data.get('subtopics', '[]'))
+            data['subtopics'] = subtopics
+            files = request.files
+            # حذف حلقه getlist کپشن
+        else:
+            if not request.is_json:
+                flash('درخواست باید به صورت JSON یا فرم باشد', 'error')
+                return redirect(url_for('admin.comments'))
+            data = request.get_json()
+            files = None
+        # user_id و title_id را از comment اصلی می‌گیریم تا تغییر نکند
+        data['user_id'] = comment.user_id
+        data['title_id'] = comment.title_id
+        comment_obj, message = save_research_form(comment, data, files, current_app.config, is_admin=True)
+        flash(message, 'success')
+    except ValueError as ve:
+        flash(str(ve), 'error')
     except Exception as e:
-        db.session.rollback()
-        flash(f'خطا در به‌روزرسانی نظر: {str(e)}', 'error')
-    
+        current_app.logger.error(f"Error saving research form (admin): {e}")
+        flash('خطا در ثبت فرم پژوهشی', 'error')
     return redirect(url_for('admin.comments'))

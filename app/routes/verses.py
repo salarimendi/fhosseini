@@ -13,6 +13,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from app import db
 from app.models import Title, Verse, Recording, Comment, User
+from app.utils.database import save_research_form
 
 verses_bp = Blueprint('verses', __name__)
 
@@ -398,114 +399,41 @@ def submit_research_form(title_id):
     try:
         if not current_user.can_comment():
             return jsonify({'success': False, 'message': 'شما مجاز به ثبت فرم پژوهشی نیستید'}), 403
-        
-        # بررسی وجود شعر
         title = Title.query.get(title_id)
         if not title:
             return jsonify({'success': False, 'message': 'شعر مورد نظر یافت نشد'}), 404
-        
-        # اگر multipart/form-data است
         if request.content_type and request.content_type.startswith('multipart/form-data'):
-            data = request.form
-            files = request.files
+            data = request.form.to_dict(flat=False)
+            # تبدیل مقادیر تک مقداری به مقدار ساده
+            for k, v in data.items():
+                if isinstance(v, list) and len(v) == 1:
+                    data[k] = v[0]
             subtopics = json.loads(data.get('subtopics', '[]'))
-            extra_info = data.get('extra_info', '')
-            topic_narrative = data.get('topic_narrative', '')
-            historical_flaw = data.get('historical_flaw', '')
-            reform_theory = data.get('reform_theory', '')
+            data['subtopics'] = subtopics
+            data['user_id'] = current_user.id
+            data['title_id'] = title_id
+            data['is_admin'] = current_user.is_admin() if hasattr(current_user, 'is_admin') else False
+            files = request.files
+            # حذف حلقه getlist کپشن
             return_url = data.get('return_url') or url_for('main.title', title_id=title_id)
         else:
-            # حالت قبلی (برای سازگاری)
             if not request.is_json:
                 return jsonify({'success': False, 'message': 'درخواست باید به صورت JSON یا فرم باشد'}), 400
             data = request.get_json()
-            subtopics = data.get('subtopics', [])
-            extra_info = data.get('extra_info', '')
-            topic_narrative = data.get('topic_narrative', '')
-            historical_flaw = data.get('historical_flaw', '')
-            reform_theory = data.get('reform_theory', '')
+            data['user_id'] = current_user.id
+            data['title_id'] = title_id
+            data['is_admin'] = current_user.is_admin() if hasattr(current_user, 'is_admin') else False
+            files = None
             return_url = data.get('return_url') or url_for('main.title', title_id=title_id)
-        # اعتبارسنجی داده‌ها
-        if not isinstance(subtopics, list):
-            return jsonify({'success': False, 'message': 'فرمت داده‌های ارسالی نامعتبر است'}), 400
-        if not subtopics:
-            return jsonify({'success': False, 'message': 'حداقل یک زیر موضوع باید وارد شود'}), 400
-        for subtopic in subtopics:
-            if not isinstance(subtopic, dict):
-                return jsonify({'success': False, 'message': 'فرمت زیر موضوع نامعتبر است'}), 400
-            if not subtopic.get('title'):
-                return jsonify({'success': False, 'message': 'عنوان زیر موضوع نمی‌تواند خالی باشد'}), 400
-        # بررسی اینکه آیا محقق قبلاً نظر داده یا نه
-        existing_comment = Comment.query.filter_by(
-            user_id=current_user.id,
-            title_id=title_id
-        ).first()
-        research_data = {
-            'subtopics': [{ 'title': s.get('title'), 'sources': s.get('sources', '') } for s in subtopics],
-            'extra_info': extra_info,
-            'topic_narrative': topic_narrative,
-            'historical_flaw': historical_flaw,
-            'reform_theory': reform_theory,
-            'form_type': 'research_form'
-        }
+        # پیدا کردن comment موجود
+        from app.models import Comment
+        existing_comment = Comment.query.filter_by(user_id=current_user.id, title_id=title_id).first()
         try:
-            if existing_comment:
-                # ویرایش نظر موجود
-                existing_comment.comment = json.dumps(research_data, ensure_ascii=False)
-                existing_comment.updated_at = datetime.utcnow()
-                comment_obj = existing_comment
-                message = 'فرم پژوهشی با موفقیت ویرایش شد'
-            else:
-                # ایجاد نظر جدید
-                new_comment = Comment(
-                    user_id=current_user.id,
-                    title_id=title_id,
-                    comment=json.dumps(research_data, ensure_ascii=False),
-                    status='approved' if current_user.is_admin() else 'pending'
-                )
-                db.session.add(new_comment)
-                db.session.flush()  # تا id داشته باشیم
-                comment_obj = new_comment
-                message = 'فرم پژوهشی با موفقیت ثبت شد' + ('' if current_user.is_admin() else ' و پس از تأیید نمایش داده خواهد شد')
-            # فقط عکس‌های جدید را اضافه کن، هیچ عکسی حذف نکن
-            from app.models import ResearchImage
-            for idx, subtopic in enumerate(subtopics):
-                img_files = request.files.getlist(f'images_{idx}[]')
-                captions = request.form.getlist(f'captions_{idx}[]')
-                for i, file in enumerate(img_files):
-                    if file and file.filename:
-                        if not allowed_research_image(file.filename):
-                            continue
-                        file.seek(0, os.SEEK_END)
-                        file_size = file.tell()
-                        file.seek(0)
-                        max_size = current_app.config['RESEARCH_IMAGE_MAX_SIZE_MB'] * 1024 * 1024
-                        if file_size > max_size:
-                            continue
-                        ext = file.filename.rsplit('.', 1)[1].lower()
-                        unique_filename = f"comment{comment_obj.id}_subtopic{idx}_{uuid.uuid4().hex}.{ext}"
-                        upload_folder = get_research_image_upload_folder()
-                        file_path = os.path.join(upload_folder, unique_filename)
-                        file.save(file_path)
-                        caption = captions[i] if i < len(captions) else ''
-                        image = ResearchImage(
-                            comment_id=comment_obj.id,
-                            subtopic_index=idx,
-                            filename=unique_filename,
-                            original_filename=secure_filename(file.filename),
-                            caption=caption,
-                            file_size=file_size,
-                            created_at=datetime.utcnow()
-                        )
-                        db.session.add(image)
-            db.session.commit()
-            return jsonify({
-                'success': True, 
-                'message': message,
-                'return_url': return_url
-            })
+            comment_obj, message = save_research_form(existing_comment, data, files, current_app.config, is_admin=current_user.is_admin() if hasattr(current_user, 'is_admin') else False)
+            return jsonify({'success': True, 'message': message, 'return_url': return_url})
+        except ValueError as ve:
+            return jsonify({'success': False, 'message': str(ve)}), 400
         except Exception as e:
-            db.session.rollback()
             current_app.logger.error(f"Error saving research form: {e}")
             return jsonify({'success': False, 'message': 'خطا در ثبت فرم پژوهشی'}), 500
     except Exception as e:
