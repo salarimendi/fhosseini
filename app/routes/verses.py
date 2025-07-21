@@ -455,14 +455,6 @@ def submit_research_form(title_id):
                 existing_comment.updated_at = datetime.utcnow()
                 comment_obj = existing_comment
                 message = 'فرم پژوهشی با موفقیت ویرایش شد'
-                # حذف تصاویر قبلی
-                from app.models import ResearchImage
-                old_images = ResearchImage.query.filter_by(comment_id=comment_obj.id).all()
-                for img in old_images:
-                    file_path = os.path.join(current_app.config['RESEARCH_IMAGE_UPLOAD_FOLDER'], img.filename)
-                    if os.path.exists(file_path):
-                        os.remove(file_path)
-                    db.session.delete(img)
             else:
                 # ایجاد نظر جدید
                 new_comment = Comment(
@@ -475,7 +467,7 @@ def submit_research_form(title_id):
                 db.session.flush()  # تا id داشته باشیم
                 comment_obj = new_comment
                 message = 'فرم پژوهشی با موفقیت ثبت شد' + ('' if current_user.is_admin() else ' و پس از تأیید نمایش داده خواهد شد')
-            # ذخیره تصاویر جدید
+            # فقط عکس‌های جدید را اضافه کن، هیچ عکسی حذف نکن
             from app.models import ResearchImage
             for idx, subtopic in enumerate(subtopics):
                 img_files = request.files.getlist(f'images_{idx}[]')
