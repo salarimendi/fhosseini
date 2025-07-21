@@ -185,45 +185,114 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ارسال فرم
+    // --- Research Images Logic ---
+    // Local state for images and captions
+    let researchImages = {};
+    // Handle image selection and preview
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('research-image-input')) {
+            const block = e.target.closest('.research-images-block');
+            const subtopicIndex = block.getAttribute('data-subtopic-index');
+            if (!researchImages[subtopicIndex]) researchImages[subtopicIndex] = [];
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    researchImages[subtopicIndex].push({ file, caption: '', preview: ev.target.result });
+                    renderResearchImages(subtopicIndex, block);
+                };
+                reader.readAsDataURL(file);
+            });
+            e.target.value = '';
+        }
+    });
+    // Render previews and caption inputs
+    function renderResearchImages(subtopicIndex, block) {
+        const listDiv = block.querySelector('.research-images-list');
+        listDiv.innerHTML = '';
+        (researchImages[subtopicIndex] || []).forEach((imgObj, idx) => {
+            const imgDiv = document.createElement('div');
+            imgDiv.className = 'd-inline-block m-1 position-relative';
+            imgDiv.innerHTML = `
+                <img src="${imgObj.preview}" style="max-width:100px;max-height:100px;border:1px solid #ccc;border-radius:4px;">
+                <input type="text" class="form-control form-control-sm mt-1 research-image-caption" placeholder="کپشن" value="${imgObj.caption || ''}" data-img-idx="${idx}" style="max-width:100px;">
+                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-image-btn" data-img-idx="${idx}" style="z-index:2;">×</button>
+            `;
+            listDiv.appendChild(imgDiv);
+        });
+    }
+    // Handle caption change
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('research-image-caption')) {
+            const block = e.target.closest('.research-images-block');
+            const subtopicIndex = block.getAttribute('data-subtopic-index');
+            const idx = e.target.getAttribute('data-img-idx');
+            if (researchImages[subtopicIndex] && researchImages[subtopicIndex][idx]) {
+                researchImages[subtopicIndex][idx].caption = e.target.value;
+            }
+        }
+    });
+    // Remove image
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-image-btn')) {
+            const block = e.target.closest('.research-images-block');
+            const subtopicIndex = block.getAttribute('data-subtopic-index');
+            const idx = e.target.getAttribute('data-img-idx');
+            if (researchImages[subtopicIndex]) {
+                researchImages[subtopicIndex].splice(idx, 1);
+                renderResearchImages(subtopicIndex, block);
+            }
+        }
+    });
+    // When adding a new subtopic, add empty image array
+    {% if not view_mode %}
+    addSubtopicBtn.addEventListener('click', function() {
+        const subtopicRows = document.querySelectorAll('.subtopic-row');
+        const newIndex = subtopicRows.length - 1;
+        researchImages[newIndex] = [];
+    });
+    {% endif %}
+    // Submit form with images and captions
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        
         try {
             const submitButton = form.querySelector('button[type="submit"]');
             submitButton.disabled = true;
-            
-            const subtopics = Array.from(document.querySelectorAll('.subtopic-row')).map(row => ({
+            const subtopics = Array.from(document.querySelectorAll('.subtopic-row')).map((row, i) => ({
                 title: row.querySelector('.subtopic-title').value.trim(),
-                sources: row.querySelector('.subtopic-sources').value.trim()
+                sources: row.querySelector('.subtopic-sources').value.trim(),
+                images: (researchImages[i] || []).map(imgObj => ({ caption: imgObj.caption }))
             }));
-            
-            const formData = {
-                subtopics: subtopics,
-                extra_info: document.getElementById('extraInfo').value.trim(),
-                topic_narrative: document.getElementById('topicNarrative').value.trim(),
-                historical_flaw: document.getElementById('historicalFlaw').value.trim(),
-                reform_theory: document.getElementById('reformTheory').value.trim(),
-                return_url: "{{ return_url }}"
-            };
-
+            const formData = new FormData();
+            formData.append('subtopics', JSON.stringify(subtopics));
+            formData.append('extra_info', document.getElementById('extraInfo').value.trim());
+            formData.append('topic_narrative', document.getElementById('topicNarrative').value.trim());
+            formData.append('historical_flaw', document.getElementById('historicalFlaw').value.trim());
+            formData.append('reform_theory', document.getElementById('reformTheory').value.trim());
+            formData.append('return_url', "{{ return_url }}");
+            // اضافه کردن CSRF token
+            formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+            // Append images and captions
+            Object.keys(researchImages).forEach(subIdx => {
+                (researchImages[subIdx] || []).forEach((imgObj, imgIdx) => {
+                    formData.append(`images_${subIdx}[]`, imgObj.file);
+                    formData.append(`captions_${subIdx}[]`, imgObj.caption);
+                });
+            });
             const response = await fetch(`/verses/submit_research_form/{{ title_id }}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(formData),
+                body: formData,
                 credentials: 'same-origin'
             });
-
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.message || 'خطا در ارسال فرم');
+            let data;
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.indexOf('application/json') !== -1) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                throw new Error('خطای غیرمنتظره از سرور: ' + text.substring(0, 200));
             }
-
+            if (!response.ok) throw new Error(data.message || 'خطا در ارسال فرم');
             if (data.success) {
                 alert(data.message);
                 window.location.href = data.return_url;
@@ -231,120 +300,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert(data.message || 'خطا در ثبت فرم پژوهشی');
             }
         } catch (error) {
-            console.error('Error:', error);
             alert(error.message || 'خطا در ارسال فرم');
         } finally {
             form.querySelector('button[type="submit"]').disabled = false;
         }
-    });
-    {% endif %}
-
-    // --- Research Images Logic ---
-    const commentId = {{ (comment.id if comment else None) | tojson }};
-    const isViewMode = {{ (True if view_mode else False) | tojson }};
-    const titleId = {{ title_id | tojson }};
-    // Helper to fetch and render images for a subtopic
-    async function loadResearchImages(commentId, subtopicIndex, container) {
-        if (!commentId) return;
-        const listDiv = container.querySelector('.research-images-list');
-        listDiv.innerHTML = '<span class="text-muted">در حال بارگذاری تصاویر...</span>';
-        try {
-            const resp = await fetch(`/verses/get_research_images/${commentId}/${subtopicIndex}`);
-            const data = await resp.json();
-            listDiv.innerHTML = '';
-            if (data.images && data.images.length > 0) {
-                data.images.forEach(img => {
-                    const imgDiv = document.createElement('div');
-                    imgDiv.className = 'd-inline-block m-1 position-relative';
-                    imgDiv.innerHTML = `
-                        <img src="/uploads/research_images/${img.filename}" alt="${img.original_filename}" style="max-width:100px;max-height:100px;border:1px solid #ccc;border-radius:4px;">
-                        ${!isViewMode ? `<button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-image-btn" data-image-id="${img.id}" style="z-index:2;">×</button>` : ''}
-                        <div class="small text-center text-muted">${img.caption ? img.caption : ''}</div>
-                    `;
-                    listDiv.appendChild(imgDiv);
-                });
-            } else {
-                listDiv.innerHTML = '<span class="text-muted">تصویری ثبت نشده است.</span>';
-            }
-        } catch (e) {
-            listDiv.innerHTML = '<span class="text-danger">خطا در بارگذاری تصاویر</span>';
-        }
-    }
-
-    // Initial load for existing subtopics
-    if (commentId) {
-        document.querySelectorAll('.research-images-block').forEach(block => {
-            const subtopicIndex = block.getAttribute('data-subtopic-index');
-            loadResearchImages(commentId, subtopicIndex, block);
-        });
-    }
-
-    // Upload handler
-    if (!isViewMode) {
-        document.addEventListener('change', async function(e) {
-            if (e.target.classList.contains('research-image-input')) {
-                const block = e.target.closest('.research-images-block');
-                const subtopicIndex = block.getAttribute('data-subtopic-index');
-                if (!commentId) {
-                    alert('ابتدا فرم پژوهشی را ثبت کنید تا امکان افزودن عکس فراهم شود.');
-                    e.target.value = '';
-                    return;
-                }
-                const files = Array.from(e.target.files);
-                for (const file of files) {
-                    const formData = new FormData();
-                    formData.append('image', file);
-                    try {
-                        const resp = await fetch(`/verses/upload_research_image/${commentId}/${subtopicIndex}`, {
-                            method: 'POST',
-                            body: formData,
-                            credentials: 'same-origin'
-                        });
-                        const data = await resp.json();
-                        if (!data.success) {
-                            alert(data.message || 'خطا در آپلود عکس');
-                        }
-                    } catch (err) {
-                        alert('خطا در ارتباط با سرور');
-                    }
-                }
-                loadResearchImages(commentId, subtopicIndex, block);
-                e.target.value = '';
-            }
-        });
-
-        // Delete handler
-        document.addEventListener('click', async function(e) {
-            if (e.target.classList.contains('remove-image-btn')) {
-                if (!confirm('آیا از حذف این عکس مطمئن هستید؟')) return;
-                const imageId = e.target.getAttribute('data-image-id');
-                try {
-                    const resp = await fetch(`/verses/delete_research_image/${imageId}`, {
-                        method: 'POST',
-                        credentials: 'same-origin'
-                    });
-                    const data = await resp.json();
-                    if (data.success) {
-                        e.target.parentElement.remove();
-                    } else {
-                        alert(data.message || 'خطا در حذف عکس');
-                    }
-                } catch (err) {
-                    alert('خطا در ارتباط با سرور');
-                }
-            }
-        });
-    }
-
-    // When adding a new subtopic, add image block as well
-    {% if not view_mode %}
-    addSubtopicBtn.addEventListener('click', function() {
-        const subtopicRows = document.querySelectorAll('.subtopic-row');
-        const newIndex = subtopicRows.length;
-        const lastRow = subtopicsContainer.lastElementChild;
-        const newBlock = lastRow.querySelector('.research-images-block');
-        newBlock.setAttribute('data-subtopic-index', newIndex);
-        newBlock.querySelector('.research-images-list').innerHTML = '';
     });
     {% endif %}
 
