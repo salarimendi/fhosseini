@@ -404,16 +404,16 @@
                     {% endif %}
                 </div>
                 <div class="order-1 order-md-2 flex-grow-1 text-center">
-                    <button id="copyPoemBtn" class="btn btn-outline-primary">
-                        <i class="fas fa-copy ms-1"></i>
-                        کپی شعر
-                    </button>
-                    {% if current_user.is_authenticated and current_user.role in ['researcher', 'admin'] %}
-                    <button type="button" class="btn btn-outline-info ms-2" onclick="window.location.href='{{ url_for('verses.get_research_form', title_id=title.id) }}'">
-                        <i class="fas fa-search-plus ms-1"></i>
-                        تکمیل فرم پژوهشی
-                    </button>
-                    {% endif %}
+                <button id="copyPoemBtn" class="btn btn-outline-primary">
+                    <i class="fas fa-copy ms-1"></i>
+                    کپی شعر
+                </button>
+                {% if current_user.is_authenticated and current_user.role in ['researcher', 'admin'] %}
+                <button type="button" class="btn btn-outline-info ms-2" onclick="window.location.href='{{ url_for('verses.get_research_form', title_id=title.id) }}'">
+                    <i class="fas fa-search-plus ms-1"></i>
+                    تکمیل فرم پژوهشی
+                </button>
+                {% endif %}
                 </div>
                 <div class="order-3 mt-2 mt-md-0">
                     {% if next_title %}
@@ -425,7 +425,7 @@
                     {% endif %}
                 </div>
             </div>
-
+            
             <!-- Verses -->
             <div class="verses-container" id="poemContent">
                 {% for verse in verses %}

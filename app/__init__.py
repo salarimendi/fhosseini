@@ -62,7 +62,8 @@ def create_app(config_name=None):
                          'img-src': ["'self'", 'data:', 'https:'],
                          'script-src': ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
                          'style-src': ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'],
-                         'font-src': ["'self'", 'https://cdnjs.cloudflare.com']
+                         'font-src': ["'self'", 'https://cdnjs.cloudflare.com'],
+                        'frame-src': ["'self'", 'https://www.aparat.com']
                      })
     
     # تنظیمات Login Manager
