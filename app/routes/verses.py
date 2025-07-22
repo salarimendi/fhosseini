@@ -306,7 +306,7 @@ def delete_recording(recording_id):
         
         flash('ضبط صوتی با موفقیت حذف شد.', 'success')
         return redirect(url_for('main.title', title_id=title_id))
-    
+
     except Exception as e:
         db.session.rollback()
         flash('خطا در حذف ضبط صوتی.', 'error')
