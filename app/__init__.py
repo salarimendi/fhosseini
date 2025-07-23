@@ -5,7 +5,7 @@
 """
 
 import os
-from flask import Flask
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
@@ -109,6 +109,21 @@ def create_app(config_name=None):
             admin_user.set_password('admin123')  # رمز پیش‌فرض - باید تغییر کند
             db.session.add(admin_user)
             db.session.commit()
+    
+    # شمارنده بازدید روزانه
+    from app.utils.visits import increment_visit, get_today_visits, get_total_visits
+
+    @app.before_request
+    def count_visit():
+        if request.endpoint and not request.endpoint.startswith('static'):
+            increment_visit()
+
+    @app.context_processor
+    def inject_today_visits():
+        return {
+            'today_visits': get_today_visits(),
+            'total_visits': get_total_visits()
+        }
     
     # متغیرهای Template سراسری
     @app.context_processor
