@@ -14,8 +14,14 @@
     .process-step .step-content {flex: 1;}
     .process-diagram {margin: 2rem 0; text-align: center;}
     .telegram-link {color: #229ED9; font-weight: bold;}
-    .source-list {list-style: decimal; padding-right: 1.5rem;}
-    .source-list li {margin-bottom: 0.5rem;}
+    .source-list {list-style: decimal; padding-right: 1.5rem; direction: rtl;}
+    .source-list li {margin-bottom: 0.5rem; font-family: inherit;}
+    .source-list {counter-reset: persianlist;}
+    .source-list > li {counter-increment: persianlist; position: relative;}
+    .source-list > li::marker {
+        font-family: inherit;
+        content: counter(persianlist, persian) ". ";
+    }
     .alert-custom {background: linear-gradient(90deg,#ffe0b3 0%,#fff5e6 100%); border: none; color: #764ba2; font-weight: bold;}
 </style>
 {% endblock %}
