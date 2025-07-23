@@ -449,6 +449,13 @@ def send_message():
     
     return redirect(url_for('main.contact'))
 
+
+
+@main_bp.route('/documentation')
+def documentation_page():
+    """صفحه مستندسازی و تطبیق تاریخی"""
+    return render_template('documentation.html')
+
 @main_bp.errorhandler(404)
 def not_found_error(error):
     """صفحه خطای ۴۰۴"""
