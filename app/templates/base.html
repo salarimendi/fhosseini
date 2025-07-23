@@ -20,7 +20,7 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url_for('main.home') }}">
                 سایت فردوسی حسینی
@@ -33,20 +33,29 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.home') }}">صفحه اصلی</a>
+                        <a class="nav-link text-white" href="{{ url_for('main.home') }}">
+                            <i class="fas fa-home text-white me-1"></i>
+                            صفحه اصلی
+                        </a>
                     </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.articles') }}">مقالات</a>
+                        <a class="nav-link text-white" href="{{ url_for('main.articles') }}">
+                            <i class="fas fa-newspaper text-white me-1"></i>
+                            مقالات
+                        </a>
                     </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.research_collaboration') }}">همکاری پژوهشی</a>
+                        <a class="nav-link text-white" href="{{ url_for('main.research_collaboration') }}">
+                            <i class="fas fa-users text-white me-1"></i>
+                            همکاری پژوهشی
+                        </a>
                     </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.documentation_page') }}">
-                            <i class="fas fa-file-alt me-1"></i>
+                        <a class="nav-link text-white" href="{{ url_for('main.documentation_page') }}">
+                            <i class="fas fa-file-alt text-white me-1"></i>
                             مستندسازی
                         </a>
                     </li>
@@ -54,7 +63,10 @@
 
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.contact') }}">تماس با ما</a>
+                        <a class="nav-link text-white" href="{{ url_for('main.contact') }}">
+                            <i class="fas fa-envelope text-white me-1"></i>
+                            تماس با ما
+                        </a>
                     </li>
                     
                     {% if current_user.is_authenticated %}
@@ -73,10 +85,16 @@
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.login') }}">ورود</a>
+                            <a class="nav-link text-white" href="{{ url_for('auth.login') }}">
+                                <i class="fas fa-sign-in-alt text-white me-1"></i>
+                                ورود
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.register') }}">ثبت نام</a>
+                            <a class="nav-link text-white" href="{{ url_for('auth.register') }}">
+                                <i class="fas fa-user-plus text-white me-1"></i>
+                                ثبت نام
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -103,26 +121,26 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: #fff;">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-info">
-                    <h6 class="footer-title">چهار خیابان باغ فردوس</h6>
-                    <p class="footer-description">از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی</p>
+                    <h6 class="footer-title text-white">چهار خیابان باغ فردوس</h6>
+                    <p class="footer-description text-white-50">از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی</p>
                 </div>
                 
                 <div class="social-links">
-                    <a href="https://instagram.com/Ferdowsi_Hosseini" target="_blank" class="social-link">
-                        <i class="fab fa-instagram"></i>
+                    <a href="https://instagram.com/Ferdowsi_Hosseini" target="_blank" class="social-link text-white">
+                        <i class="fab fa-instagram text-white"></i>
                     </a>
-                    <a href="https://t.me/Ferdowsi_Hosseini" target="_blank" class="social-link">
-                        <i class="fab fa-telegram-plane"></i>
+                    <a href="https://t.me/Ferdowsi_Hosseini" target="_blank" class="social-link text-white">
+                        <i class="fab fa-telegram-plane text-white"></i>
                     </a>
                 </div>
                 
-                <div class="copyright d-flex justify-content-between align-items-center" style="width:100%;">
+                <div class="copyright d-flex justify-content-between align-items-center text-white" style="width:100%;">
                     <span>© تمامی حقوق برای سایت فردوسی حسینی محفوظ است</span>
-                    <span style="font-size:1.05rem; color:#764ba2;">
+                    <span style="font-size:1.05rem; color:#fff;">
                         آمار بازدید امروز: {{ today_visits|persian_number }}
                         &nbsp;|&nbsp;
                         آمار بازدید کل: {{ total_visits|persian_number }}
