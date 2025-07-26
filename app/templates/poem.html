@@ -408,7 +408,7 @@
                     <i class="fas fa-copy ms-1"></i>
                     کپی شعر
                 </button>
-                {% if current_user.is_authenticated and current_user.role in ['researcher', 'admin'] %}
+                {% if current_user.is_authenticated and current_user.role == 'researcher' %}
                 <button type="button" class="btn btn-outline-info ms-2" onclick="window.location.href='{{ url_for('verses.get_research_form', title_id=title.id) }}'">
                     <i class="fas fa-search-plus ms-1"></i>
                     تکمیل فرم پژوهشی

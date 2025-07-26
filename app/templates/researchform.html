@@ -371,12 +371,17 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('return_url', "{{ return_url }}");
             formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
             
-            // Append only new images and captions
+            // Append new images and captions, and updated captions for existing images
             Object.keys(researchImages).forEach(subIdx => {
                 (researchImages[subIdx] || []).forEach((imgObj, imgIdx) => {
                     if (!imgObj.isServer) {
+                        // New images
                         formData.append(`images_${subIdx}[]`, imgObj.file);
                         formData.append(`captions_${subIdx}[]`, imgObj.caption);
+                    } else {
+                        // Existing images with updated captions
+                        formData.append(`existing_captions_${subIdx}[]`, imgObj.caption);
+                        formData.append(`existing_image_ids_${subIdx}[]`, imgObj.id);
                     }
                 });
             });

@@ -203,8 +203,9 @@ def save_research_form(comment_obj, data, files, config, is_admin=False):
         db.session.flush()  # تا id داشته باشیم
         message = 'فرم پژوهشی با موفقیت ثبت شد' + ('' if is_admin else ' و پس از تأیید نمایش داده خواهد شد')
 
-    # فقط عکس‌های جدید را اضافه کن، هیچ عکسی حذف نکن
+    # اضافه کردن عکس‌های جدید و به‌روزرسانی کپشن‌های عکس‌های موجود
     for idx, subtopic in enumerate(subtopics):
+        # پردازش عکس‌های جدید
         img_files = files.getlist(f'images_{idx}[]') if files else []
         captions = data.get(f'captions_{idx}[]', [])
         if not isinstance(captions, list):
@@ -238,5 +239,23 @@ def save_research_form(comment_obj, data, files, config, is_admin=False):
                     created_at=datetime.utcnow()
                 )
                 db.session.add(image)
+        
+        # به‌روزرسانی کپشن‌های عکس‌های موجود
+        existing_captions = data.get(f'existing_captions_{idx}[]', [])
+        existing_image_ids = data.get(f'existing_image_ids_{idx}[]', [])
+        if not isinstance(existing_captions, list):
+            existing_captions = [existing_captions]
+        if not isinstance(existing_image_ids, list):
+            existing_image_ids = [existing_image_ids]
+        
+        for i, image_id in enumerate(existing_image_ids):
+            if i < len(existing_captions):
+                # به‌روزرسانی کپشن عکس موجود
+                existing_image = ResearchImage.query.filter_by(
+                    id=image_id, 
+                    comment_id=comment_obj.id
+                ).first()
+                if existing_image:
+                    existing_image.caption = existing_captions[i]
     db.session.commit()
     return comment_obj, message
