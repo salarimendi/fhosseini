@@ -17,7 +17,7 @@ from app.forms import LoginForm, ChangePasswordForm, RegisterForm
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
-@limiter.limit("5 per minute")  # محدودیت 5 درخواست در دقیقه
+@limiter.limit(lambda: current_app.config.get('RATELIMIT_LOGIN', "5 per minute"))  # استفاده از تنظیمات محیط
 def login():
     """ورود کاربر"""
     

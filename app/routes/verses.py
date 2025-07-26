@@ -360,7 +360,7 @@ def compare_versions(title_id):
 @login_required
 def get_research_form():
     """دریافت فرم پژوهشی"""
-    if current_user.role not in ['researcher', 'admin']:
+    if current_user.role != 'researcher':
         return jsonify({'error': 'شما دسترسی لازم را ندارید'}), 403
     
     title_id = request.args.get('title_id', type=int)
@@ -397,7 +397,7 @@ def get_research_form():
 @login_required
 def submit_research_form(title_id):
     try:
-        if not current_user.can_comment():
+        if current_user.role != 'researcher':
             return jsonify({'success': False, 'message': 'شما مجاز به ثبت فرم پژوهشی نیستید'}), 403
         title = Title.query.get(title_id)
         if not title:

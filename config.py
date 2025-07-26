@@ -99,6 +99,10 @@ class DevelopmentConfig(Config):
     PREFERRED_URL_SCHEME = 'http'
     SESSION_COOKIE_SECURE = False
     REMEMBER_COOKIE_SECURE = False
+    
+    # تنظیمات Rate Limiting برای محیط توسعه - محدودیت بسیار کم برای تست راحت‌تر
+    RATELIMIT_DEFAULT = "5000 per day;1000 per hour;200 per minute"  # محدودیت بسیار کم برای توسعه
+    RATELIMIT_LOGIN = "100 per minute"  # محدودیت بسیار کم برای لاگین در توسعه
 
 class ProductionConfig(Config):
     """تنظیمات محیط تولید"""
@@ -114,6 +118,10 @@ class ProductionConfig(Config):
     
     # تنظیمات SSL برای محیط تولید
     PREFERRED_URL_SCHEME = 'https'
+    
+    # تنظیمات Rate Limiting برای محیط تولید - محدودیت متعادل برای امنیت و کارایی
+    RATELIMIT_DEFAULT = "500 per day;100 per hour;20 per minute"  # محدودیت متعادل برای تولید
+    RATELIMIT_LOGIN = "10 per minute"  # محدودیت متعادل برای لاگین در تولید
     
     @classmethod
     def init_app(cls, app):
@@ -149,6 +157,10 @@ class TestingConfig(Config):
     PREFERRED_URL_SCHEME = 'http'
     SESSION_COOKIE_SECURE = False
     REMEMBER_COOKIE_SECURE = False
+    
+    # تنظیمات Rate Limiting برای محیط تست - محدودیت بسیار کم برای تست‌ها
+    RATELIMIT_DEFAULT = "10000 per day;1000 per hour;100 per minute"  # محدودیت بسیار کم برای تست
+    RATELIMIT_LOGIN = "100 per minute"  # محدودیت بسیار کم برای لاگین در تست
 
 config = {
     'development': DevelopmentConfig,

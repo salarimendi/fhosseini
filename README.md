@@ -147,6 +147,49 @@ http://localhost:5000
 2. مسیر جدید را در پوشه `routes` ایجاد کنید
 3. قالب HTML مربوطه را در `templates` بسازید
 
+## تنظیمات Rate Limiting
+
+پروژه از سیستم Rate Limiting برای جلوگیری از حملات DDoS و محدود کردن درخواست‌های مکرر استفاده می‌کند. تنظیمات برای محیط‌های مختلف متفاوت است:
+
+### محیط‌های مختلف
+
+#### 1. محیط توسعه (Development)
+- **RATELIMIT_DEFAULT**: `5000 per day;1000 per hour;200 per minute`
+- **RATELIMIT_LOGIN**: `100 per minute`
+- **هدف**: امکان تست راحت‌تر بدون محدودیت‌های شدید
+
+#### 2. محیط تست (Testing)
+- **RATELIMIT_DEFAULT**: `10000 per day;1000 per hour;100 per minute`
+- **RATELIMIT_LOGIN**: `100 per minute`
+- **هدف**: حداقل محدودیت برای اجرای تست‌ها
+
+#### 3. محیط تولید (Production)
+- **RATELIMIT_DEFAULT**: `500 per day;100 per hour;20 per minute`
+- **RATELIMIT_LOGIN**: `10 per minute`
+- **هدف**: امنیت بالا با محدودیت‌های متعادل
+
+### نحوه تغییر محیط
+
+```bash
+# محیط توسعه (پیش‌فرض)
+export FLASK_CONFIG=development
+python run.py
+
+# محیط تست
+export FLASK_CONFIG=testing
+python -m pytest
+
+# محیط تولید
+export FLASK_CONFIG=production
+python run.py
+```
+
+### نکات مهم
+
+- در محیط توسعه، محدودیت‌ها کمتر هستند تا تست راحت‌تر باشد
+- در محیط تولید، محدودیت‌ها برای امنیت مناسب تنظیم شده‌اند
+- اگر پیام "Too Many Requests" دریافت کردید، در محیط development اجرا کنید
+
 ## لینک‌های مفید
 
 - [صفحه اینستاگرام فردوسی حسینی](https://instagram.com/Ferdowsi_Hosseini)
