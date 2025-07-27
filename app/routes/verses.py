@@ -109,18 +109,38 @@ def delete_research_image(image_id):
     return jsonify({'success': True})
 
 @verses_bp.route('/get_research_images/<int:comment_id>/<int:subtopic_index>')
-@login_required
 def get_research_images(comment_id, subtopic_index):
-    images = ResearchImage.query.filter_by(comment_id=comment_id, subtopic_index=subtopic_index).all()
-    images_data = [{
-        'id': img.id,
-        'filename': img.filename,
-        'original_filename': img.original_filename,
-        'caption': img.caption,
-        'file_size': img.file_size,
-        'created_at': img.created_at.strftime('%Y-%m-%d %H:%M')
-    } for img in images]
-    return jsonify({'images': images_data})
+    """دریافت تصاویر مربوط به یک زیرموضوع خاص - برای همه کاربران قابل دسترسی"""
+    try:
+        # دریافت comment
+        comment = Comment.query.get_or_404(comment_id)
+        
+        # دریافت تصاویر از دیتابیس
+        images = ResearchImage.query.filter_by(
+            comment_id=comment_id, 
+            subtopic_index=subtopic_index
+        ).all()
+        
+        images_data = [{
+            'id': img.id,
+            'filename': img.filename,
+            'original_filename': img.original_filename,
+            'caption': img.caption or '',
+            'file_size': img.file_size,
+            'created_at': img.created_at.strftime('%Y-%m-%d %H:%M') if img.created_at else ''
+        } for img in images]
+        
+        return jsonify({
+            'success': True,
+            'images': images_data
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Error getting research images: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @verses_bp.route('/record/<int:title_id>', methods=['GET', 'POST'])
 @login_required
@@ -442,30 +462,104 @@ def submit_research_form(title_id):
 
 @verses_bp.route('/view_research_comment/<int:comment_id>')
 def view_research_comment(comment_id):
-    """نمایش نظر پژوهشی"""
-    comment = Comment.query.get_or_404(comment_id)
-    
-    # تبدیل JSON نظر به دیکشنری
+    """نمایش نظر پژوهشی در حالت فقط خواندنی"""
     try:
-        comment_data = json.loads(comment.comment)
-    except:
-        flash('خطا در بازیابی اطلاعات نظر', 'error')
-        return redirect(url_for('main.title', title_id=comment.title_id))
-    
-    # دریافت مسیر بازگشت از پارامترهای URL
-    return_url = request.args.get('return_url') or url_for('main.title', title_id=comment.title_id)
-    
-    return render_template('research/view_only_form.html', 
-                         title_id=comment.title_id,
-                         poem_title=comment.poem_title.title,
-                         view_mode=True,
-                         comment_data=comment_data,
-                         username=comment.author_name,
-                         comment=comment,
-                         return_url=return_url,
-                         config=current_app.config)
+        # دریافت comment
+        comment = Comment.query.get_or_404(comment_id)
+        
+        # دریافت عنوان شعر از relationship
+        # فرض می‌کنیم که در model Comment رابطه‌ای با Title وجود دارد
+        title_obj = comment.poem_title  # اگر relationship با این نام وجود دارد
+        if not title_obj:
+            # اگر relationship مستقیم نیست، از title_id استفاده کنیم
+            title_obj = Title.query.get(comment.title_id)
+        
+        if not title_obj:
+            flash('شعر مربوط به این نظر یافت نشد', 'error')
+            return redirect(url_for('main.index'))
+        
+        poem_title = title_obj.title
+        
+        # تبدیل JSON نظر به دیکشنری
+        try:
+            if isinstance(comment.comment, str):
+                comment_data = json.loads(comment.comment)
+            elif isinstance(comment.comment, dict):
+                comment_data = comment.comment
+            else:
+                comment_data = {}
+        except (json.JSONDecodeError, TypeError):
+            current_app.logger.error(f"Error parsing comment JSON for comment_id: {comment_id}")
+            comment_data = {
+                'subtopics': [],
+                'extra_info': '',
+                'topic_narrative': '',
+                'historical_flaw': '',
+                'reform_theory': ''
+            }
+        
+        # اطمینان از وجود کلیدهای مورد نیاز
+        default_data = {
+            'subtopics': [],
+            'extra_info': '',
+            'topic_narrative': '',
+            'historical_flaw': '',
+            'reform_theory': ''
+        }
+        
+        for key, default_value in default_data.items():
+            if key not in comment_data:
+                comment_data[key] = default_value
+        
+        # دریافت نام نویسنده نظر
+        author_name = comment.author_name if hasattr(comment, 'author_name') and comment.author_name else 'نامشخص'
+        if not author_name or author_name == 'نامشخص':
+            # اگر author_name خالی است، از user relationship استفاده کنیم
+            if hasattr(comment, 'user') and comment.user:
+                author_name = comment.user.username
+            elif hasattr(comment, 'user_id'):
+                user = User.query.get(comment.user_id)
+                author_name = user.username if user else 'نامشخص'
+        
+        # دریافت مسیر بازگشت از پارامترهای URL
+        return_url = request.args.get('return_url') or url_for('main.title', title_id=comment.title_id)
+        
+        # رندر template
+        return render_template('research/view_only_form.html', 
+                             title_id=comment.title_id,
+                             poem_title=poem_title,
+                             view_mode=True,
+                             comment_data=comment_data,
+                             username=author_name,
+                             comment=comment,
+                             return_url=return_url,
+                             config=current_app.config)
+        
+    except Exception as e:
+        current_app.logger.error(f"Error in view_research_comment: {e}")
+        flash('خطا در نمایش نظر پژوهشی', 'error')
+        return redirect(url_for('main.index'))
 
-@verses_bp.route('/research_images/<path:filename>')
+@verses_bp.route('/research_image_file/<path:filename>')
 def research_image_file(filename):
-    folder = current_app.config['RESEARCH_IMAGE_UPLOAD_FOLDER']
-    return send_from_directory(folder, filename)
+    """سرو کردن فایل‌های تصویری پژوهشی"""
+    try:
+        folder = current_app.config['RESEARCH_IMAGE_UPLOAD_FOLDER']
+        
+        # بررسی امنیتی نام فایل
+        secure_name = secure_filename(filename)
+        if secure_name != filename:
+            current_app.logger.warning(f"Insecure filename attempted: {filename}")
+            return "فایل نامعتبر", 400
+        
+        # بررسی وجود فایل
+        file_path = os.path.join(folder, filename)
+        if not os.path.exists(file_path):
+            current_app.logger.warning(f"Research image file not found: {file_path}")
+            return "فایل یافت نشد", 404
+            
+        return send_from_directory(folder, filename)
+        
+    except Exception as e:
+        current_app.logger.error(f"Error serving research image: {e}")
+        return "خطا در بارگذاری تصویر", 500
