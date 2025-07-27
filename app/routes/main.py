@@ -454,7 +454,21 @@ def send_message():
 @main_bp.route('/documentation')
 def documentation_page():
     """صفحه مستندسازی و تطبیق تاریخی"""
-    return render_template('documentation.html')
+    from app.models import Title, Comment
+    total_titles = Title.query.count()
+    documented_titles = Title.query.join(Title.comments).filter(Comment.status == 'approved').distinct().count()
+    percent = int((documented_titles / total_titles) * 100) if total_titles else 0
+    return render_template('documentation.html', total_titles=total_titles, documented_titles=documented_titles, percent=percent)
+
+@main_bp.route('/textual-criticism')
+def textual_criticism_page():
+    """صفحه نسخه‌پژوهی"""
+    return render_template('textual_criticism.html')
+
+@main_bp.route('/biography')
+def biography_page():
+    """صفحه زندگینامه الهامی"""
+    return render_template('biography.html')
 
 @main_bp.errorhandler(404)
 def not_found_error(error):

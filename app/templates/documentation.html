@@ -32,6 +32,50 @@
             <h1 class="text-center mb-5 mt-5 pt-5" style="color:#764ba2;"><i class="fas fa-file-alt doc-icon"></i> مستندسازی و تطبیق تاریخی</h1>
         </div>
     </div>
+    <!-- داشبورد پیشرفت مستندسازی -->
+    <div class="doc-section doc-card mb-4" style="text-align:center;">
+        <h4 style="color:#764ba2; font-weight:bold; margin-bottom:1.5rem;"><i class="fas fa-tachometer-alt doc-icon"></i> درصد پیشرفت مستندسازی</h4>
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <!-- Gauge SVG -->
+            <svg width="220" height="120" viewBox="0 0 220 120">
+                <defs>
+                    <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#667eea"/>
+                        <stop offset="100%" stop-color="#764ba2"/>
+                    </linearGradient>
+                </defs>
+                <!-- زمینه خاکستری -->
+                <path d="M20,110 A90,90 0 0,1 200,110" fill="none" stroke="#eee" stroke-width="18"/>
+                <!-- مقدار پیشرفت -->
+                <path id="gaugeArc" d="" fill="none" stroke="url(#gaugeGradient)" stroke-width="18" stroke-linecap="round"/>
+                <!-- دایره وسط -->
+                <circle cx="110" cy="110" r="40" fill="#fff" stroke="#764ba2" stroke-width="3"/>
+                <!-- درصد -->
+                <text id="gaugePercent" x="110" y="120" text-anchor="middle" font-size="2.2rem" font-family="Sahel, Vazir, Tahoma, sans-serif" fill="#764ba2" font-weight="bold">{{ percent|persian_number }}٪</text>
+            </svg>
+            <div class="d-flex justify-content-between mt-3" style="width: 100%; max-width: 350px; font-size:1rem;">
+                <span>تیترهای مستندسازی‌شده: <b>{{ documented_titles|persian_number }}</b></span>
+                <span>کل تیترها: <b>{{ total_titles|persian_number }}</b></span>
+            </div>
+        </div>
+    </div>
+    <script>
+    // محاسبه آرک برای gauge
+    (function() {
+        var percent = {{ percent }};
+        var startAngle = Math.PI;
+        var endAngle = Math.PI * (1 + percent / 100);
+        var r = 90;
+        var cx = 110, cy = 110;
+        var x1 = cx + r * Math.cos(startAngle);
+        var y1 = cy + r * Math.sin(startAngle);
+        var x2 = cx + r * Math.cos(endAngle);
+        var y2 = cy + r * Math.sin(endAngle);
+        var largeArc = percent > 50 ? 1 : 0;
+        var d = `M${x1},${y1} A${r},${r} 0 ${largeArc},1 ${x2},${y2}`;
+        document.getElementById('gaugeArc').setAttribute('d', d);
+    })();
+    </script>
     <div class="doc-section doc-card">
         <h4><i class="fas fa-bullseye doc-icon"></i> اهداف پژوهش</h4>
         <ul class="doc-list">
