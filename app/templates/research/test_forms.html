@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}تست فرم‌های پژوهشی - سایت فردوسی حسینی{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">تست فرم‌های پژوهشی</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">فرم اضافه کردن نظر جدید</h6>
+                                    <p class="card-text">برای محققان جهت اضافه کردن نظر جدید</p>
+                                    <a href="{{ url_for('verses.get_research_form', title_id=133, mode='add') }}" 
+                                       class="btn btn-primary">تست فرم اضافه کردن</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">فرم ویرایش نظر</h6>
+                                    <p class="card-text">برای محققان جهت ویرایش نظر موجود</p>
+                                    <a href="{{ url_for('verses.get_research_form', title_id=133, mode='edit', comment_id=1) }}" 
+                                       class="btn btn-warning">تست فرم ویرایش</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">فرم مشاهده فقط خواندنی</h6>
+                                    <p class="card-text">برای نمایش عمومی نظر پژوهشی</p>
+                                    <a href="{{ url_for('verses.get_research_form', title_id=133, mode='view', comment_id=1) }}" 
+                                       class="btn btn-info">تست فرم مشاهده</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">فرم ادمین</h6>
+                                    <p class="card-text">برای ادمین‌ها جهت ویرایش نظر</p>
+                                    <a href="{{ url_for('verses.get_research_form', title_id=133, mode='admin', comment_id=1) }}" 
+                                       class="btn btn-danger">تست فرم ادمین</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>نکات مهم:</h6>
+                        <ul>
+                            <li>برای تست کامل، باید با حساب کاربری محقق وارد شده باشید</li>
+                            <li>برای تست فرم ادمین، باید با حساب کاربری ادمین وارد شده باشید</li>
+                            <li>مقادیر <code>title_id</code> و <code>comment_id</code> باید در دیتابیس موجود باشند</li>
+                            <li>در صورت عدم وجود نظر، فرم اضافه کردن نمایش داده می‌شود</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

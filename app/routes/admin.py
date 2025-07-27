@@ -376,7 +376,7 @@ def edit_comment_research(comment_id):
     except:
         comment_data = None
     
-    return render_template('researchform.html', 
+    return render_template('research/admin_form.html', 
                          title_id=comment.title_id,
                          poem_title=title.title if title else 'نظر عمومی',
                          comment_data=comment_data,

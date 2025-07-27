@@ -1,0 +1,315 @@
+{% extends "research/base_form.html" %}
+
+{% block form_title %}
+    ویرایش نظر پژوهشی برای شعر: {{ poem_title }}
+    <small class="text-muted">(نظر {{ comment.author_name }})</small>
+{% endblock %}
+
+{% block form_hidden_fields %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="return_url" value="{{ url_for('admin.comments') }}">
+{% endblock %}
+
+{% block add_subtopic_button %}
+    <button type="button" class="btn btn-secondary mt-2" id="addSubtopic">افزودن زیر موضوع</button>
+{% endblock %}
+
+{% block form_buttons %}
+    <button type="submit" class="btn btn-primary">ویرایش نظر</button>
+    <button type="button" class="btn btn-secondary" id="cancelButton">بازگشت</button>
+{% endblock %}
+
+{% block form_scripts %}
+<script>
+var commentId = {{ comment_id_js }};
+var researchImageUrlPrefix = "{{ research_image_url_prefix }}";
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('researchForm');
+    const subtopicsContainer = document.getElementById('subtopicsContainer');
+    const addSubtopicBtn = document.getElementById('addSubtopic');
+    const cancelButton = document.getElementById('cancelButton');
+    const returnUrl = "{{ return_url }}";
+
+    // Auto-resize function for textareas
+    function autoResizeTextarea(element) {
+        element.style.height = 'auto';
+        element.style.height = (element.scrollHeight) + 'px';
+    }
+
+    // Apply auto-resize to all textareas
+    document.querySelectorAll('textarea.auto-resize').forEach(textarea => {
+        autoResizeTextarea(textarea);
+        textarea.addEventListener('input', function() {
+            autoResizeTextarea(this);
+        });
+    });
+
+    // Research Images Logic
+    let researchImages = {};
+
+    // Load previous images for each subtopic (if editing)
+    if (commentId !== null) {
+        const subtopicRows = document.querySelectorAll('.subtopic-row');
+        subtopicRows.forEach((row, i) => {
+            const block = row.querySelector('.research-images-block');
+            const subtopicIndex = block.getAttribute('data-subtopic-index');
+            researchImages[subtopicIndex] = [];
+            fetch(`/verses/get_research_images/${commentId}/${subtopicIndex}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.images && Array.isArray(data.images)) {
+                        data.images.forEach(img => {
+                            researchImages[subtopicIndex].push({
+                                id: img.id,
+                                preview: researchImageUrlPrefix + img.filename,
+                                caption: img.caption || '',
+                                isServer: true // Mark that this image is from server
+                            });
+                        });
+                        renderResearchImages(subtopicIndex, block);
+                    }
+                });
+        });
+    }
+
+    // Handle image selection and preview
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('research-image-input')) {
+            const block = e.target.closest('.research-images-block');
+            const subtopicIndex = block.getAttribute('data-subtopic-index');
+            if (!researchImages[subtopicIndex]) researchImages[subtopicIndex] = [];
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    researchImages[subtopicIndex].push({ 
+                        file, 
+                        caption: '', 
+                        preview: ev.target.result, 
+                        isServer: false 
+                    });
+                    renderResearchImages(subtopicIndex, block);
+                };
+                reader.readAsDataURL(file);
+            });
+            e.target.value = '';
+        }
+    });
+
+    // Render previews and caption inputs
+    function renderResearchImages(subtopicIndex, block) {
+        const listDiv = block.querySelector('.research-images-list');
+        listDiv.innerHTML = '';
+        (researchImages[subtopicIndex] || []).forEach((imgObj, idx) => {
+            const imgDiv = document.createElement('div');
+            imgDiv.className = 'd-inline-block m-1 position-relative';
+            imgDiv.innerHTML = `
+                <img src="${imgObj.preview}" style="max-width:100px;max-height:100px;border:1px solid #ccc;border-radius:4px;">
+                <input type="text" class="form-control form-control-sm mt-1 research-image-caption" placeholder="کپشن" value="${imgObj.caption || ''}" data-img-idx="${idx}" style="max-width:100px;">
+                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-image-btn" data-img-idx="${idx}" style="z-index:2;">×</button>
+            `;
+            // If image is from server, mark delete button specially
+            if (imgObj.isServer) {
+                imgDiv.querySelector('.remove-image-btn').setAttribute('data-server-id', imgObj.id);
+            }
+            listDiv.appendChild(imgDiv);
+        });
+    }
+
+    // Handle caption change
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('research-image-caption')) {
+            const block = e.target.closest('.research-images-block');
+            const subtopicIndex = block.getAttribute('data-subtopic-index');
+            const idx = e.target.getAttribute('data-img-idx');
+            if (researchImages[subtopicIndex] && researchImages[subtopicIndex][idx]) {
+                researchImages[subtopicIndex][idx].caption = e.target.value;
+            }
+        }
+    });
+
+    // Remove image (local or server)
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-image-btn')) {
+            const block = e.target.closest('.research-images-block');
+            const subtopicIndex = block.getAttribute('data-subtopic-index');
+            const idx = e.target.getAttribute('data-img-idx');
+            const serverId = e.target.getAttribute('data-server-id');
+            if (serverId) {
+                // Remove image from server
+                if (confirm('آیا از حذف این عکس مطمئن هستید؟')) {
+                    fetch(`/verses/delete_research_image/${serverId}`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            researchImages[subtopicIndex].splice(idx, 1);
+                            renderResearchImages(subtopicIndex, block);
+                        } else {
+                            alert(data.message || 'خطا در حذف عکس');
+                        }
+                    });
+                }
+            } else {
+                // Remove new image (local)
+                researchImages[subtopicIndex].splice(idx, 1);
+                renderResearchImages(subtopicIndex, block);
+            }
+        }
+    });
+
+    // When adding a new subtopic, add empty image array
+    if (addSubtopicBtn) {
+        addSubtopicBtn.addEventListener('click', function() {
+            const subtopicRows = document.querySelectorAll('.subtopic-row');
+            const newIndex = subtopicRows.length;
+            
+            // Create new subtopic HTML
+            const newSubtopicHTML = `
+                <div class="row mb-2 subtopic-row" data-index="${newIndex}">
+                    <div class="col-md-5">
+                        <textarea class="form-control auto-resize subtopic-title" 
+                               placeholder="زیرموضوع" required></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <textarea class="form-control auto-resize subtopic-sources" 
+                               placeholder="منابع تاریخی"></textarea>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger remove-subtopic">×</button>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <div class="research-images-block" data-subtopic-index="${newIndex}">
+                            <div class="research-images-list mb-2"></div>
+                            <input type="file" class="form-control research-image-input" accept="image/*" multiple style="max-width:300px;display:inline-block;">
+                            <small class="text-muted">حداکثر حجم هر عکس: {{ config.RESEARCH_IMAGE_MAX_SIZE_MB }} مگابایت</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add new subtopic to container
+            subtopicsContainer.insertAdjacentHTML('beforeend', newSubtopicHTML);
+            
+            // Initialize auto-resize for new textareas
+            const newRow = subtopicsContainer.lastElementChild;
+            newRow.querySelectorAll('textarea.auto-resize').forEach(textarea => {
+                autoResizeTextarea(textarea);
+                textarea.addEventListener('input', function() {
+                    autoResizeTextarea(this);
+                });
+            });
+            
+            // Initialize empty image array for new subtopic
+            researchImages[newIndex] = [];
+        });
+    }
+
+    // Handle remove subtopic button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-subtopic')) {
+            const row = e.target.closest('.subtopic-row');
+            const subtopicIndex = row.getAttribute('data-index');
+            
+            // Remove from researchImages
+            delete researchImages[subtopicIndex];
+            
+            // Remove the row
+            row.remove();
+            
+            // Reindex remaining rows
+            document.querySelectorAll('.subtopic-row').forEach((row, index) => {
+                row.setAttribute('data-index', index);
+                const imagesBlock = row.querySelector('.research-images-block');
+                if (imagesBlock) {
+                    imagesBlock.setAttribute('data-subtopic-index', index);
+                }
+            });
+            
+            // Reindex researchImages
+            const newResearchImages = {};
+            Object.keys(researchImages).forEach(oldIndex => {
+                const newIndex = parseInt(oldIndex);
+                if (newIndex > parseInt(subtopicIndex)) {
+                    newResearchImages[newIndex - 1] = researchImages[oldIndex];
+                } else if (newIndex < parseInt(subtopicIndex)) {
+                    newResearchImages[newIndex] = researchImages[oldIndex];
+                }
+            });
+            researchImages = newResearchImages;
+        }
+    });
+
+    // Form submission for admin
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Collect form data
+        const formData = new FormData();
+        
+        // Add basic form fields
+        formData.append('extra_info', document.getElementById('extraInfo').value);
+        formData.append('topic_narrative', document.getElementById('topicNarrative').value);
+        formData.append('historical_flaw', document.getElementById('historicalFlaw').value);
+        formData.append('reform_theory', document.getElementById('reformTheory').value);
+        formData.append('return_url', returnUrl);
+        
+        // Collect subtopics data
+        const subtopics = [];
+        document.querySelectorAll('.subtopic-row').forEach((row, index) => {
+            const title = row.querySelector('.subtopic-title').value;
+            const sources = row.querySelector('.subtopic-sources').value;
+            if (title.trim()) {
+                subtopics.push({
+                    title: title,
+                    sources: sources
+                });
+            }
+        });
+        formData.append('subtopics', JSON.stringify(subtopics));
+        
+        // Append new images and captions, and updated captions for existing images
+        Object.keys(researchImages).forEach(subIdx => {
+            (researchImages[subIdx] || []).forEach((imgObj, imgIdx) => {
+                if (!imgObj.isServer) {
+                    // New images
+                    formData.append(`images_${subIdx}[]`, imgObj.file);
+                    formData.append(`captions_${subIdx}[]`, imgObj.caption);
+                } else {
+                    // Existing images with updated captions
+                    formData.append(`existing_captions_${subIdx}[]`, imgObj.caption);
+                    formData.append(`existing_image_ids_${subIdx}[]`, imgObj.id);
+                }
+            });
+        });
+        
+        // Submit form using admin endpoint
+        fetch(`/admin/comments/{{ comment.id }}/research-update`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                window.location.href = data.return_url;
+            } else {
+                alert(data.message || 'خطا در ویرایش نظر');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('خطا در ویرایش نظر');
+        });
+    });
+
+    // Cancel button
+    cancelButton.addEventListener('click', function() {
+        window.location.href = returnUrl;
+    });
+});
+</script>
+{% endblock %} 

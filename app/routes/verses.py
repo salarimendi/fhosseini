@@ -356,7 +356,7 @@ def compare_versions(title_id):
     title = Title.query.get_or_404(title_id)
     return render_template('verses/compare_versions.html', title=title)
 
-@verses_bp.route('/get_research_form')
+@verses_bp.route('/get_research_form', methods=['GET'])
 @login_required
 def get_research_form():
     """دریافت فرم پژوهشی"""
@@ -385,7 +385,7 @@ def get_research_form():
     # دریافت مسیر بازگشت از پارامترهای URL
     return_url = request.args.get('return_url') or url_for('main.title', title_id=title_id)
         
-    return render_template('researchform.html', 
+    return render_template('research/researcher_form.html', 
                          title_id=title_id,
                          poem_title=title.title,
                          comment_data=comment_data,
@@ -455,7 +455,7 @@ def view_research_comment(comment_id):
     # دریافت مسیر بازگشت از پارامترهای URL
     return_url = request.args.get('return_url') or url_for('main.title', title_id=comment.title_id)
     
-    return render_template('researchform.html', 
+    return render_template('research/view_only_form.html', 
                          title_id=comment.title_id,
                          poem_title=comment.poem_title.title,
                          view_mode=True,

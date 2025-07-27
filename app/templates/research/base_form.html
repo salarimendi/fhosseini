@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+
+{% block title %}فرم پژوهشی - سایت فردوسی حسینی{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        {% block form_title %}
+                            فرم پژوهشی برای شعر: {{ poem_title }}
+                        {% endblock %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="researchForm" method="POST" enctype="multipart/form-data">
+                        {% block form_hidden_fields %}{% endblock %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">زیر موضوعات</label>
+                            <div id="subtopicsContainer">
+                                {% if comment_data and comment_data.subtopics %}
+                                    {% for subtopic in comment_data.subtopics %}
+                                        <div class="row mb-2 subtopic-row" data-index="{{ loop.index0 }}">
+                                            <div class="col-md-5">
+                                                <textarea class="form-control auto-resize subtopic-title" 
+                                                       placeholder="زیرموضوع" 
+                                                       {% if view_mode %}readonly{% else %}required{% endif %}>{{ subtopic.title if subtopic.title else '' }}</textarea>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <textarea class="form-control auto-resize subtopic-sources" 
+                                                       placeholder="منابع تاریخی"
+                                                       {% if view_mode %}readonly{% endif %}>{{ subtopic.sources if subtopic.sources else '' }}</textarea>
+                                            </div>
+                                            
+                                            {% block subtopic_remove_button %}
+                                                {% if not view_mode %}
+                                                <div class="col-md-1">
+                                                    <button type="button" class="btn btn-danger remove-subtopic">×</button>
+                                                </div>
+                                                {% endif %}
+                                            {% endblock %}
+                                            
+                                            <div class="col-12 mt-2">
+                                                <div class="research-images-block" data-subtopic-index="{{ loop.index0 }}">
+                                                    <div class="research-images-list mb-2"></div>
+                                                    {% block image_upload_section %}
+                                                        {% if not view_mode %}
+                                                            <input type="file" class="form-control research-image-input" accept="image/*" multiple style="max-width:300px;display:inline-block;">
+                                                            <small class="text-muted">حداکثر حجم هر عکس: {{ config.RESEARCH_IMAGE_MAX_SIZE_MB }} مگابایت</small>
+                                                        {% endif %}
+                                                    {% endblock %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% elif not view_mode %}
+                                    <div class="row mb-2 subtopic-row" data-index="0">
+                                        <div class="col-md-5">
+                                            <textarea class="form-control auto-resize subtopic-title" 
+                                                   placeholder="زیرموضوع" required></textarea>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <textarea class="form-control auto-resize subtopic-sources" 
+                                                   placeholder="منابع تاریخی"></textarea>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-danger remove-subtopic">×</button>
+                                        </div>
+                                        <div class="col-12 mt-2">
+                                            <div class="research-images-block" data-subtopic-index="0">
+                                                <div class="research-images-list mb-2"></div>
+                                                <input type="file" class="form-control research-image-input" accept="image/*" multiple style="max-width:300px;display:inline-block;">
+                                                <small class="text-muted">حداکثر حجم هر عکس: {{ config.RESEARCH_IMAGE_MAX_SIZE_MB }} مگابایت</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% block add_subtopic_button %}{% endblock %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="extraInfo" class="form-label">اطلاعات تکمیلی</label>
+                            <textarea class="form-control auto-resize" id="extraInfo" name="extra_info"
+                                    {% if view_mode %}readonly{% endif %}>{{ comment_data.extra_info if comment_data else '' }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="topicNarrative" class="form-label">نثر موضوع</label>
+                            <textarea class="form-control auto-resize" id="topicNarrative" name="topic_narrative"
+                                    {% if view_mode %}readonly{% endif %}>{{ comment_data.topic_narrative if comment_data else '' }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="historicalFlaw" class="form-label">نقص تاریخی</label>
+                            <textarea class="form-control auto-resize" id="historicalFlaw" name="historical_flaw"
+                                    {% if view_mode %}readonly{% endif %}>{{ comment_data.historical_flaw if comment_data else '' }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="reformTheory" class="form-label">نظریه اصلاحی</label>
+                            <textarea class="form-control auto-resize" id="reformTheory" name="reform_theory"
+                                    {% if view_mode %}readonly{% endif %}>{{ comment_data.reform_theory if comment_data else '' }}</textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            {% block form_buttons %}
+                                <button type="button" class="btn btn-secondary" id="cancelButton">بازگشت</button>
+                            {% endblock %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% set comment_id_js = (comment.id if comment and comment.id is not none else None) | tojson %}
+{% set research_image_url_prefix = url_for('verses.research_image_file', filename='') %}
+
+<script>
+// Global variables for child templates
+var commentId = {{ comment_id_js if comment_id_js is not none else 'null' }};
+var researchImageUrlPrefix = "{{ research_image_url_prefix | safe }}";
+var viewMode = {{ 'true' if view_mode else 'false' }};
+var maxFileSize = {{ config.RESEARCH_IMAGE_MAX_SIZE_MB * 1024 * 1024 }}; // Convert MB to bytes
+
+// Base Form Manager Class
+class BaseFormManager {
+    constructor() {
+        this.form = document.getElementById('researchForm');
+        this.subtopicsContainer = document.getElementById('subtopicsContainer');
+        this.addSubtopicBtn = document.getElementById('addSubtopic');
+        this.cancelButton = document.getElementById('cancelButton');
+        this.returnUrl = "{{ return_url if return_url else url_for('main.title', title_id=title_id) }}";
+        this.researchImages = {};
+        
+        this.init();
+    }
+    
+    init() {
+        this.initAutoResize();
+        this.bindEvents();
+        if (!viewMode) {
+            this.initImageHandling();
+        }
+    }
+    
+    // Auto-resize functionality for textareas
+    initAutoResize() {
+        document.querySelectorAll('textarea.auto-resize').forEach(textarea => {
+            this.autoResizeTextarea(textarea);
+            textarea.addEventListener('input', () => {
+                this.autoResizeTextarea(textarea);
+            });
+        });
+    }
+    
+    autoResizeTextarea(element) {
+        element.style.height = 'auto';
+        element.style.height = (element.scrollHeight) + 'px';
+    }
+    
+    // Bind basic events
+    bindEvents() {
+        // Cancel button
+        if (this.cancelButton) {
+            this.cancelButton.addEventListener('click', () => {
+                window.location.href = this.returnUrl;
+            });
+        }
+        
+        // Add subtopic button
+        if (this.addSubtopicBtn) {
+            this.addSubtopicBtn.addEventListener('click', () => {
+                this.addSubtopic();
+            });
+        }
+        
+        // Remove subtopic buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-subtopic')) {
+                this.removeSubtopic(e.target);
+            }
+        });
+    }
+    
+    // Image handling functionality
+    initImageHandling() {
+        // Handle image selection
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('research-image-input')) {
+                this.handleImageSelection(e);
+            }
+        });
+        
+        // Handle caption changes
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('research-image-caption')) {
+                this.handleCaptionChange(e);
+            }
+        });
+        
+        // Handle image removal
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-image-btn')) {
+                this.handleImageRemoval(e);
+            }
+        });
+    }
+    
+    // Validate file before processing
+    validateFile(file) {
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        
+        if (!validTypes.includes(file.type)) {
+            alert(`نوع فایل ${file.name} پشتیبانی نمی‌شود. فقط فایل‌های تصویری مجاز هستند.`);
+            return false;
+        }
+        
+        if (file.size > maxFileSize) {
+            alert(`حجم فایل ${file.name} بیش از حد مجاز است. حداکثر ${Math.round(maxFileSize / 1024 / 1024)} مگابایت مجاز است.`);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Handle image selection
+    handleImageSelection(e) {
+        const block = e.target.closest('.research-images-block');
+        const subtopicIndex = block.getAttribute('data-subtopic-index');
+        
+        if (!this.researchImages[subtopicIndex]) {
+            this.researchImages[subtopicIndex] = [];
+        }
+        
+        const files = Array.from(e.target.files);
+        files.forEach(file => {
+            if (this.validateFile(file)) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    this.researchImages[subtopicIndex].push({
+                        file,
+                        caption: '',
+                        preview: ev.target.result,
+                        isServer: false
+                    });
+                    this.renderResearchImages(subtopicIndex, block);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Clear input
+        e.target.value = '';
+    }
+    
+    // Handle caption changes
+    handleCaptionChange(e) {
+        const block = e.target.closest('.research-images-block');
+        const subtopicIndex = block.getAttribute('data-subtopic-index');
+        const idx = parseInt(e.target.getAttribute('data-img-idx'));
+        
+        if (this.researchImages[subtopicIndex] && this.researchImages[subtopicIndex][idx]) {
+            this.researchImages[subtopicIndex][idx].caption = e.target.value;
+        }
+    }
+    
+    // Handle image removal
+    handleImageRemoval(e) {
+        const block = e.target.closest('.research-images-block');
+        const subtopicIndex = block.getAttribute('data-subtopic-index');
+        const idx = parseInt(e.target.getAttribute('data-img-idx'));
+        
+        this.researchImages[subtopicIndex].splice(idx, 1);
+        this.renderResearchImages(subtopicIndex, block);
+    }
+    
+    // Render research images
+    renderResearchImages(subtopicIndex, block) {
+        const listDiv = block.querySelector('.research-images-list');
+        listDiv.innerHTML = '';
+        
+        (this.researchImages[subtopicIndex] || []).forEach((imgObj, idx) => {
+            const imgDiv = document.createElement('div');
+            imgDiv.className = 'd-inline-block m-1 position-relative';
+            imgDiv.innerHTML = `
+                <img src="${imgObj.preview}" style="max-width:100px;max-height:100px;border:1px solid #ccc;border-radius:4px;" alt="تصویر پژوهشی">
+                <input type="text" class="form-control form-control-sm mt-1 research-image-caption" 
+                       placeholder="کپشن" value="${imgObj.caption || ''}" 
+                       data-img-idx="${idx}" style="max-width:100px;">
+                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-image-btn" 
+                        data-img-idx="${idx}" style="z-index:2;" title="حذف تصویر">×</button>
+            `;
+            listDiv.appendChild(imgDiv);
+        });
+    }
+    
+    // Add new subtopic
+    addSubtopic() {
+        const subtopicRows = document.querySelectorAll('.subtopic-row');
+        const newIndex = subtopicRows.length;
+        
+        const newSubtopicHTML = `
+            <div class="row mb-2 subtopic-row" data-index="${newIndex}">
+                <div class="col-md-5">
+                    <textarea class="form-control auto-resize subtopic-title" 
+                           placeholder="زیرموضوع" required></textarea>
+                </div>
+                <div class="col-md-6">
+                    <textarea class="form-control auto-resize subtopic-sources" 
+                           placeholder="منابع تاریخی"></textarea>
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger remove-subtopic">×</button>
+                </div>
+                <div class="col-12 mt-2">
+                    <div class="research-images-block" data-subtopic-index="${newIndex}">
+                        <div class="research-images-list mb-2"></div>
+                        <input type="file" class="form-control research-image-input" accept="image/*" multiple 
+                               style="max-width:300px;display:inline-block;">
+                        <small class="text-muted">حداکثر حجم هر عکس: {{ config.RESEARCH_IMAGE_MAX_SIZE_MB }} مگابایت</small>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        this.subtopicsContainer.insertAdjacentHTML('beforeend', newSubtopicHTML);
+        
+        // Initialize auto-resize for new textareas
+        const newRow = this.subtopicsContainer.lastElementChild;
+        newRow.querySelectorAll('textarea.auto-resize').forEach(textarea => {
+            this.autoResizeTextarea(textarea);
+            textarea.addEventListener('input', () => {
+                this.autoResizeTextarea(textarea);
+            });
+        });
+        
+        // Initialize empty image array
+        this.researchImages[newIndex] = [];
+    }
+    
+    // Remove subtopic
+    removeSubtopic(button) {
+        const row = button.closest('.subtopic-row');
+        const subtopicIndex = parseInt(row.getAttribute('data-index'));
+        
+        if (confirm('آیا از حذف این زیرموضوع مطمئن هستید؟')) {
+            // Remove from researchImages
+            delete this.researchImages[subtopicIndex];
+            
+            // Remove the row
+            row.remove();
+            
+            // Reindex everything
+            this.reindexSubtopics();
+        }
+    }
+    
+    // Reindex subtopics after removal
+    reindexSubtopics() {
+        const newResearchImages = {};
+        let newIndex = 0;
+        
+        document.querySelectorAll('.subtopic-row').forEach((row, index) => {
+            const oldIndex = parseInt(row.getAttribute('data-index'));
+            row.setAttribute('data-index', index);
+            
+            const imagesBlock = row.querySelector('.research-images-block');
+            if (imagesBlock) {
+                imagesBlock.setAttribute('data-subtopic-index', index);
+            }
+            
+            // Migrate research images data
+            if (this.researchImages[oldIndex]) {
+                newResearchImages[index] = this.researchImages[oldIndex];
+            }
+        });
+        
+        this.researchImages = newResearchImages;
+    }
+    
+    // Collect subtopics data
+    collectSubtopicsData() {
+        const subtopics = [];
+        document.querySelectorAll('.subtopic-row').forEach((row, index) => {
+            const title = row.querySelector('.subtopic-title').value.trim();
+            const sources = row.querySelector('.subtopic-sources').value.trim();
+            
+            if (title) {
+                subtopics.push({
+                    title: title,
+                    sources: sources,
+                    images: (this.researchImages[index] || []).map(img => ({
+                        caption: img.caption
+                    }))
+                });
+            }
+        });
+        return subtopics;
+    }
+    
+    // Show loading state
+    showLoading(show = true) {
+        const submitBtn = this.form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = show;
+            submitBtn.innerHTML = show ? 'در حال ارسال...' : (submitBtn.getAttribute('data-original-text') || 'ثبت نظر');
+            if (!show && !submitBtn.getAttribute('data-original-text')) {
+                submitBtn.setAttribute('data-original-text', submitBtn.innerHTML);
+            }
+        }
+    }
+}
+
+// Initialize base form manager when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    window.baseFormManager = new BaseFormManager();
+    
+    // Dispatch custom event to notify other scripts that base form manager is ready
+    const event = new CustomEvent('baseFormManagerReady', {
+        detail: { baseFormManager: window.baseFormManager }
+    });
+    document.dispatchEvent(event);
+    
+    // If this is view mode and we have existing images, load them
+    if (viewMode && commentId !== null) {
+        setTimeout(function() {
+            loadExistingImages();
+        }, 200);
+    }
+});
+
+// Function to load existing images in view mode
+function loadExistingImages() {
+    if (typeof window.loadSubtopicImages === 'function') {
+        window.loadSubtopicImages();
+    }
+}
+
+
+</script>
+
+{% block form_scripts %}{% endblock %}
+
+<style>
+.remove-subtopic {
+    padding: 0.375rem 0.75rem;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.form-control[readonly] {
+    background-color: #f8f9fa;
+    opacity: 1;
+}
+
+textarea.form-control {
+    min-height: 38px;
+    overflow: hidden;
+    resize: none;
+}
+
+.form-control {
+    margin-bottom: 0.5rem;
+}
+
+.research-images-list img {
+    transition: opacity 0.2s;
+}
+
+.research-images-list img:hover {
+    opacity: 0.8;
+}
+
+.remove-image-btn {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    font-size: 12px;
+    line-height: 1;
+    border-radius: 50%;
+}
+
+.position-relative {
+    position: relative;
+}
+
+.position-absolute {
+    position: absolute;
+}
+
+.top-0 {
+    top: 0;
+}
+
+.end-0 {
+    right: 0;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 0.375rem;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background-color: #d1eddc;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: 0.375rem;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %}
