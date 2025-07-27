@@ -15,6 +15,10 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from config import config
+from datetime import datetime
+
+from app.utils.visits import increment_visit, get_visit_stats
+from flask import session, request
 
 # ایجاد نمونه‌های اصلی
 db = SQLAlchemy()
@@ -109,22 +113,35 @@ def create_app(config_name=None):
             admin_user.set_password('admin123')  # رمز پیش‌فرض - باید تغییر کند
             db.session.add(admin_user)
             db.session.commit()
-    
+
     # شمارنده بازدید روزانه
-    from app.utils.visits import increment_visit, get_today_visits, get_total_visits
+    from app.utils.visits import increment_visit, get_visit_stats
 
     @app.before_request
     def count_visit():
-        if request.endpoint and not request.endpoint.startswith('static'):
+        # فقط برای درخواست‌های صفحات اصلی (نه فایل‌های static)
+        if not request.endpoint or request.endpoint.startswith('static'):
+            return
+        # جلوگیری از شمارش AJAX requests
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return
+        try:
             increment_visit()
+        except Exception as e:
+            app.logger.error(f"خطا در شمارش بازدید: {e}")
 
     @app.context_processor
-    def inject_today_visits():
-        return {
-            'today_visits': get_today_visits(),
-            'total_visits': get_total_visits()
-        }
-    
+    def inject_visit_stats():
+        """تزریق آمار بازدید به تمام template ها"""
+        try:
+            return get_visit_stats()
+        except Exception as e:
+            app.logger.error(f"خطا در دریافت آمار بازدید: {e}")
+            return {
+                'today_visits': 0,
+                'total_visits': 0
+            }
+
     # متغیرهای Template سراسری
     @app.context_processor
     def inject_config():

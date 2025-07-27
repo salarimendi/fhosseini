@@ -141,11 +141,16 @@
                 <div class="copyright d-flex justify-content-between align-items-center text-white" style="width:100%;">
                     <span>© تمامی حقوق برای سایت فردوسی حسینی محفوظ است</span>
                     <span style="font-size:1.05rem; color:#fff;">
-                        آمار بازدید امروز: {{ today_visits|persian_number }}
-                        &nbsp;|&nbsp;
-                        آمار بازدید کل: {{ total_visits|persian_number }}
+                        {% if today_visits is defined and total_visits is defined %}
+                            آمار بازدید امروز: {{ today_visits|persian_number }}
+                            &nbsp;|&nbsp;
+                            آمار بازدید کل: {{ total_visits|persian_number }}
+                        {% else %}
+                            آمار بازدید در حال بارگذاری...
+                        {% endif %}
                     </span>
                 </div>
+                
             </div>
         </div>
     </footer>
