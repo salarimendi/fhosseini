@@ -55,12 +55,14 @@
                     
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle text-white" href="#" id="researchDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-microscope text-white me-1"></i>
                             پژوهش‌ها
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="researchDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('main.documentation_page') }}">مستندسازی</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.textual_criticism_page') }}">نسخه‌پژوهی</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.biography_page') }}">زندگینامه الهامی</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.documentation_page') }}"><i class="fas fa-file-alt me-2"></i>مستندسازی</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.textual_criticism_page') }}"><i class="fas fa-book-open me-2"></i>نسخه‌پژوهی و مقابله</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.ilhami_manuscript_studies') }}"><i class="fas fa-scroll me-2"></i>نسخه شناسی الهامی</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.biography_page') }}"><i class="fas fa-user me-2"></i>زندگینامه الهامی</a></li>
                         </ul>
                     </li>
 

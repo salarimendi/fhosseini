@@ -470,6 +470,11 @@ def biography_page():
     """صفحه زندگینامه الهامی"""
     return render_template('biography.html')
 
+@main_bp.route('/ilhami-manuscript-studies')
+def ilhami_manuscript_studies():
+    """صفحه نسخه شناسی الهامی"""
+    return render_template('ilhami_manuscript_studies.html')
+
 @main_bp.errorhandler(404)
 def not_found_error(error):
     """صفحه خطای ۴۰۴"""
