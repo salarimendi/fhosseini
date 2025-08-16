@@ -23,6 +23,142 @@
         content: counter(persianlist, persian) ". ";
     }
     .alert-custom {background: linear-gradient(90deg,#ffe0b3 0%,#fff5e6 100%); border: none; color: #764ba2; font-weight: bold;}
+    
+    /* داشبورد تفصیلی باغ‌ها */
+    .garden-dashboard {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #e9ecef;
+        height: 100%;
+    }
+    
+    .garden-header-dashboard {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .garden-title-dashboard {
+        color: #495057;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .garden-stats {
+        margin-bottom: 1rem;
+    }
+    
+    .garden-progress {
+        display: block;
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    
+    .progress-number {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .garden-progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .garden-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #28a745, #20c997);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+    
+    .garden-titles-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .title-item {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f1f3f4;
+        transition: all 0.2s ease;
+    }
+    
+    .title-item:last-child {
+        border-bottom: none;
+    }
+    
+    .title-item:hover {
+        background: rgba(0,0,0,0.02);
+        border-radius: 6px;
+        padding-right: 0.5rem;
+        padding-left: 0.5rem;
+    }
+    
+    .title-status {
+        margin-left: 0.75rem;
+        font-size: 1.1rem;
+        min-width: 20px;
+        text-align: center;
+    }
+    
+    .title-info {
+        display: flex;
+        align-items: center;
+        flex: 1;
+    }
+    
+    .title-order {
+        color: #6c757d;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+        min-width: 25px;
+    }
+    
+    .title-text {
+        color: #495057;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        font-family: 'Vazir', Tahoma, sans-serif;
+    }
+    
+    .title-item.documented .title-text {
+        color: #28a745;
+        font-weight: 500;
+    }
+    
+    .title-item.not-documented .title-text {
+        color: #6c757d;
+    }
+    
+    /* اسکرول بار سفارشی */
+    .garden-titles-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .garden-titles-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    .garden-titles-list::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+    
+    .garden-titles-list::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
 </style>
 {% endblock %}
 {% block content %}
@@ -76,6 +212,57 @@
         document.getElementById('gaugeArc').setAttribute('d', d);
     })();
     </script>
+    
+    <!-- داشبورد تفصیلی مستندسازی هر باغ -->
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-chart-bar doc-icon"></i> وضعیت مستندسازی هر باغ</h4>
+        <div class="row">
+            {% for garden in garden_details %}
+            <div class="col-lg-6 mb-4">
+                <div class="garden-dashboard">
+                    <div class="garden-header-dashboard">
+                        <h5 class="garden-title-dashboard">
+                            <i class="fas fa-seedling text-success me-2"></i>
+                            {{ garden.name }}
+                        </h5>
+                        <div class="garden-stats">
+                            {% set documented_count = garden.titles | selectattr('is_documented') | list | length %}
+                            {% set total_count = garden.titles | length %}
+                            {% set garden_percent = ((documented_count / total_count) * 100) | int if total_count > 0 else 0 %}
+                            <span class="garden-progress">
+                                <span class="progress-number">{{ documented_count|persian_number }}</span>
+                                از
+                                <span class="progress-number">{{ total_count|persian_number }}</span>
+                                تیتر مستندسازی شده
+                            </span>
+                            <div class="garden-progress-bar">
+                                <div class="garden-progress-fill" style="width: {{ garden_percent }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="garden-titles-list">
+                        {% for title in garden.titles %}
+                        <div class="title-item {% if title.is_documented %}documented{% else %}not-documented{% endif %}">
+                            <div class="title-status">
+                                {% if title.is_documented %}
+                                    <i class="fas fa-check-circle text-success"></i>
+                                {% else %}
+                                    <i class="fas fa-circle text-muted"></i>
+                                {% endif %}
+                            </div>
+                            <div class="title-info">
+                                <span class="title-order">{{ title.order|persian_number }}.</span>
+                                <span class="title-text">{{ title.title }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
     <div class="doc-section doc-card">
         <h4><i class="fas fa-bullseye doc-icon"></i> اهداف پژوهش</h4>
         <ul class="doc-list">
@@ -124,29 +311,29 @@
             منابع اصلی در <a class="telegram-link" href="https://t.me/Ferdowsi_Hosseini" target="_blank"><i class="fab fa-telegram-plane"></i> کانال تلگرامی فردوسی حسینی</a> قرار دارد:
         </div>
         <ol class="source-list">
-            <li>دمع السجوم ترجمه نفس المهموم - علامه شعرانی</li>
-            <li>ناسخ التواریخ - محمد تقی لسان الملک سپهر</li>
-            <li>ارشاد - شیخ مفید</li>
-            <li>ملهوف - سید بن طاووس</li>
-            <li>تاریخ طبری - محمد بن جریر طبری</li>
-            <li>تاريخ کامل - ابن اثیر</li>
-            <li>مقاتل الطالبین - ابوالفرج اصفهانی</li>
-            <li>مروج الذهب و معادن الجوهر - مسعودی</li>
-            <li>تذکره الخواص - سبط ابن جوزی</li>
-            <li>مطالب السئول فی مناقب آل الرسول - محمد بن طلحه النصیبی</li>
-            <li>فصول المهمه فی معرفه الائمه - علی بن محمد مکی معروف به ابن صباغ مالکی</li>
-            <li>کشف الغمه فی معرفه الائمه - علی بن عیسی اربلی</li>
-            <li>عقد الفرید - ابن عبد ربه اندلسی</li>
-            <li>احتجاج - علامه طبرسی</li>
-            <li>مناقب آل ابی طالب - ابن شهر آشوب</li>
-            <li>روضة الواعظین - محمد بن حسن فتال نیشابوری</li>
-            <li>مثیر الاحزان - ابن نما</li>
-            <li>کامل بهایی - عمادالدین طبری</li>
-            <li>روضة الصفا - محمد بن خاوندشاه بلخی</li>
-            <li>تسلیة المجالس و زینة المجالس - محمدبن ابی طالب حائری کرکی</li>
-            <li>قمقمام زخار و صمصام بتار - فرهاد میرزا</li>
-            <li>روضه الشهدا - ملاحسین کاشفی سبزواری</li>
-            <li>محن الابرار - مقتل علامه مجلسی در بحار الانوار</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/75" target="_blank" class="telegram-link">دمع السجوم</a> - ترجمه نفس المهموم - علامه شعرانی</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/77" target="_blank" class="telegram-link">ناسخ التواریخ</a> - محمد تقی لسان الملک سپهر</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/120" target="_blank" class="telegram-link">ارشاد</a> - شیخ مفید</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/118" target="_blank" class="telegram-link">ملهوف</a> - سید بن طاووس</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/81" target="_blank" class="telegram-link">طبری</a> - محمد بن جریر طبری</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/84" target="_blank" class="telegram-link">کامل ابن اثیر</a> - ابن اثیر</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/87" target="_blank" class="telegram-link">مقاتل الطالبین</a> - ابوالفرج اصفهانی</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/89" target="_blank" class="telegram-link">مروج الذهب</a> - مسعودی</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/92" target="_blank" class="telegram-link">تذکرة الخواص</a> - سبط ابن جوزی</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/94" target="_blank" class="telegram-link">مطالب السئول</a> - محمد بن طلحه النصیبی</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/96" target="_blank" class="telegram-link">فصول المهمه</a> - علی بن محمد مکی معروف به ابن صباغ مالکی</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/98" target="_blank" class="telegram-link">کشف الغمه</a> - علی بن عیسی اربلی</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/100" target="_blank" class="telegram-link">عقد الفرید</a> - ابن عبد ربه اندلسی</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/102" target="_blank" class="telegram-link">احتجاج</a> - علامه طبرسی</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/104" target="_blank" class="telegram-link">مناقب</a> - ابن شهر آشوب</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/106" target="_blank" class="telegram-link">روضة الواعظین</a> - محمد بن حسن فتال نیشابوری</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/108" target="_blank" class="telegram-link">مثیر الاحزان</a> - ابن نما</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/110" target="_blank" class="telegram-link">کامل بهایی</a> - عمادالدین طبری</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/112" target="_blank" class="telegram-link">روضة الصفا</a> - محمد بن خاوندشاه بلخی</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/114" target="_blank" class="telegram-link">تسلیة المجالس</a> - محمدبن ابی طالب حائری کرکی</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/116" target="_blank" class="telegram-link">قمقمام زخار</a> - فرهاد میرزا</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/122" target="_blank" class="telegram-link">روضه الشهدا</a> - ملاحسین کاشفی سبزواری</li>
+            <li><a href="https://t.me/Ferdowsi_Hosseini/124" target="_blank" class="telegram-link">بحار مجلسی</a> - علامه مجلسی</li>
         </ol>
         <div class="mt-3">
             اشارات فراوانی در اسناد پژوهشی وجود دارد مبنی بر آنکه اشعار الهامی در مواردی مانند شهادت حضرت مسلم، وقایع شب عاشورا، و مکاتبات یزید با ولید بن عقبه، تطبیق با نقل‌های تاریخی دارد...

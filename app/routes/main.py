@@ -455,10 +455,44 @@ def send_message():
 def documentation_page():
     """صفحه مستندسازی و تطبیق تاریخی"""
     from app.models import Title, Comment
+    from sqlalchemy import func
+    
     total_titles = Title.query.count()
     documented_titles = Title.query.join(Title.comments).filter(Comment.status == 'approved').distinct().count()
     percent = int((documented_titles / total_titles) * 100) if total_titles else 0
-    return render_template('documentation.html', total_titles=total_titles, documented_titles=documented_titles, percent=percent)
+    
+    # اطلاعات تفصیلی هر باغ
+    garden_details = []
+    for garden_num in range(1, 5):
+        garden_titles = Title.query.filter_by(garden=garden_num).order_by(Title.order_in_garden).all()
+        
+        garden_data = {
+            'number': garden_num,
+            'name': f'خیابان {garden_num} باغ فردوس' if garden_num == 1 else f'خیابان {garden_num} باغ فردوس',
+            'titles': []
+        }
+        
+        for title in garden_titles:
+            # بررسی اینکه آیا این تیتر مستندسازی شده یا نه
+            is_documented = Comment.query.filter_by(
+                title_id=title.id, 
+                status='approved'
+            ).first() is not None
+            
+            garden_data['titles'].append({
+                'id': title.id,
+                'title': title.title,
+                'order': title.order_in_garden,
+                'is_documented': is_documented
+            })
+        
+        garden_details.append(garden_data)
+    
+    return render_template('documentation.html', 
+                         total_titles=total_titles, 
+                         documented_titles=documented_titles, 
+                         percent=percent,
+                         garden_details=garden_details)
 
 @main_bp.route('/textual-criticism')
 def textual_criticism_page():
