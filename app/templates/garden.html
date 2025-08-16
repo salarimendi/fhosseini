@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+
+{% block title %}باغ {{ garden_num|persian_number }} - سایت فردوسی حسینی{% endblock %}
+
+{% block head %}
+<style>
+    .garden-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 80px 0 40px;
+        margin-top: 56px;
+        text-align: center;
+    }
+    
+    .breadcrumb-custom {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 25px;
+        padding: 12px 20px;
+        margin-bottom: 30px;
+    }
+    
+    .title-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        overflow: hidden;
+        border-right: 4px solid #667eea;
+    }
+    
+    .title-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        border-right-color: #764ba2;
+    }
+    
+    .title-card-body {
+        padding: 25px;
+    }
+    
+    .title-text {
+        font-family: 'Vazir', Tahoma, sans-serif;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        line-height: 1.8;
+    }
+    
+    h1, h2, h3, h4, h5, h6,
+    .site-title,
+    .garden-title,
+    .poem-title,
+    .section-title {
+        font-family: 'Sahel', Tahoma, sans-serif;
+        font-weight: 700;
+    }
+
+    .verse-text,
+    .poem-content {
+        font-family: 'Vazir', Tahoma, sans-serif;
+        font-size: 1.1rem;
+        line-height: 2;
+    }
+
+    .title-meta {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+    
+    .title-stats {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #95a5a6;
+        font-size: 0.85rem;
+    }
+    
+
+
+
+    .view-btn {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .view-btn:hover {
+        background: linear-gradient(45deg, #764ba2, #667eea);
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .search-mini {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .no-titles {
+        text-align: center;
+        padding: 60px 20px;
+        color: #7f8c8d;
+    }
+    
+    .no-titles i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #bdc3c7;
+    }
+    
+    .garden-name-persian {
+        {% if garden_num == 1 %}
+            content: "اول";
+        {% elif garden_num == 2 %}
+            content: "دوم";
+        {% elif garden_num == 3 %}
+            content: "سوم";
+        {% else %}
+            content: "چهارم";
+        {% endif %}
+    }
+    
+    @media (max-width: 768px) {
+        .garden-header {
+            padding: 60px 0 30px;
+        }
+        
+        .title-stats {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .title-card-body {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Garden Header -->
+<section class="garden-header">
+    <div class="container">
+        <div class="breadcrumb-custom d-inline-block">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('main.home') }}" class="text-white text-decoration-none">
+                            <i class="fas fa-home"></i> صفحه اصلی
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">
+                        باغ {{ garden_num|persian_number }}
+                    </li>
+                </ol>
+            </nav>
+        </div>
+        
+        <h1 class="display-4 fw-bold mb-3" style="font-family: 'Sahel', Tahoma, sans-serif;">
+            خیابان 
+            {% if garden_num == 1 %}اول
+            {% elif garden_num == 2 %}دوم
+            {% elif garden_num == 3 %}سوم
+            {% else %}چهارم
+            {% endif %}
+        </h1>
+        
+        <p class="lead mb-0">
+            باغ {{ garden_num|persian_number }} از مجموعه چهار خیابان باغ فردوس
+        </p>
+        
+        {% if titles %}
+        <div class="mt-4">
+            <span class="badge bg-light text-dark fs-6 px-3 py-2">
+                {{ titles|length|persian_number }} عنوان شعر
+            </span>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Search in Garden -->
+<section class="py-4">
+    <div class="container">
+        <div class="search-mini">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" 
+                               id="gardenSearch" 
+                               class="form-control" 
+                               placeholder="جستجو در این باغ..."
+                               autocomplete="off">
+                        <button class="btn btn-outline-primary" type="button" id="searchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="clearSearch()">
+                        <i class="fas fa-times"></i> پاک کردن
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Titles List -->
+<section class="pb-5">
+    <div class="container">
+        {% if titles %}
+            <div id="titlesContainer">
+                {% for title in titles %}
+                <div class="title-card" data-title="{{ title.title|lower }}">
+                    <div class="title-card-body">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <h3 class="title-text">{{ title.title }}</h3>
+                                <div class="title-meta">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    باغ {{ garden_num|persian_number }} - ترتیب {{ title.order_in_garden|persian_number }}
+                                </div>
+                                <div class="title-stats">
+                                    <div class="stat-item">
+                                        <i class="fas fa-quote-right"></i>
+                                        <span>{{ title.verses_count|persian_number }} بیت</span>
+                                    </div>
+                                    {% if title.approved_comments_count > 0 %}
+                                    <div class="stat-item">
+                                        <i class="fas fa-comment-alt"></i>
+                                        <span>{{ title.approved_comments_count|persian_number }} نظر تحقیقی</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if title.approved_recordings_count > 0 %}
+                                    <div class="stat-item">
+                                        <i class="fas fa-microphone"></i>
+                                        <span>{{ title.approved_recordings_count|persian_number }} قرائت صوتی</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                                <a href="{{ url_for('main.title', title_id=title.id) }}"
+                                   class="view-btn">
+                                    <i class="fas fa-book-open me-2"></i>
+                                    مشاهده شعر
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination if needed -->
+            {% if pagination and pagination.pages > 1 %}
+            <nav aria-label="صفحه‌بندی" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.garden', garden_num=garden_num, page=pagination.prev_num) }}">قبلی</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != pagination.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.garden', garden_num=garden_num, page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.garden', garden_num=garden_num, page=pagination.next_num) }}">بعدی</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="no-titles">
+                <i class="fas fa-seedling"></i>
+                <h4>هنوز شعری در این باغ قرار نگرفته است</h4>
+                <p class="text-muted">به زودی اشعار این باغ اضافه خواهند شد</p>
+                <a href="{{ url_for('main.home') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-arrow-right me-2"></i>
+                    بازگشت به صفحه اصلی
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('gardenSearch');
+    const searchBtn = document.getElementById('searchBtn');
+    const titlesContainer = document.getElementById('titlesContainer');
+    
+    if (searchInput && titlesContainer) {
+        // Real-time search in current garden
+        searchInput.addEventListener('input', function() {
+            filterTitles(this.value.trim());
+        });
+        
+        searchBtn.addEventListener('click', function() {
+            filterTitles(searchInput.value.trim());
+        });
+    }
+    
+    function filterTitles(searchTerm) {
+        const titleCards = titlesContainer.querySelectorAll('.title-card');
+        let visibleCount = 0;
+        
+        titleCards.forEach(card => {
+            const titleText = card.getAttribute('data-title');
+            const titleElement = card.querySelector('.title-text');
+            
+            if (!searchTerm || titleText.includes(searchTerm.toLowerCase())) {
+                card.style.display = 'block';
+                visibleCount++;
+                
+                // Highlight search term
+                if (searchTerm && titleElement) {
+                    const originalText = titleElement.textContent;
+                    const highlightedText = originalText.replace(
+                        new RegExp(`(${searchTerm})`, 'gi'),
+                        '<mark>$1</mark>'
+                    );
+                    titleElement.innerHTML = highlightedText;
+                }
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // Show/hide no results message
+        let noResultsMsg = document.getElementById('noResultsMessage');
+        if (visibleCount === 0 && searchTerm) {
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('div');
+                noResultsMsg.id = 'noResultsMessage';
+                noResultsMsg.className = 'no-titles';
+                noResultsMsg.innerHTML = `
+                    <i class="fas fa-search"></i>
+                    <h4>نتیجه‌ای یافت نشد</h4>
+                    <p class="text-muted">برای عبارت "${searchTerm}" چیزی پیدا نشد</p>
+                `;
+                titlesContainer.appendChild(noResultsMsg);
+            }
+        } else if (noResultsMsg) {
+            noResultsMsg.remove();
+        }
+    }
+});
+
+function clearSearch() {
+    const searchInput = document.getElementById('gardenSearch');
+    const titlesContainer = document.getElementById('titlesContainer');
+    
+    if (searchInput) {
+        searchInput.value = '';
+        
+        // Show all titles
+        const titleCards = titlesContainer.querySelectorAll('.title-card');
+        titleCards.forEach(card => {
+            card.style.display = 'block';
+            
+            // Remove highlights
+            const titleElement = card.querySelector('.title-text');
+            if (titleElement) {
+                titleElement.innerHTML = titleElement.textContent;
+            }
+        });
+        
+        // Remove no results message
+        const noResultsMsg = document.getElementById('noResultsMessage');
+        if (noResultsMsg) {
+            noResultsMsg.remove();
+        }
+    }
+}
+
+// Animation on load
+document.addEventListener('DOMContentLoaded', function() {
+    const titleCards = document.querySelectorAll('.title-card');
+    titleCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

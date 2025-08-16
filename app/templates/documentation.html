@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}مستندسازی و تطبیق تاریخی{% endblock %}
+{% block head %}
+<style>
+    .doc-section {margin-bottom: 2.5rem;}
+    .doc-icon {font-size: 2.2rem; margin-left: 0.7rem; color: #764ba2; vertical-align: middle;}
+    .doc-card {background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(118,75,162,0.07); padding: 2rem 1.5rem; margin-bottom: 2rem; border-right: 6px solid #764ba2;}
+    .doc-card h4 {color: #764ba2; font-weight: bold;}
+    .doc-list {list-style: none; padding: 0;}
+    .doc-list li {margin-bottom: 0.7rem; font-size: 1.1rem;}
+    .doc-list i {color: #667eea; margin-left: 0.5rem;}
+    .process-step {display: flex; align-items: flex-start; margin-bottom: 1.5rem;}
+    .process-step .step-icon {font-size: 2rem; color: #ff9800; margin-left: 1rem;}
+    .process-step .step-content {flex: 1;}
+    .process-diagram {margin: 2rem 0; text-align: center;}
+    .telegram-link {color: #229ED9; font-weight: bold;}
+    .source-list {list-style: decimal; padding-right: 1.5rem; direction: rtl;}
+    .source-list li {margin-bottom: 0.5rem; font-family: inherit;}
+    .source-list {counter-reset: persianlist;}
+    .source-list > li {counter-increment: persianlist; position: relative;}
+    .source-list > li::marker {
+        font-family: inherit;
+        content: counter(persianlist, persian) ". ";
+    }
+    .alert-custom {background: linear-gradient(90deg,#ffe0b3 0%,#fff5e6 100%); border: none; color: #764ba2; font-weight: bold;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="text-center mb-5 mt-5 pt-5" style="color:#764ba2;"><i class="fas fa-file-alt doc-icon"></i> مستندسازی و تطبیق تاریخی</h1>
+        </div>
+    </div>
+    <!-- داشبورد پیشرفت مستندسازی -->
+    <div class="doc-section doc-card mb-4" style="text-align:center;">
+        <h4 style="color:#764ba2; font-weight:bold; margin-bottom:1.5rem;"><i class="fas fa-tachometer-alt doc-icon"></i> درصد پیشرفت مستندسازی</h4>
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <!-- Gauge SVG -->
+            <svg width="220" height="120" viewBox="0 0 220 120">
+                <defs>
+                    <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#667eea"/>
+                        <stop offset="100%" stop-color="#764ba2"/>
+                    </linearGradient>
+                </defs>
+                <!-- زمینه خاکستری -->
+                <path d="M20,110 A90,90 0 0,1 200,110" fill="none" stroke="#eee" stroke-width="18"/>
+                <!-- مقدار پیشرفت -->
+                <path id="gaugeArc" d="" fill="none" stroke="url(#gaugeGradient)" stroke-width="18" stroke-linecap="round"/>
+                <!-- دایره وسط -->
+                <circle cx="110" cy="110" r="40" fill="#fff" stroke="#764ba2" stroke-width="3"/>
+                <!-- درصد -->
+                <text id="gaugePercent" x="110" y="120" text-anchor="middle" font-size="2.2rem" font-family="Sahel, Vazir, Tahoma, sans-serif" fill="#764ba2" font-weight="bold">{{ percent|persian_number }}٪</text>
+            </svg>
+            <div class="d-flex justify-content-between mt-3" style="width: 100%; max-width: 350px; font-size:1rem;">
+                <span>تیترهای مستندسازی‌شده: <b>{{ documented_titles|persian_number }}</b></span>
+                <span>کل تیترها: <b>{{ total_titles|persian_number }}</b></span>
+            </div>
+        </div>
+    </div>
+    <script>
+    // محاسبه آرک برای gauge
+    (function() {
+        var percent = {{ percent }};
+        var startAngle = Math.PI;
+        var endAngle = Math.PI * (1 + percent / 100);
+        var r = 90;
+        var cx = 110, cy = 110;
+        var x1 = cx + r * Math.cos(startAngle);
+        var y1 = cy + r * Math.sin(startAngle);
+        var x2 = cx + r * Math.cos(endAngle);
+        var y2 = cy + r * Math.sin(endAngle);
+        var largeArc = percent > 50 ? 1 : 0;
+        var d = `M${x1},${y1} A${r},${r} 0 ${largeArc},1 ${x2},${y2}`;
+        document.getElementById('gaugeArc').setAttribute('d', d);
+    })();
+    </script>
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-bullseye doc-icon"></i> اهداف پژوهش</h4>
+        <ul class="doc-list">
+            <li><i class="fas fa-history"></i> احیای میراث ادبی-تاریخی شیعه در قرن ۱۳ هجری با تکیه بر اسناد تاریخی مستقل</li>
+            <li><i class="fas fa-sitemap"></i> استخراج ساختار تاریخی-روایی اشعار الهامی و تطبیق آن با منابع معتبر مقتل‌نگاری شیعی و سنی مانند <span style="color:#229ED9">نفس‌المهموم، دمع‌السجوم، ناسخ‌التواریخ، ارشاد، لهوف، تاریخ طبری، مروج الذهب، بحارالانوار</span> و منابع معتبر دوران قاجار مانند <span style="color:#229ED9">قمقام زخار و صمصام بتار</span> و ...</li>
+            <li><i class="fas fa-balance-scale"></i> بررسی تحلیلی موارد اختلافی میان اشعار حکیم الهامی و تاریخ معتبر</li>
+        </ul>
+    </div>
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-gavel doc-icon"></i> اساسنامه کار تحقیقی</h4>
+        <ul class="doc-list">
+            <li><i class="fas fa-link"></i> کتاب باید بند به بند با تاریخ کربلا تطبیق داده شود؛ در هر مرحله از روایت منظوم، بررسی شود که کدام واقعه تاریخی در کدام مقتل آمده است و آیا مطابقت دارد یا خیر.</li>
+            <li><i class="fas fa-heading"></i> تیترها و ساختار کلی اشعار نیاز به بازبینی دارند. در مواردی از جمله توصیف حضور حضرت سجاد علیه‌السلام در میدان جنگ، باید با دقت و بر اساس اقوال علمای برجسته مانند علامه شعرانی بررسی شود.</li>
+            <li><i class="fas fa-language"></i> بعضی از ابیات ممکن است "به زبان حال" سروده شده باشند و نه مبتنی بر رخداد واقعی؛ این موارد باید مشخص شوند.</li>
+            <li><i class="fas fa-exchange-alt"></i> نسخ بعدی دچار تحریفات کلمه‌ای یا ساختاری هستند؛ لذا کار مقابله و تصحیح ضروری و محوری است.</li>
+            <li><i class="fas fa-pen-nib"></i> اشعار ممکن است در مواردی مکمل یا حتی مصحح تاریخ باشند؛ خصوصاً اگر شاعر با حال معنوی و عنایت الهی شعر گفته باشد.</li>
+            <li><i class="fas fa-book-open"></i> منابع تاریخی همچون نفس‌المهموم، دمع‌السجوم و ناسخ‌التواریخ باید به عنوان منابع مبنایی و سنجه‌های تطبیقی به‌کار روند.</li>
+            <li><i class="fas fa-signature"></i> شناسایی و تحلیل دستخط‌های موجود از الهامی و تعیین نسبت آن‌ها با نسخه‌های موجود ضروری است؛ به‌ویژه در مورد نسخه مرعشی که مشکوک به نسخه‌برداری است.</li>
+            <li><i class="fas fa-search-location"></i> ضرورت دارد نسخه اصلی (احتمالاً نزد نوه یا مجموعه‌داران خاص) شناسایی و مستند شود؛ اقدامات حقوقی و مستندسازی مالکیت نیز باید مدنظر قرار گیرد.</li>
+        </ul>
+    </div>
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-question-circle doc-icon"></i> سؤالات پژوهش</h4>
+        <ul class="doc-list">
+            <li><i class="fas fa-feather-alt"></i> الهامی چگونه تاریخ کربلا را در ساختار منظوم روایت کرده است؟</li>
+            <li><i class="fas fa-balance-scale"></i> تطابق روایی اشعار او با متون معتبر تاریخی چه میزان است؟</li>
+            <li><i class="fas fa-edit"></i> آیا در مواردی می‌توان اشعار او را تصحیح‌کننده یا مکمل تاریخ نگاشت؟</li>
+            <li><i class="fas fa-spell-check"></i> ویژگی‌های ادبی و زبانی این مثنوی چیست؟</li>
+            <li><i class="fas fa-dove"></i> چه عوامل عرفانی یا روحی در سرایش این اثر مؤثر بوده‌اند؟</li>
+        </ul>
+    </div>
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-flask doc-icon"></i> روش‌شناسی تحقیق</h4>
+        <ul class="doc-list">
+            <li><i class="fas fa-exchange-alt"></i> روش تطبیقی-تحلیلی: مقایسه دقیق ساختار روایی اشعار با متون تاریخی مقاتل معتبر.</li>
+            <li><i class="fas fa-highlighter"></i> تحلیل سبک‌شناسی، متن‌شناسی و بلاغت اشعار.</li>
+            <li><i class="fas fa-book-reader"></i> مطالعات نسخه‌شناسی: بررسی دقیق تفاوت‌های موجود در نسخه‌های چاپی و خطی و تصحیح آن‌ها بر اساس اصول علمی.</li>
+            <li><i class="fas fa-user-friends"></i> مطالعات رجالی، حدیثی و تاریخی در رابطه با منابع مورد استناد در شعر.</li>
+            <li><i class="fas fa-search"></i> پژوهش میدانی و مصاحبه برای شناسایی نسخه‌ی اصلی یا ناقص سی‌هزار بیتی، با تمرکز بر مجموعه‌های شخصی و آرشیوهای کمتر شناخته‌شده.</li>
+            <li><i class="fas fa-brain"></i> بررسی تخصصی مفاهیم عرفانی و الهامی در سرایش اشعار، با مراجعه به متون عرفانی معاصر شاعر.</li>
+        </ul>
+    </div>
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-book doc-icon"></i> منابع و پیشینه تحقیق</h4>
+        <div class="alert alert-custom">
+            منابع اصلی در <a class="telegram-link" href="https://t.me/Ferdowsi_Hosseini" target="_blank"><i class="fab fa-telegram-plane"></i> کانال تلگرامی فردوسی حسینی</a> قرار دارد:
+        </div>
+        <ol class="source-list">
+            <li>دمع السجوم ترجمه نفس المهموم - علامه شعرانی</li>
+            <li>ناسخ التواریخ - محمد تقی لسان الملک سپهر</li>
+            <li>ارشاد - شیخ مفید</li>
+            <li>ملهوف - سید بن طاووس</li>
+            <li>تاریخ طبری - محمد بن جریر طبری</li>
+            <li>تاريخ کامل - ابن اثیر</li>
+            <li>مقاتل الطالبین - ابوالفرج اصفهانی</li>
+            <li>مروج الذهب و معادن الجوهر - مسعودی</li>
+            <li>تذکره الخواص - سبط ابن جوزی</li>
+            <li>مطالب السئول فی مناقب آل الرسول - محمد بن طلحه النصیبی</li>
+            <li>فصول المهمه فی معرفه الائمه - علی بن محمد مکی معروف به ابن صباغ مالکی</li>
+            <li>کشف الغمه فی معرفه الائمه - علی بن عیسی اربلی</li>
+            <li>عقد الفرید - ابن عبد ربه اندلسی</li>
+            <li>احتجاج - علامه طبرسی</li>
+            <li>مناقب آل ابی طالب - ابن شهر آشوب</li>
+            <li>روضة الواعظین - محمد بن حسن فتال نیشابوری</li>
+            <li>مثیر الاحزان - ابن نما</li>
+            <li>کامل بهایی - عمادالدین طبری</li>
+            <li>روضة الصفا - محمد بن خاوندشاه بلخی</li>
+            <li>تسلیة المجالس و زینة المجالس - محمدبن ابی طالب حائری کرکی</li>
+            <li>قمقمام زخار و صمصام بتار - فرهاد میرزا</li>
+            <li>روضه الشهدا - ملاحسین کاشفی سبزواری</li>
+            <li>محن الابرار - مقتل علامه مجلسی در بحار الانوار</li>
+        </ol>
+        <div class="mt-3">
+            اشارات فراوانی در اسناد پژوهشی وجود دارد مبنی بر آنکه اشعار الهامی در مواردی مانند شهادت حضرت مسلم، وقایع شب عاشورا، و مکاتبات یزید با ولید بن عقبه، تطبیق با نقل‌های تاریخی دارد...
+        </div>
+    </div>
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-tasks doc-icon"></i> فرآیند مستندسازی</h4>
+        <div class="process-step">
+            <span class="step-icon"><i class="fas fa-user-plus"></i></span>
+            <div class="step-content">ثبت نام به عنوان محقق در سایت فردوسی حسینی</div>
+        </div>
+        <div class="process-step">
+            <span class="step-icon"><i class="fas fa-user-check"></i></span>
+            <div class="step-content">تایید کاربری توسط مدیر سایت</div>
+        </div>
+        <div class="process-step">
+            <span class="step-icon"><i class="fas fa-edit"></i></span>
+            <div class="step-content">انجام مستندسازی طبق الگوی موجود در صفحه‌ی مربوط به هر شعر</div>
+        </div>
+        <div class="process-diagram">
+            <img src="{{ url_for('static', filename='images/form.png') }}" alt="فرم مستندسازی" style="max-width: 400px; width: 100%;">
+            <div class="small text-muted mt-2">(برای مشاهده ویدیو راهنما به پایین صفحه مراجعه کنید)</div>
+        </div>
+        <div class="alert alert-warning mt-3">به ویدیوی زیر نگاه بفرمایید.</div>
+    </div>
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-star doc-icon"></i> نتایج مورد انتظار</h4>
+        <ul class="doc-list">
+            <li><i class="fas fa-book-medical"></i> ارائه نسخه‌ای تصحیح‌شده و مستند از کتاب چهار خیابان باغ فردوس به عنوان منبع علمی و تطبیقی جدید برای تاریخ کربلا.</li>
+            <li><i class="fas fa-award"></i> احیای جایگاه این اثر در تاریخ ادبیات فارسی و شعر آیینی و مجامع علمی، دانشگاهی</li>
+            <li><i class="fas fa-university"></i> معرفی اثر به مجامع علمی، دانشگاهی و حوزوی</li>
+            <li><i class="fas fa-chalkboard-teacher"></i> نگارش مقالات علمی و برگزاری نشست‌های تخصصی جهت معرفی ظرفیت‌های این کتاب.</li>
+            <li><i class="fas fa-database"></i> ایجاد پایگاه داده دیجیتال برای نسخه‌های مختلف و ابزار تطبیقی برای پژوهشگران.</li>
+            <li><i class="fas fa-layer-group"></i> مستندسازی مواردی که الهامی روایت تاریخی را به نحو خاصی اصلاح یا تبیین کرده است.</li>
+            <li><i class="fas fa-layer-group"></i> امکان ارائه نسخه‌ای چندلایه (Annotated Edition) از متن که در آن لایه‌های تاریخی، ادبی و عرفانی تفکیک و تفسیر شده باشند.</li>
+        </ul>
+    </div>
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-hands-helping doc-icon"></i> نهادهای همکار پیشنهادی</h4>
+        <div class="alert alert-success">
+            با افتخار اعلام می‌دارد که در مسیر تحقیق این پژوهش به لطف الهی از هیچ نهادی کمک گرفته نشده و حتی یک ریال از بودجه دولتی و بیت المال مسلمین صرف و هزینه نگردیده است و تمام هزینه های این اثر مهم تاریخی با کمک مشتاقان انوار حسینی علیه السلام و نور عدل الهی جل جلاله به جمله تحقق پیوسته است.
+        </div>
+    </div>
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-archive doc-icon"></i> جمع‌بندی</h4>
+        <div>
+            کتاب چهار خیابان باغ فردوس گنجینه‌ای است از معرفت دینی، تاریخ شیعی و هنر فاخر زبان فارسی که تاکنون در سکوت تاریخی مانده است. این اثر منحصر به‌فرد که در تاریخ شعر آیینی شیعه با تلفیق روایت تاریخی و بیان شاعرانه است، ظرفیت آن را دارد که به مثابه سندی مکمل و اصلاحی در مطالعات کربلا تلقی گردد. این پژوهش نه صرفاً احیای متنی ادبی، بلکه احیای یک میراث معنوی است که می‌تواند موجب ارتقاء گفتمان علمی و فرهنگی در حوزه‌ی عاشورا پژوهی گردد. یافتن نسخه‌ی اصیل، تصحیح علمی ابیات، و مستندسازی روایت تاریخی منظوم از واقعه‌ی کربلا، وظیفه‌ای ملی و علمی است که اجرای آن می‌تواند نام ایران و شیعه را در این حوزه به صدر پژوهش‌های جهانی رساند. این پژوهش می‌کوشد با تکیه بر رویکرد علمی، ادبی، و دینی، سهمی در احیای این میراث عظیم و گمنام ایفا کند و آن را از حاشیه به متن مطالعات دانشگاهی وارد سازد. به تعبیر اعضای جلسه پژوهشی، «این اثر همچون شاهنامه‌ای در باب عاشورا است» و می‌تواند سرمایه‌ای معنوی، ادبی و تاریخی برای ایران در سطح بین‌المللی باشد.
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}مقایسه نسخه‌ها - {{ title.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4" dir="rtl">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">خانه</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.garden', garden_num=title.garden) }}">باغ {{ title.garden }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.poem', title_id=title.id) }}">{{ title.title }}</a></li>
+                    <li class="breadcrumb-item active">مقایسه نسخه‌ها</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-balance-scale"></i>
+                        مقایسه نسخه‌های « {{ title.title }} »
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if versions|length > 1 %}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="version1" class="form-label">نسخه اول:</label>
+                                <select id="version1" class="form-select" onchange="loadComparison()">
+                                    {% for version in versions %}
+                                        <option value="{{ version.id }}" {% if loop.first %}selected{% endif %}>
+                                            {{ version.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="version2" class="form-label">نسخه دوم:</label>
+                                <select id="version2" class="form-select" onchange="loadComparison()">
+                                    {% for version in versions %}
+                                        <option value="{{ version.id }}" {% if loop.index == 2 %}selected{% endif %}>
+                                            {{ version.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="comparison-result">
+                            <!-- نتیجه مقایسه در اینجا نمایش داده می‌شود -->
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning text-center">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            برای مقایسه حداقل دو نسخه مختلف لازم است.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نمایش نسخه اصلی -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-book"></i>
+                        نسخه اصلی
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for verse in original_verses %}
+                        <div class="verse-item mb-3 p-3 border rounded">
+                            <div class="row">
+                                <div class="col-md-6 text-right">
+                                    <p class="verse-text">{{ verse.verse_1 }}</p>
+                                </div>
+                                {% if verse.verse_2 %}
+                                <div class="col-md-6 text-left">
+                                    <p class="verse-text">{{ verse.verse_2 }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function loadComparison() {
+    const version1 = document.getElementById('version1').value;
+    const version2 = document.getElementById('version2').value;
+    
+    if (version1 === version2) {
+        document.getElementById('comparison-result').innerHTML = `
+            <div class="alert alert-warning text-center">
+                <i class="fas fa-info-circle"></i>
+                لطفاً دو نسخه متفاوت انتخاب کنید.
+            </div>
+        `;
+        return;
+    }
+    
+    // نمایش loading
+    document.getElementById('comparison-result').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">در حال بارگذاری...</span>
+            </div>
+        </div>
+    `;
+    
+    // ارسال درخواست AJAX
+    fetch(`{{ url_for('verses.api_compare_versions', title_id=title.id) }}?v1=${version1}&v2=${version2}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayComparison(data.comparison);
+            } else {
+                document.getElementById('comparison-result').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        خطا در بارگذاری مقایسه: ${data.message}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('comparison-result').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    خطا در ارتباط با سرور
+                </div>
+            `;
+        });
+}
+
+function displayComparison(comparison) {
+    let html = `
+        <div class="comparison-container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-primary">${comparison.version1_name}</h6>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-success">${comparison.version2_name}</h6>
+                </div>
+            </div>
+            <hr>
+    `;
+    
+    comparison.verses_comparison.forEach((item, index) => {
+        const isDifferent = item.different;
+        const cardClass = isDifferent ? 'border-warning bg-light' : 'border-secondary';
+        
+        html += `
+            <div class="card mb-3 ${cardClass}">
+                <div class="card-body">
+                    ${isDifferent ? '<div class="badge bg-warning mb-2">تفاوت</div>' : ''}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="verse-container p-2 border-end">
+                                <div class="verse-line">${item.version1.verse_1}</div>
+                                ${item.version1.verse_2 ? `<div class="verse-line">${item.version1.verse_2}</div>` : ''}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="verse-container p-2">
+                                <div class="verse-line">${item.version2.verse_1}</div>
+                                ${item.version2.verse_2 ? `<div class="verse-line">${item.version2.verse_2}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += `</div>`;
+    document.getElementById('comparison-result').innerHTML = html;
+}
+
+// بارگذاری مقایسه اولیه
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('version1') && document.getElementById('version2')) {
+        loadComparison();
+    }
+});
+</script>
+
+<style>
+.verse-text {
+    font-family: 'Nastaliq', serif;
+    font-size: 1.1em;
+    line-height: 1.8;
+    margin: 0;
+}
+
+.verse-line {
+    font-family: 'Nastaliq', serif;
+    font-size: 1.1em;
+    line-height: 1.8;
+    margin-bottom: 0.5em;
+}
+
+.comparison-container .card {
+    transition: all 0.3s ease;
+}
+
+.comparison-container .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.verse-container {
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .border-end {
+        border-end: none !important;
+        border-bottom: 1px solid #dee2e6;
+    }
+}
+</style>
+{% endblock %}

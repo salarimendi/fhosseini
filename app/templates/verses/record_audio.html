@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+
+{% block title %}ضبط صوت - {{ poem.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-microphone me-2"></i>
+                        ضبط صوت برای شعر: {{ poem.title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- نمایش شعر -->
+                    <div class="poem-display mb-4 p-3 bg-light rounded">
+                        <h5 class="text-center mb-3 poem-title">{{ poem.title }}</h5>
+                        <div class="verses-container">
+                            {% for verse in verses %}
+                            <div class="verse-row d-flex justify-content-between mb-2">
+                                <div class="verse-right text-end col-6">{{ verse.verse_1 }}</div>
+                                {% if verse.verse_2 %}
+                                <div class="verse-left text-start col-6">{{ verse.verse_2 }}</div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- کنترل‌های ضبط صوت -->
+                    <div class="recording-controls text-center mb-4">
+                        <div class="recording-status mb-3">
+                            <span id="recordingStatus" class="badge bg-secondary">آماده ضبط</span>
+                            <div id="recordingTimer" class="mt-2 text-muted" style="display: none;">
+                                <span id="timer">00:00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-buttons">
+                            <button id="startRecord" class="btn btn-success btn-lg me-2">
+                                <i class="fas fa-play"></i> شروع ضبط
+                            </button>
+                            <button id="stopRecord" class="btn btn-danger btn-lg me-2" disabled>
+                                <i class="fas fa-stop"></i> توقف ضبط
+                            </button>
+                            <button id="playRecord" class="btn btn-info btn-lg me-2" disabled>
+                                <i class="fas fa-play-circle"></i> پخش
+                            </button>
+                            <button id="resetRecord" class="btn btn-warning btn-lg">
+                                <i class="fas fa-undo"></i> تنظیم مجدد
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- نوار پیشرفت -->
+                    <div class="progress mb-3" style="display: none;" id="progressContainer">
+                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+
+                    <!-- پلیر صوت -->
+                    <div class="audio-player mb-4" style="display: none;" id="audioPlayerContainer">
+                        <audio id="audioPlayer" controls class="w-100">
+                            مرورگر شما از پخش صوت پشتیبانی نمی‌کند.
+                        </audio>
+                    </div>
+
+                    <!-- فرم آپلود -->
+                    <form id="uploadForm" method="POST" enctype="multipart/form-data" style="display: none;">
+                        {{ form.hidden_tag() }}
+                        <div class="text-center">
+                            <div class="mb-3">
+                                <span class="text-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    ضبط با موفقیت انجام شد!
+                                </span>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-upload"></i> بارگذاری ضبط
+                            </button>
+                            <a href="{{ url_for('verses.poem', garden=garden, title_id=poem.id) }}" class="btn btn-secondary btn-lg ms-2">
+                                <i class="fas fa-times"></i> انصراف
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- پیام‌های هشدار -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>راهنما:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>حداکثر مدت ضبط: 10 دقیقه</li>
+                            <li>حداکثر حجم فایل: 5 مگابایت</li>
+                            <li>پس از ضبط، حتماً فایل را پخش کنید تا از کیفیت آن اطمینان حاصل کنید</li>
+                            <li>شما می‌توانید فقط یک ضبط برای هر شعر داشته باشید</li>
+                        </ul>
+                    </div>
+
+                    {% if existing_recording %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>توجه:</strong> شما قبلاً برای این شعر ضبط صوتی بارگذاری کرده‌اید. 
+                        بارگذاری جدید، ضبط قبلی را جایگزین خواهد کرد.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript برای کنترل ضبط صوت -->
+<script>
+class AudioRecorder {
+    constructor() {
+        this.mediaRecorder = null;
+        this.audioChunks = [];
+        this.isRecording = false;
+        this.startTime = null;
+        this.timerInterval = null;
+        this.maxRecordingTime = 600000; // 10 minutes in milliseconds
+        this.maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
+        
+        this.initializeElements();
+        this.bindEvents();
+    }
+    
+    initializeElements() {
+        this.startBtn = document.getElementById('startRecord');
+        this.stopBtn = document.getElementById('stopRecord');
+        this.playBtn = document.getElementById('playRecord');
+        this.resetBtn = document.getElementById('resetRecord');
+        this.status = document.getElementById('recordingStatus');
+        this.timer = document.getElementById('timer');
+        this.timerContainer = document.getElementById('recordingTimer');
+        this.audioPlayer = document.getElementById('audioPlayer');
+        this.audioPlayerContainer = document.getElementById('audioPlayerContainer');
+        this.uploadForm = document.getElementById('uploadForm');
+        this.progressContainer = document.getElementById('progressContainer');
+    }
+    
+    bindEvents() {
+        this.startBtn.addEventListener('click', () => this.startRecording());
+        this.stopBtn.addEventListener('click', () => this.stopRecording());
+        this.playBtn.addEventListener('click', () => this.playRecording());
+        this.resetBtn.addEventListener('click', () => this.resetRecording());
+    }
+    
+    async startRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                } 
+            });
+            
+            this.mediaRecorder = new MediaRecorder(stream, {
+                mimeType: 'audio/webm;codecs=opus'
+            });
+            
+            this.audioChunks = [];
+            this.mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    this.audioChunks.push(event.data);
+                }
+            };
+            
+            this.mediaRecorder.onstop = () => {
+                this.processRecording();
+            };
+            
+            this.mediaRecorder.start();
+            this.isRecording = true;
+            this.startTime = Date.now();
+            
+            this.updateUI('recording');
+            this.startTimer();
+            
+            // توقف خودکار پس از حداکثر زمان
+            setTimeout(() => {
+                if (this.isRecording) {
+                    this.stopRecording();
+                    this.showMessage('ضبط به دلیل رسیدن به حداکثر زمان متوقف شد.', 'warning');
+                }
+            }, this.maxRecordingTime);
+            
+        } catch (error) {
+            console.error('خطا در شروع ضبط:', error);
+            this.showMessage('خطا در دسترسی به میکروفون. لطفاً اجازه دسترسی را بدهید.', 'error');
+        }
+    }
+    
+    stopRecording() {
+        if (this.mediaRecorder && this.isRecording) {
+            this.mediaRecorder.stop();
+            this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            this.isRecording = false;
+            this.stopTimer();
+            this.updateUI('stopped');
+        }
+    }
+    
+    processRecording() {
+        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+        
+        // بررسی حجم فایل
+        if (audioBlob.size > this.maxFileSize) {
+            this.showMessage('حجم فایل ضبط شده بیش از حد مجاز است. لطفاً ضبط کوتاه‌تری انجام دهید.', 'error');
+            this.resetRecording();
+            return;
+        }
+        
+        // تبدیل به URL قابل پخش
+        const audioUrl = URL.createObjectURL(audioBlob);
+        this.audioPlayer.src = audioUrl;
+        
+        // آماده کردن برای آپلود
+        this.prepareForUpload(audioBlob);
+        
+        this.updateUI('recorded');
+    }
+    
+    prepareForUpload(audioBlob) {
+        // ایجاد فایل input مخفی برای آپلود
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.name = 'audio_file';
+        fileInput.style.display = 'none';
+        
+        // تبدیل blob به file
+        const file = new File([audioBlob], `recording_${Date.now()}.webm`, {
+            type: 'audio/webm'
+        });
+        
+        // ایجاد DataTransfer برای اختصاص فایل
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+        
+        // اضافه کردن به فرم
+        this.uploadForm.appendChild(fileInput);
+    }
+    
+    playRecording() {
+        if (this.audioPlayer.src) {
+            this.audioPlayer.play();
+        }
+    }
+    
+    resetRecording() {
+        this.stopRecording();
+        this.audioChunks = [];
+        this.audioPlayer.src = '';
+        
+        // حذف فایل input اضافه شده
+        const fileInput = this.uploadForm.querySelector('input[name="audio_file"]');
+        if (fileInput) {
+            fileInput.remove();
+        }
+        
+        this.updateUI('reset');
+    }
+    
+    startTimer() {
+        this.timerContainer.style.display = 'block';
+        this.timerInterval = setInterval(() => {
+            const elapsed = Date.now() - this.startTime;
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            this.timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }, 1000);
+    }
+    
+    stopTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+    }
+    
+    updateUI(state) {
+        switch (state) {
+            case 'recording':
+                this.startBtn.disabled = true;
+                this.stopBtn.disabled = false;
+                this.playBtn.disabled = true;
+                this.resetBtn.disabled = true;
+                this.status.textContent = 'در حال ضبط...';
+                this.status.className = 'badge bg-danger';
+                this.audioPlayerContainer.style.display = 'none';
+                this.uploadForm.style.display = 'none';
+                break;
+                
+            case 'stopped':
+                this.startBtn.disabled = true;
+                this.stopBtn.disabled = true;
+                this.playBtn.disabled = true;
+                this.resetBtn.disabled = false;
+                this.status.textContent = 'در حال پردازش...';
+                this.status.className = 'badge bg-warning';
+                break;
+                
+            case 'recorded':
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                this.playBtn.disabled = false;
+                this.resetBtn.disabled = false;
+                this.status.textContent = 'ضبط تکمیل شد';
+                this.status.className = 'badge bg-success';
+                this.audioPlayerContainer.style.display = 'block';
+                this.uploadForm.style.display = 'block';
+                break;
+                
+            case 'reset':
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                this.playBtn.disabled = true;
+                this.resetBtn.disabled = false;
+                this.status.textContent = 'آماده ضبط';
+                this.status.className = 'badge bg-secondary';
+                this.timerContainer.style.display = 'none';
+                this.timer.textContent = '00:00';
+                this.audioPlayerContainer.style.display = 'none';
+                this.uploadForm.style.display = 'none';
+                break;
+        }
+    }
+    
+    showMessage(message, type) {
+        // ایجاد المان پیام
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // اضافه کردن به بالای صفحه
+        const container = document.querySelector('.container');
+        container.insertBefore(alertDiv, container.firstChild);
+        
+        // حذف خودکار پس از 5 ثانیه
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+}
+
+// راه‌اندازی ضبط‌کننده صوت
+document.addEventListener('DOMContentLoaded', () => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        new AudioRecorder();
+    } else {
+        document.querySelector('.recording-controls').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                مرورگر شما از ضبط صوت پشتیبانی نمی‌کند.
+            </div>
+        `;
+    }
+});
+</script>
+{% endblock %}

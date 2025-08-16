@@ -1,0 +1,778 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title.title }} - سایت فردوسی حسینی{% endblock %}
+
+{% block head %}
+<style>
+    .poem-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0 40px;
+        margin-top: 56px;
+    }
+    
+    .poem-content {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        margin: -30px 0 30px;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .poem-title {
+        font-family: 'Sahel', Tahoma, sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        padding: 25px;
+        border-bottom: 2px solid #f8f9fa;
+        margin-bottom: 0;
+    }
+    
+    .verses-container {
+        padding: 25px;
+    }
+    
+    .verse-row {
+        margin-bottom: 8px;
+        padding: 8px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        border-right: 3px solid transparent;
+    }
+    
+    .verse-row:hover {
+        background-color: #f8f9fa;
+        border-right-color: #667eea;
+    }
+    
+    .verse-text {
+        font-family: 'Vazir', Tahoma, sans-serif;
+        font-size: 1.3rem;
+        line-height: 1.8;
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 2px;
+    }
+    
+    .verse-1, .verse-2 {
+        padding: 0 8px;
+    }
+    
+    .verse-number {
+        color: #95a5a6;
+        font-size: 0.85rem;
+        text-align: center;
+        margin-top: 3px;
+    }
+    
+    .audio-controls {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 25px;
+        margin: 0 auto 30px;
+        width: 100%;
+    }
+    
+    .audio-player {
+        background: white;
+        border-radius: 10px;
+        padding: 25px 30px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        width: 100%;
+    }
+    
+    .audio-player:last-child {
+        margin-bottom: 0;
+    }
+    
+    audio {
+        width: 100%;
+        min-width: 0;
+    }
+    
+    audio::-webkit-media-controls-panel {
+        background-color: #f8f9fa;
+        min-width: 0;
+    }
+    
+    audio::-webkit-media-controls-current-time-display,
+    audio::-webkit-media-controls-time-remaining-display {
+        color: #495057;
+        font-size: 14px;
+    }
+    
+    audio::-webkit-media-controls-timeline {
+        border-radius: 10px;
+        min-width: 0;
+    }
+    
+    .audio-player small {
+        margin-top: 15px !important;
+        display: block;
+        color: #6c757d;
+    }
+    
+    .comments-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 30px;
+        margin-top: 40px;
+    }
+    
+    .comment-card {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border-right: 4px solid #17a2b8;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .comment-author {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+    
+    .comment-date {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+    }
+    
+    .comment-text {
+        line-height: 1.8;
+        color: #495057;
+    }
+    
+    .comment-form {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin-top: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .toggle-comments {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .toggle-comments:hover {
+        background: linear-gradient(45deg, #764ba2, #667eea);
+        transform: translateY(-2px);
+    }
+    
+    .breadcrumb-custom {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 25px;
+        padding: 12px 20px;
+        margin-bottom: 20px;
+    }
+    
+    .upload-area {
+        border: 2px dashed #ced4da;
+        border-radius: 10px;
+        padding: 30px;
+        text-align: center;
+        margin-top: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-area:hover {
+        border-color: #667eea;
+        background-color: #f8f9fa;
+    }
+    
+    .upload-area.dragover {
+        border-color: #667eea;
+        background-color: #e3f2fd;
+    }
+    
+    @media (max-width: 768px) {
+        .poem-title {
+            font-size: 2rem;
+            padding: 20px;
+        }
+        
+        .verses-container {
+            padding: 20px;
+        }
+        
+        .verse-text {
+            font-size: 1.2rem;
+        }
+        
+        .verse-1, .verse-2 {
+            text-align: center;
+        }
+        
+        .audio-controls {
+            padding: 15px;
+        }
+        
+        .audio-player {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        audio {
+            height: 45px;
+        }
+        
+        .comments-section {
+            padding: 20px;
+        }
+        
+        .comment-card {
+            padding: 20px;
+        }
+        
+        .subtopics-list {
+            grid-template-columns: 1fr;
+        }
+        
+        .research-form-display .section {
+            padding: 15px;
+        }
+    }
+    
+    @media (max-width: 900px) {
+        .audio-controls {
+            padding: 15px;
+        }
+        
+        .audio-player {
+            padding: 15px;
+        }
+    }
+    
+    .modal-backdrop {
+        z-index: 1040;
+    }
+    .modal {
+        z-index: 1045;
+    }
+    
+    /* استایل‌های جدید برای نمایش فرم پژوهشی */
+    .research-form-display {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 25px;
+        margin-top: 15px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .research-form-display .section {
+        margin-bottom: 25px;
+    }
+    
+    .research-form-display .section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .research-form-display .section-title {
+        color: #0d6efd;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+    }
+    
+    .research-form-display .section-content {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        line-height: 1.8;
+        font-size: 1rem;
+    }
+    
+    .subtopics-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 15px;
+    }
+    
+    .subtopic-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        border: 1px solid #e9ecef;
+        border-right: 3px solid #0d6efd;
+    }
+    
+    .subtopic-item .title {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+        font-size: 1.05rem;
+    }
+    
+    .subtopic-item .sources {
+        color: #6c757d;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+    
+    .research-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .research-meta .author {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.1rem;
+        color: #495057;
+    }
+    
+    .research-meta .date {
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Poem Header -->
+<section class="poem-header">
+    <div class="container">
+        <div class="breadcrumb-custom d-inline-block">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('main.home') }}" class="text-white text-decoration-none">
+                            <i class="fas fa-home"></i> صفحه اصلی
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('main.garden', garden_num=title.garden) }}" class="text-white text-decoration-none">
+                            باغ {{ title.garden|persian_number }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">
+                        {{ title.title }}
+                    </li>
+                </ol>
+            </nav>
+        </div>
+        
+        <div class="text-center">
+            <p class="mb-2">
+                <span class="badge bg-light text-dark">باغ {{ title.garden|persian_number }}</span>
+                <span class="badge bg-light text-dark ms-2">{{ title.order_in_garden|persian_number }}ام</span>
+                <span class="badge bg-light text-dark ms-2">{{ verses|length|persian_number }} بیت</span>
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Poem Content -->
+<section class="pb-5">
+    <div class="container">
+        <div class="poem-content">
+            <!-- Poem Title -->
+            <h1 class="poem-title">{{ title.title }}</h1>
+            
+            <!-- Copy Button and Navigation Buttons -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+                <div class="order-2 order-md-1 mt-2 mt-md-0">
+                    {% if prev_title %}
+                        <a href="{{ url_for('main.title', title_id=prev_title.id) }}" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-arrow-right ms-1"></i> شعر قبلی
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary ms-2" disabled><i class="fas fa-arrow-right ms-1"></i> شعر قبلی</button>
+                    {% endif %}
+                </div>
+                <div class="order-1 order-md-2 flex-grow-1 text-center">
+                <button id="copyPoemBtn" class="btn btn-outline-primary">
+                    <i class="fas fa-copy ms-1"></i>
+                    کپی شعر
+                </button>
+                {% if current_user.is_authenticated and current_user.role == 'researcher' %}
+                <button type="button" class="btn btn-outline-info ms-2" onclick="window.location.href='{{ url_for('verses.get_research_form', title_id=title.id) }}'">
+                    <i class="fas fa-search-plus ms-1"></i>
+                    تکمیل فرم پژوهشی
+                </button>
+                {% endif %}
+                </div>
+                <div class="order-3 mt-2 mt-md-0">
+                    {% if next_title %}
+                        <a href="{{ url_for('main.title', title_id=next_title.id) }}" class="btn btn-outline-secondary">
+                            شعر بعدی <i class="fas fa-arrow-left me-1"></i>
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary" disabled>شعر بعدی <i class="fas fa-arrow-left me-1"></i></button>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Verses -->
+            <div class="verses-container" id="poemContent">
+                {% for verse in verses %}
+                <div class="verse-row">
+                    <div class="row">
+                        {% if verse.verse_2 %}
+                        <div class="col-md-6">
+                            <div class="verse-text verse-1">{{ verse.verse_1 }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="verse-text verse-2">{{ verse.verse_2 }}</div>
+                        </div>
+                        {% else %}
+                        <div class="col-12">
+                            <div class="verse-text">{{ verse.verse_1 }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="verse-number">بیت {{ loop.index|persian_number }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Navigation Buttons at Bottom -->
+            <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+                <div>
+                    {% if prev_title %}
+                        <a href="{{ url_for('main.title', title_id=prev_title.id) }}" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-arrow-right ms-1"></i> شعر قبلی
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary ms-2" disabled><i class="fas fa-arrow-right ms-1"></i> شعر قبلی</button>
+                    {% endif %}
+                </div>
+                <div>
+                    {% if next_title %}
+                        <a href="{{ url_for('main.title', title_id=next_title.id) }}" class="btn btn-outline-secondary">
+                            شعر بعدی <i class="fas fa-arrow-left me-1"></i>
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary" disabled>شعر بعدی <i class="fas fa-arrow-left me-1"></i></button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Audio Controls -->
+            {% if recordings %}
+            <div class="audio-controls">
+                <h5 class="mb-3">
+                    <i class="fas fa-volume-up me-2"></i>
+                    قرائت صوتی
+                </h5>
+                
+                {% for recording in recordings %}
+                    {% if recording.is_approved or (current_user.is_authenticated and current_user.is_admin()) %}
+                <div class="audio-player">
+                    <h6>
+                        <i class="fas fa-microphone me-2"></i>
+                        قرائت {{ recording.reader_name }}
+                            {% if not recording.is_approved and current_user.is_authenticated and current_user.is_admin() %}
+                            <span class="badge bg-warning">در انتظار تأیید</span>
+                            {% endif %}
+                    </h6>
+                    <audio controls class="w-100">
+                            <source src="{{ url_for('verses.play_audio', recording_id=recording.id) }}" type="audio/mpeg">
+                        مرورگر شما از پخش صوت پشتیبانی نمی‌کند.
+                    </audio>
+                    <small class="text-muted d-block mt-2">
+                        ضبط شده در {{ recording.created_at.strftime('%Y/%m/%d') }}
+                    </small>
+                </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <!-- Upload Audio (for readers) -->
+            {% if current_user.is_authenticated and current_user.role in ['reader', 'admin'] %}
+            <div class="audio-controls">
+                <h5 class="mb-3">
+                    <i class="fas fa-upload me-2"></i>
+                    بارگذاری قرائت صوتی
+                </h5>
+                
+                {% if user_has_recording %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    شما قبلاً برای این شعر قرائت صوتی بارگذاری کرده‌اید.
+                    {% if not user_recording_approved %}
+                    <br>
+                    <small class="text-muted">وضعیت: در انتظار تأیید مدیر</small>
+                    {% endif %}
+                </div>
+                {% else %}
+                <form id="audioUploadForm" enctype="multipart/form-data">
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                        <h6>فایل صوتی را اینجا بکشید یا کلیک کنید</h6>
+                        <p class="text-muted small">حداکثر حجم: {{ config.UPLOAD_MAX_SIZE_MB }} مگابایت | فرمت‌های مجاز: MP3, WAV</p>
+                        <input type="file" id="audioFile" name="audio_file" accept="audio/*" style="display: none;">
+                        <button type="button" class="btn btn-outline-primary mt-2" onclick="document.getElementById('audioFile').click()">
+                            انتخاب فایل
+                        </button>
+                    </div>
+                    <div id="uploadProgress" style="display: none;" class="mt-3">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="submit" class="btn btn-success" id="uploadBtn" style="display: none;">
+                            <i class="fas fa-upload me-2"></i>
+                            بارگذاری
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Comments Section -->
+        <div class="comments-section container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-10">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>
+                            <i class="fas fa-comments me-2"></i>
+                            نظرات پژوهشی
+                            <span class="badge bg-secondary">{{ comments|length|persian_number }}</span>
+                        </h4>
+                    </div>
+                    
+                    <div id="commentsContainer">
+                        {% if comments %}
+                            {% for comment in comments %}
+                            <div class="comment-card">
+                                <div class="research-meta">
+                                    <div class="author">
+                                        <i class="fas fa-user-graduate"></i>
+                                        <span>{{ comment.author.fullname }}</span>
+                                    </div>
+                                    <div class="date">
+                                        {{ comment.created_at.strftime('%Y/%m/%d - %H:%M') }}
+                                    </div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="{{ url_for('verses.view_research_comment', comment_id=comment.id) }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-eye ms-1"></i>
+                                        مشاهده نظر پژوهشی
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-comment-slash fa-2x mb-3"></i>
+                                <p>هنوز نظری ثبت نشده است</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let commentsVisible = true;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const audioFile = document.getElementById('audioFile');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadForm = document.getElementById('audioUploadForm');
+    const uploadProgress = document.getElementById('uploadProgress');
+    
+    if (uploadArea && audioFile) {
+        // Drag and drop
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                audioFile.files = files;
+                handleFileSelect(files[0]);
+            }
+        });
+        
+        // File input change
+        audioFile.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                handleFileSelect(this.files[0]);
+            }
+        });
+        
+        // Form submission
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                uploadAudioFile();
+            });
+        }
+    }
+});
+
+function handleFileSelect(file) {
+    const maxSize = parseInt("{{ config.UPLOAD_MAX_SIZE_MB }}") * 1024 * 1024; // از تنظیمات فلسک
+    const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/mp3'];
+    
+    if (file.size > maxSize) {
+        alert(`حجم فایل نباید بیش از {{ config.UPLOAD_MAX_SIZE_MB }} مگابایت باشد`);
+        return;
+    }
+    
+    if (!allowedTypes.includes(file.type)) {
+        alert('فقط فایل‌های صوتی MP3 و WAV مجاز است');
+        return;
+    }
+    
+    document.getElementById('uploadBtn').style.display = 'inline-block';
+    document.getElementById('uploadArea').querySelector('h6').textContent = `فایل انتخاب شده: ${file.name}`;
+}
+
+function uploadAudioFile() {
+    const formData = new FormData();
+    const fileInput = document.getElementById('audioFile');
+    const titleId = '{{ title.id }}';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    if (!fileInput.files[0]) {
+        alert('لطفاً ابتدا فایل صوتی را انتخاب کنید');
+        return;
+    }
+    
+    formData.append('audio_file', fileInput.files[0]);
+    formData.append('title_id', titleId);
+    
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressBar = uploadProgress.querySelector('.progress-bar');
+    
+    uploadProgress.style.display = 'block';
+    
+    fetch('{{ url_for("verses.record_audio", title_id=title.id) }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        body: formData,
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (response.headers.get('content-type')?.includes('application/json')) {
+            return response.json().then(data => {
+                if (!response.ok) {
+                    throw new Error(data.message || 'خطا در بارگذاری فایل');
+                }
+                return data;
+            });
+        } else {
+            throw new Error('خطای سرور: لطفاً دوباره تلاش کنید');
+        }
+    })
+    .then(data => {
+        if (data.success) {
+            alert('فایل صوتی با موفقیت بارگذاری شد');
+            location.reload();
+        } else {
+            alert('خطا در بارگذاری: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert(error.message || 'خطا در بارگذاری فایل');
+    })
+    .finally(() => {
+        uploadProgress.style.display = 'none';
+    });
+}
+
+// Copy poem functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const copyPoemBtn = document.getElementById('copyPoemBtn');
+    
+    if (copyPoemBtn) {
+        copyPoemBtn.addEventListener('click', function() {
+            // دریافت عنوان شعر
+            const poemTitle = document.querySelector('.poem-title').innerText;
+            
+            // دریافت تمام ابیات
+            const verses = document.querySelectorAll('.verse-row');
+            
+            // ایجاد متن فرمت‌شده برای کپی
+            let formattedText = poemTitle + '\n\n';
+            
+            verses.forEach((verse, index) => {
+                const lines = verse.querySelectorAll('.verse-text');
+                lines.forEach(line => {
+                    formattedText += line.innerText + '\n';
+                });
+                // اضافه کردن خط خالی بین ابیات (به جز آخرین بیت)
+                if (index < verses.length - 1) {
+                    formattedText += '\n';
+                }
+            });
+            
+            // کپی متن به کلیپ‌بورد
+            navigator.clipboard.writeText(formattedText).then(() => {
+                // تغییر موقت متن دکمه برای نمایش موفقیت
+                const originalText = copyPoemBtn.innerHTML;
+                copyPoemBtn.innerHTML = '<i class="fas fa-check ms-1"></i> کپی شد';
+                copyPoemBtn.classList.remove('btn-outline-primary');
+                copyPoemBtn.classList.add('btn-success');
+                
+                // برگرداندن دکمه به حالت اولیه بعد از 2 ثانیه
+                setTimeout(() => {
+                    copyPoemBtn.innerHTML = originalText;
+                    copyPoemBtn.classList.remove('btn-success');
+                    copyPoemBtn.classList.add('btn-outline-primary');
+                }, 2000);
+            }).catch(err => {
+                console.error('خطا در کپی متن:', err);
+                // نمایش پیام خطا
+                copyPoemBtn.innerHTML = '<i class="fas fa-times ms-1"></i> خطا در کپی';
+                copyPoemBtn.classList.remove('btn-outline-primary');
+                copyPoemBtn.classList.add('btn-danger');
+                
+                setTimeout(() => {
+                    copyPoemBtn.innerHTML = originalText;
+                    copyPoemBtn.classList.remove('btn-danger');
+                    copyPoemBtn.classList.add('btn-outline-primary');
+                }, 2000);
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

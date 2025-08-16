@@ -1,0 +1,183 @@
+{% extends "research/base_form.html" %}
+
+{% block form_title %}
+    مشاهده نظر پژوهشی برای شعر: {{ poem_title }}
+    <small class="text-muted">(نظر {{ comment.author_name if comment else username }})</small>
+{% endblock %}
+
+{% block form_scripts %}
+<script>
+var commentId = {{ comment_id_js }};
+var researchImageUrlPrefix = "{{ research_image_url_prefix }}";
+
+document.addEventListener('DOMContentLoaded', function() {
+    const cancelButton = document.getElementById('cancelButton');
+    const returnUrl = "{{ return_url if return_url else url_for('main.title', title_id=title_id) }}";
+
+    // Auto-resize function for textareas in view mode
+    function autoResizeTextarea(element) {
+        element.style.height = 'auto';
+        element.style.height = (element.scrollHeight) + 'px';
+    }
+    
+    // Apply auto-resize to all textareas in view mode
+    document.querySelectorAll('textarea.auto-resize').forEach(textarea => {
+        autoResizeTextarea(textarea);
+    });
+
+    // Load and display images for each subtopic
+    function loadSubtopicImages() {
+        if (commentId !== null && commentId !== undefined) {
+            console.log('Loading images for comment ID:', commentId);
+            
+            const subtopicRows = document.querySelectorAll('.subtopic-row');
+            console.log('Found subtopic rows:', subtopicRows.length);
+            
+            subtopicRows.forEach((row, i) => {
+                const block = row.querySelector('.research-images-block');
+                if (!block) {
+                    console.warn(`No research-images-block found in row ${i}`);
+                    return;
+                }
+                
+                const subtopicIndex = block.getAttribute('data-subtopic-index');
+                console.log(`Loading images for subtopic ${subtopicIndex}`);
+                
+                fetch(`/verses/get_research_images/${commentId}/${subtopicIndex}`)
+                    .then(res => {
+                        console.log(`Response status for subtopic ${subtopicIndex}:`, res.status);
+                        console.log(`Response headers:`, res.headers);
+                        
+                        // بررسی اینکه آیا response JSON است یا HTML
+                        const contentType = res.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            console.warn(`Expected JSON but got: ${contentType}`);
+                            // اگر HTML برگشت داده شده، احتمالاً صفحه error است
+                            return res.text().then(text => {
+                                console.log('Response body:', text);
+                                throw new Error(`Expected JSON response but got: ${contentType}`);
+                            });
+                        }
+                        
+                        if (!res.ok) {
+                            throw new Error(`HTTP error! status: ${res.status}`);
+                        }
+                        return res.json();
+                    })
+                    .then(res => {
+                        console.log(`Response status for subtopic ${subtopicIndex}:`, res.status);
+                        if (!res.ok) {
+                            throw new Error(`HTTP error! status: ${res.status}`);
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        console.log(`Data received for subtopic ${subtopicIndex}:`, data);
+                        
+                        if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+                            const listDiv = block.querySelector('.research-images-list');
+                            if (!listDiv) {
+                                console.warn(`No research-images-list found in subtopic ${subtopicIndex}`);
+                                return;
+                            }
+                            
+                            // Clear existing content
+                            listDiv.innerHTML = '';
+                            
+                            data.images.forEach((img, imgIndex) => {
+                                console.log(`Creating image element for ${img.filename}`);
+                                
+                                const imgDiv = document.createElement('div');
+                                imgDiv.className = 'd-inline-block m-2 text-center';
+                                imgDiv.style.maxWidth = '200px';
+                                
+                                const imageUrl = researchImageUrlPrefix + img.filename;
+                                console.log('Image URL:', imageUrl);
+                                
+                                imgDiv.innerHTML = `
+                                    <div class="card shadow-sm">
+                                        <img src="${imageUrl}" 
+                                             class="card-img-top"
+                                             style="max-width:180px;max-height:180px;object-fit:cover;border-radius:4px;"
+                                             alt="تصویر پژوهشی ${imgIndex + 1}"
+                                             onerror="console.error('Failed to load image: ${imageUrl}'); this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                        <div style="display:none;padding:20px;background:#f8f9fa;border-radius:4px;color:#6c757d;">
+                                            <i class="fas fa-image"></i><br>
+                                            تصویر قابل نمایش نیست
+                                        </div>
+                                        ${img.caption ? `<div class="card-body p-2"><small class="text-muted">${img.caption}</small></div>` : ''}
+                                    </div>
+                                `;
+                                listDiv.appendChild(imgDiv);
+                            });
+                            
+                            console.log(`Successfully loaded ${data.images.length} images for subtopic ${subtopicIndex}`);
+                        } else {
+                            console.log(`No images found for subtopic ${subtopicIndex}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error(`Error loading images for subtopic ${subtopicIndex}:`, error);
+                        
+                        // Show error message in the images list
+                        const listDiv = block.querySelector('.research-images-list');
+                        if (listDiv) {
+                            listDiv.innerHTML = `
+                                <div class="alert alert-warning small" role="alert">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    خطا در بارگذاری تصاویر این زیرموضوع
+                                </div>
+                            `;
+                        }
+                    });
+            });
+        } else {
+            console.warn('No comment ID available for loading images');
+        }
+    }
+
+    // Load images with a small delay to ensure DOM is fully ready
+    setTimeout(loadSubtopicImages, 100);
+    
+    // Also try loading images when base form manager is ready
+    if (window.baseFormManager) {
+        setTimeout(loadSubtopicImages, 500);
+    } else {
+        // Listen for when base form manager is initialized
+        document.addEventListener('baseFormManagerReady', function() {
+            setTimeout(loadSubtopicImages, 200);
+        });
+    }
+    
+    // Debug function to check current state
+    window.debugImageLoading = function() {
+        console.log('=== DEBUG INFO ===');
+        console.log('Comment ID:', commentId);
+        console.log('Research Image URL Prefix:', researchImageUrlPrefix);
+        console.log('View Mode:', viewMode);
+        console.log('Subtopic rows found:', document.querySelectorAll('.subtopic-row').length);
+        
+        document.querySelectorAll('.subtopic-row').forEach((row, i) => {
+            const block = row.querySelector('.research-images-block');
+            const subtopicIndex = block ? block.getAttribute('data-subtopic-index') : 'N/A';
+            console.log(`Row ${i}: subtopic index = ${subtopicIndex}`);
+        });
+        console.log('==================');
+    };
+    
+    // Auto-run debug in development
+    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+        setTimeout(window.debugImageLoading, 1000);
+    }
+
+    // Cancel button functionality
+    if (cancelButton) {
+        cancelButton.addEventListener('click', function() {
+            window.location.href = returnUrl;
+        });
+    } else {
+        console.warn('Cancel button not found');
+    }
+});
+</script>
+{% endblock %}

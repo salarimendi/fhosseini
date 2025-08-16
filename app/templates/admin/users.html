@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت کاربران - سایت فردوسی حسینی{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="row">
+        <!-- منوی کناری -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="sidebar-content">
+                <h5 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    پنل مدیریت
+                </h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                            داشبورد
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin.users') }}">
+                            مدیریت کاربران
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.comments') }}">
+                            مدیریت نظرات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.recordings') }}">
+                            مدیریت ضبط‌ها
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- محتوای اصلی -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">مدیریت کاربران</h1>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="alert alert-info">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- جستجو و فیلتر -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <form method="GET" class="d-flex">
+                        <input class="form-control me-2" type="search" name="search" placeholder="جستجو در نام کاربری یا ایمیل..." value="{{ request.args.get('search', '') }}" dir="rtl">
+                        <button class="btn btn-outline-primary" type="submit">جستجو</button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <form method="GET" class="d-flex">
+                        <select name="role" class="form-select me-2" dir="rtl">
+                            <option value="">همه نقش‌ها</option>
+                            <option value="user" {% if request.args.get('role') == 'user' %}selected{% endif %}>کاربر عادی</option>
+                            <option value="researcher" {% if request.args.get('role') == 'researcher' %}selected{% endif %}>محقق</option>
+                            <option value="reader" {% if request.args.get('role') == 'reader' %}selected{% endif %}>خواننده</option>
+                            <option value="admin" {% if request.args.get('role') == 'admin' %}selected{% endif %}>مدیر</option>
+                        </select>
+                        <button class="btn btn-outline-secondary" type="submit">فیلتر</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- جدول کاربران -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>شناسه</th>
+                                    <th>نام کاربری</th>
+                                    <th>نام کامل</th>
+                                    <th>ایمیل</th>
+                                    <th>نقش</th>
+                                    <th>تاریخ ثبت نام</th>
+                                    <th>وضعیت</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users.items %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.fullname }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'danger' if user.role == 'admin' else 'primary' if user.role == 'researcher' else 'success' if user.role == 'reader' else 'secondary' }}">
+                                            {% if user.role == 'admin' %}مدیر
+                                            {% elif user.role == 'researcher' %}محقق
+                                            {% elif user.role == 'reader' %}خواننده
+                                            {% else %}کاربر عادی{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>{{ user.created_at.strftime('%Y/%m/%d') if user.created_at else 'نامشخص' }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if user.is_active else 'danger' }}">
+                                            {{ 'فعال' if user.is_active else 'غیرفعال' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if user.id != current_user.id %}
+                                        <div class="btn-group">
+                                            <!-- دکمه فعال/غیرفعال -->
+                                            <form action="{{ url_for('admin.toggle_user_status', user_id=user.id) }}" method="POST" class="me-1">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" 
+                                                    class="btn btn-sm btn-{{ 'danger' if user.is_active else 'success' }}"
+                                                    data-action="{{ 'غیرفعال' if user.is_active else 'فعال' }}"
+                                                    onclick="return confirmToggleStatus(this)">
+                                                    {{ 'غیرفعال کردن' if user.is_active else 'فعال کردن' }}
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- دکمه تغییر نقش -->
+                                            <a href="{{ url_for('admin.change_user_role', user_id=user.id) }}" class="btn btn-sm btn-primary">
+                                                تغییر نقش
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if not users.items %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">هیچ کاربری یافت نشد.</p>
+                        {% if request.args.get('search') or request.args.get('role') %}
+                        <a href="{{ url_for('admin.users') }}" class="btn btn-outline-primary">مشاهده همه کاربران</a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- صفحه‌بندی -->
+            {% if users.pages > 1 %}
+            <nav aria-label="صفحه‌بندی کاربران" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <!-- دکمه صفحه قبل -->
+                    {% if users.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.users', page=users.prev_num, search=request.args.get('search', ''), role=request.args.get('role', '')) }}">
+                            <i class="fas fa-chevron-right"></i>
+                            قبلی
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            <i class="fas fa-chevron-right"></i>
+                            قبلی
+                        </span>
+                    </li>
+                    {% endif %}
+
+                    <!-- شماره صفحات -->
+                    {% for page_num in users.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+                        {% if page_num %}
+                            {% if page_num != users.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.users', page=page_num, search=request.args.get('search', ''), role=request.args.get('role', '')) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- دکمه صفحه بعد -->
+                    {% if users.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.users', page=users.next_num, search=request.args.get('search', ''), role=request.args.get('role', '')) }}">
+                            بعدی
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            بعدی
+                            <i class="fas fa-chevron-left"></i>
+                        </span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <!-- اطلاعات صفحه‌بندی -->
+            <div class="text-center text-muted mt-3">
+                <small>
+                    نمایش {{ users.items|length }} کاربر از {{ users.total }} کاربر
+                    {% if users.pages > 1 %}
+                    (صفحه {{ users.page }} از {{ users.pages }})
+                    {% endif %}
+                </small>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+{% endblock %}

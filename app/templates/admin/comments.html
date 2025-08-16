@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت نظرات - سایت فردوسی حسینی{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="row">
+        <!-- منوی کناری -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="sidebar-content">
+                <h5 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    پنل مدیریت
+                </h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                            داشبورد
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.users') }}">
+                            مدیریت کاربران
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin.comments') }}">
+                            مدیریت نظرات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.recordings') }}">
+                            مدیریت ضبط‌ها
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- محتوای اصلی -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">مدیریت نظرات</h1>
+                <div class="text-muted">
+                    <small>تعداد کل نظرات: {{ comments.total }}</small>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="alert alert-info">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- جستجو و فیلتر -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <form method="GET" class="d-flex">
+                        <input class="form-control me-2" type="search" name="search" placeholder="جستجو در نظرات..." value="{{ request.args.get('search', '') }}" dir="rtl">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="fas fa-search me-1"></i>
+                            جستجو
+                        </button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <form method="GET" class="d-flex">
+                        <select name="status" class="form-select me-2" dir="rtl">
+                            <option value="">همه نظرات</option>
+                            <option value="approved" {% if request.args.get('status') == 'approved' %}selected{% endif %}>تأیید شده</option>
+                            <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>در انتظار تأیید</option>
+                            <option value="rejected" {% if request.args.get('status') == 'rejected' %}selected{% endif %}>رد شده</option>
+                        </select>
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="fas fa-filter me-1"></i>
+                            فیلتر
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- نمایش فیلترهای فعال -->
+            {% if request.args.get('search') or request.args.get('status') %}
+            <div class="alert alert-info mb-3">
+                <strong>فیلترهای فعال:</strong>
+                {% if request.args.get('search') %}
+                    <span class="badge bg-primary me-2">جستجو: {{ request.args.get('search') }}</span>
+                {% endif %}
+                {% if request.args.get('status') %}
+                    <span class="badge bg-info me-2">وضعیت: {{ request.args.get('status') }}</span>
+                {% endif %}
+                <a href="{{ url_for('admin.comments') }}" class="btn btn-sm btn-outline-secondary">پاک کردن فیلترها</a>
+            </div>
+            {% endif %}
+
+            <!-- لیست نظرات -->
+            {% for comment in comments.items %}
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ comment.author_name }}</strong>
+                        <span class="text-muted">- {{ comment.created_at.strftime('%Y/%m/%d %H:%M') }}</span>
+                    </div>
+                    <div>
+                        <span class="badge bg-{{ 'success' if comment.status == 'approved' else 'warning' if comment.status == 'pending' else 'danger' }}">
+                            {% if comment.status == 'approved' %}تأیید شده
+                            {% elif comment.status == 'pending' %}در انتظار تأیید
+                            {% else %}رد شده{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="card-title">
+                                {% if comment.poem_title %}
+                                    نظر روی شعر: {{ comment.poem_title.title }} (شناسه: {{ comment.poem_title.id }})
+                                {% else %}
+                                    نظر عمومی
+                                {% endif %}
+                            </h6>
+                            <p class="card-text" dir="rtl">{{ comment.comment }}</p>
+                            
+                            {% if comment.research_note %}
+                            <div class="alert alert-info">
+                                <strong>یادداشت پژوهشی:</strong>
+                                <p class="mb-0" dir="rtl">{{ comment.research_note }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="text-muted mb-2">
+                                <i class="fas fa-user me-2"></i>
+                                <strong>{{ comment.author_name }}</strong>
+                            </div>
+                            <div class="text-muted mb-2">
+                                <i class="fas fa-calendar me-2"></i>
+                                {{ comment.created_at.strftime('%Y/%m/%d - %H:%M') }}
+                            </div>
+                            {% if comment.poem_title %}
+                            <div class="text-muted mb-2">
+                                <i class="fas fa-book me-2"></i>
+                                <strong>شعر:</strong> {{ comment.poem_title.title }}
+                            </div>
+                            <div class="text-muted mb-2">
+                                <i class="fas fa-hashtag me-2"></i>
+                                <strong>شناسه شعر:</strong> {{ comment.poem_title.id }}
+                            </div>
+                            {% endif %}
+                            <div class="text-muted mb-2">
+                                <i class="fas fa-check-circle me-2"></i>
+                                وضعیت: 
+                                {% if comment.status == 'approved' %}
+                                <span class="badge bg-success">تأیید شده</span>
+                                {% elif comment.status == 'pending' %}
+                                <span class="badge bg-warning">در انتظار تأیید</span>
+                                {% else %}
+                                <span class="badge bg-danger">رد شده</span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- دکمه‌های مدیریت نظر -->
+                            <div class="btn-group-vertical w-100 mt-3">
+                                {% if comment.status == 'pending' %}
+                                <button class="btn btn-success btn-sm mb-2" onclick="approveComment({{ comment.id }})">
+                                    <i class="fas fa-check me-1"></i>
+                                    تأیید نظر
+                                </button>
+                                <button class="btn btn-danger btn-sm mb-2" onclick="rejectComment({{ comment.id }})">
+                                    <i class="fas fa-times me-1"></i>
+                                    رد نظر
+                                </button>
+                                {% elif comment.status == 'approved' %}
+                                <button class="btn btn-warning btn-sm mb-2" onclick="rejectComment({{ comment.id }})">
+                                    <i class="fas fa-ban me-1"></i>
+                                    لغو تأیید
+                                </button>
+                                {% else %}
+                                <button class="btn btn-success btn-sm mb-2" onclick="approveComment({{ comment.id }})">
+                                    <i class="fas fa-check me-1"></i>
+                                    تأیید مجدد
+                                </button>
+                                {% endif %}
+                                
+                                <a href="{{ url_for('admin.edit_comment_research', comment_id=comment.id) }}" class="btn btn-outline-primary btn-sm mb-2">
+                                    <i class="fas fa-edit me-1"></i>
+                                    ویرایش نظر پژوهشی
+                                </a>
+                                
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteComment({{ comment.id }})">
+                                    <i class="fas fa-trash me-1"></i>
+                                    حذف
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- فرم ویرایش نظر (به صورت مخفی) -->
+                <div id="editForm{{ comment.id }}" class="card-footer bg-light" style="display: none;">
+                    <form onsubmit="return handleEditSubmit(event, {{ comment.id }})">
+                        <div class="mb-3">
+                            <label class="form-label">متن نظر:</label>
+                            <textarea class="form-control" id="editCommentText{{ comment.id }}" rows="4" dir="rtl" required>{{ comment.comment }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">یادداشت پژوهشی:</label>
+                            <textarea class="form-control" id="editResearchNote{{ comment.id }}" rows="3" dir="rtl">{{ comment.research_note or '' }}</textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" onclick="toggleEditForm({{ comment.id }})">انصراف</button>
+                            <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if not comments.items %}
+            <div class="text-center py-5">
+                <p class="text-muted">هیچ نظری یافت نشد.</p>
+                {% if request.args.get('search') or request.args.get('status') %}
+                <a href="{{ url_for('admin.comments') }}" class="btn btn-outline-primary">مشاهده همه نظرات</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- صفحه‌بندی -->
+            {% if comments.pages > 1 %}
+            <nav aria-label="صفحه‌بندی نظرات" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <!-- دکمه صفحه قبل -->
+                    {% if comments.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.comments', page=comments.prev_num, search=request.args.get('search', ''), status=request.args.get('status', '')) }}">
+                            <i class="fas fa-chevron-right"></i>
+                            قبلی
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            <i class="fas fa-chevron-right"></i>
+                            قبلی
+                        </span>
+                    </li>
+                    {% endif %}
+
+                    <!-- شماره صفحات -->
+                    {% for page_num in comments.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+                        {% if page_num %}
+                            {% if page_num != comments.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.comments', page=page_num, search=request.args.get('search', ''), status=request.args.get('status', '')) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- دکمه صفحه بعد -->
+                    {% if comments.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.comments', page=comments.next_num, search=request.args.get('search', ''), status=request.args.get('status', '')) }}">
+                            بعدی
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            بعدی
+                            <i class="fas fa-chevron-left"></i>
+                        </span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <!-- اطلاعات صفحه‌بندی -->
+            <div class="text-center text-muted mt-3">
+                <small>
+                    نمایش {{ comments.items|length }} نظر از {{ comments.total }} نظر
+                    {% if comments.pages > 1 %}
+                    (صفحه {{ comments.page }} از {{ comments.pages }})
+                    {% endif %}
+                </small>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<script>
+function approveComment(commentId) {
+    if (confirm('آیا از تأیید این نظر اطمینان دارید؟')) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        fetch(`/admin/comments/${commentId}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`خطا در تأیید نظر (کد ${response.status})`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'خطا در تأیید نظر');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message || 'خطا در تأیید نظر');
+        });
+    }
+}
+
+function rejectComment(commentId) {
+    if (confirm('آیا از رد این نظر اطمینان دارید؟')) {
+        fetch(`/admin/comments/${commentId}/reject`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'خطا در رد نظر');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('خطا در رد نظر');
+        });
+    }
+}
+
+function deleteComment(commentId) {
+    if (confirm('آیا از حذف این نظر اطمینان دارید؟ این عمل قابل بازگشت نیست.')) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        fetch(`/admin/comments/delete/${commentId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`خطا در حذف نظر (کد ${response.status})`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'خطا در حذف نظر');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message || 'خطا در حذف نظر');
+        });
+    }
+}
+
+function toggleEditForm(commentId) {
+    const editForm = document.getElementById(`editForm${commentId}`);
+    if (editForm.style.display === 'none') {
+        editForm.style.display = 'block';
+    } else {
+        editForm.style.display = 'none';
+    }
+}
+
+function handleEditSubmit(event, commentId) {
+    event.preventDefault();
+    
+    const commentText = document.getElementById(`editCommentText${commentId}`).value;
+    const researchNote = document.getElementById(`editResearchNote${commentId}`).value;
+    
+    if (!commentText.trim()) {
+        alert('متن نظر نمی‌تواند خالی باشد');
+        return false;
+    }
+
+    const formData = new FormData();
+    formData.append('comment', commentText);
+    formData.append('research_note', researchNote);
+
+    fetch(`/admin/comments/${commentId}/edit`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`خطا در ویرایش نظر (کد ${response.status})`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'خطا در ویرایش نظر');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert(error.message || 'خطا در ویرایش نظر');
+    });
+
+    return false;
+}
+</script>
+{% endblock %} 

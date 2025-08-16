@@ -1,0 +1,1129 @@
+/* استایل‌های اصلی سایت فردوسی حسینی */
+
+
+/* تنظیمات کلی */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+/* تعریف فونت وزیر */
+@font-face {
+    font-family: 'Vazir';
+    src: url('../fonts/Vazir.woff2') format('woff2'),
+         url('../fonts/Vazir.woff') format('woff');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Vazir';
+    src: url('../fonts/Vazir-Bold.woff2') format('woff2'),
+         url('../fonts/Vazir-Bold.woff') format('woff');
+    font-weight: bold;
+}
+
+/* تعریف فونت ساحل */
+@font-face {
+    font-family: 'Sahel';
+    src: url('../fonts/Sahel.woff') format('woff');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Sahel';
+    src: url('../fonts/Sahel-Bold.woff') format('woff');
+        
+    font-weight: bold;
+}
+
+
+body {
+    font-family: 'Vazir', 'Tahoma', sans-serif;
+    direction: rtl;
+    text-align: right;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    line-height: 1.8;
+}
+
+/* عناوین */
+h1, h2, h3, h4, h5, h6,
+.site-title,
+.garden-title,
+.poem-title,
+.navbar-brand,
+.section-title {
+    font-family: 'Sahel', Tahoma, sans-serif;
+    font-weight: bold;
+}
+
+
+
+/* متن اشعار و محتوا */
+.verse,
+.verse-line,
+.poem-content,
+.card-text,
+.comment-text {
+    font-family: 'Vazir', Tahoma, sans-serif;
+    line-height: 2;
+}
+
+/* فرم‌ها و دکمه‌ها */
+input,
+textarea,
+button,
+.btn,
+.form-control {
+    font-family: 'Vazir', Tahoma, sans-serif;
+}
+
+/* هدر */
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.site-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.site-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* کنتینر اصلی */
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* کارت‌ها */
+.card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    padding: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+}
+
+/* عکس شاعر */
+.poet-image {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.poet-image img {
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border: 5px solid #667eea;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.poet-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-top: 1rem;
+}
+
+/* باغ‌ها */
+.gardens-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.garden-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+}
+
+.garden-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.garden-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.garden-count {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+/* جستجو */
+.search-container {
+    margin: 2rem 0;
+}
+
+.search-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    padding: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    direction: rtl;
+    text-align: right;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+}
+
+.search-btn {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-family: inherit;
+    transition: transform 0.3s ease;
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* نتایج جستجو */
+.search-results {
+    margin-top: 2rem;
+}
+
+.search-result-item {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-right: 4px solid #667eea;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-result-item:hover {
+    background-color: #f8f9ff;
+}
+
+.result-title {
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.result-match {
+    color: #666;
+    font-style: italic;
+}
+
+.result-garden {
+    color: #667eea;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* لیست تیترها */
+.titles-list {
+    list-style: none;
+    padding: 0;
+}
+
+.title-item {
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.title-item:hover {
+    transform: translateY(-3px);
+}
+
+.title-link {
+    display: block;
+    padding: 1.5rem;
+    color: #333;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.title-link:hover {
+    background-color: #f8f9ff;
+    color: #667eea;
+    text-decoration: none;
+}
+
+/* صفحه شعر */
+.poem-container {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.poem-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    color: #333;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 1rem;
+}
+
+.verses-container {
+    margin: 2rem 0;
+}
+
+.verse {
+    background: #f8f9ff;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-right: 4px solid #667eea;
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.verse.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.verse-line {
+    font-size: 1.3rem;
+    line-height: 2;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.verse-line:last-child {
+    margin-bottom: 0;
+}
+
+/* انیمیشن ورود ابیات */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* پخش صوت */
+.audio-player {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.audio-title {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.audio-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.audio-select {
+    padding: 0.8rem;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    direction: rtl;
+    background: white;
+    color: #333;
+}
+
+.play-btn {
+    padding: 1rem 2rem;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 2px solid white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.play-btn:hover {
+    background: white;
+    color: #667eea;
+}
+
+/* نظرات */
+.comments-section {
+    margin-top: 3rem;
+}
+
+.comments-toggle {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    transition: background-color 0.3s ease;
+}
+
+.comments-toggle:hover {
+    background: #5a6fd8;
+}
+
+.comments-container {
+    display: none;
+}
+
+.comments-container.show {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.comment {
+    background: #f8f9ff;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-right: 4px solid #667eea;
+}
+
+.comment-author {
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+.comment-date {
+    font-size: 0.9rem;
+    color: #999;
+    margin-bottom: 1rem;
+}
+
+.comment-text {
+    line-height: 1.8;
+    color: #333;
+}
+
+/* فرم نظر */
+.comment-form {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-family: inherit;
+    direction: rtl;
+    text-align: right;
+    transition: border-color 0.3s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.form-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* لینک‌های اجتماعی */
+.social-links {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.social-link {
+    display: inline-block;
+    margin: 0 1rem;
+    padding: 1rem;
+    color: #667eea;
+    font-size: 1.5rem;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.social-link:hover {
+    transform: translateY(-3px);
+    color: #5a6fd8;
+}
+
+/* فوتر جدید */
+.footer {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 2rem 0;
+    margin-top: 3rem;
+    border-top: 1px solid #2a2a2a;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.footer-info {
+    flex: 1;
+    min-width: 200px;
+}
+
+.footer-title {
+    font-family: 'Sahel', Tahoma, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #fff;
+}
+
+.footer-description {
+    font-size: 0.85rem;
+    color: #999;
+    margin: 0;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+    margin: 0;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.social-link:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.copyright {
+    width: 100%;
+    font-size: 0.8rem;
+    color: #777;
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #2a2a2a;
+}
+
+/* ناوبری */
+.nav-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.nav-link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: #f8f9ff;
+    color: #5a6fd8;
+    text-decoration: none;
+}
+
+/* دکمه بازگشت */
+.back-button {
+    display: inline-block;
+    background: #6c757d;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    margin-bottom: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+    background: #5a6268;
+    color: white;
+    text-decoration: none;
+}
+
+/* پیام‌های سیستم */
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* لودینگ */
+.loading {
+    text-align: center;
+    padding: 2rem;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ریسپانسیو */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 1rem;
+    }
+    
+    .site-title {
+        font-size: 2rem;
+    }
+    
+    .gardens-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .search-form {
+        flex-direction: column;
+    }
+    
+    .search-input {
+        margin-bottom: 1rem;
+    }
+    
+    .verse-line {
+        font-size: 1.1rem;
+    }
+    
+    .audio-controls {
+        flex-direction: column;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .card {
+        padding: 1.5rem;
+    }
+    
+    .poet-image img {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .footer-info {
+        margin-bottom: 1rem;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-title {
+        font-size: 1.8rem;
+    }
+    
+    .poem-title {
+        font-size: 1.5rem;
+    }
+    
+    .verse-line {
+        font-size: 1rem;
+    }
+    
+    .card {
+        padding: 1rem;
+    }
+    
+    .poet-image img {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+/* استایل‌های خاص فرم‌ها */
+.login-form,
+.register-form {
+    max-width: 400px;
+    margin: 2rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.form-title {
+    text-align: center;
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+/* استایل‌های پنل مدیریت */
+.admin-panel {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.admin-title {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 2rem;
+    text-align: center;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 1rem;
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* جدول کاربران */
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.users-table th,
+.users-table td {
+    padding: 1rem;
+    text-align: right;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.users-table th {
+    background: #f8f9ff;
+    font-weight: 700;
+    color: #333;
+}
+
+.users-table tr:hover {
+    background-color: #f8f9ff;
+}
+
+.role-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.role-admin {
+    background: #dc3545;
+    color: white;
+}
+
+.role-researcher {
+    background: #28a745;
+    color: white;
+}
+
+.role-reader {
+    background: #007bff;
+    color: white;
+}
+
+.role-user {
+    background: #6c757d;
+    color: white;
+}
+
+/* دکمه‌های عملیات */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.btn-sm:hover {
+    opacity: 0.8;
+}
+
+.btn-edit {
+    background: #ffc107;
+    color: #333;
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-reset {
+    background: #17a2b8;
+    color: white;
+}
+
+.collaborators-table-wrapper {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  background: #fff;
+  padding: 1rem;
+}
+.collaborators-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Vazir', 'Sahel', sans-serif;
+  direction: rtl;
+  text-align: center;
+  font-size: 0.98rem;
+}
+.collaborators-table th, .collaborators-table td {
+  padding: 0.7rem 0.5rem;
+  border-bottom: 1px solid #eee;
+  min-width: 60px;
+}
+.collaborators-table th {
+  background: #f5f5f5;
+  font-weight: bold;
+  color: #333;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.collaborators-table tr:nth-child(even) {
+  background: #fafafa;
+}
+.fa-check.text-success {
+  color: #27ae60;
+  font-size: 1.2em;
+}
+@media (max-width: 991px) {
+  .collaborators-table th, .collaborators-table td {
+    font-size: 0.92rem;
+    padding: 0.5rem 0.2rem;
+  }
+  .collaborators-table-wrapper {
+    padding: 0.5rem;
+  }
+}
+
+.collaborator-card {
+  background: #f9f9fc;
+  border: 1px solid #e3e6f0;
+  transition: box-shadow 0.2s;
+}
+.collaborator-card:hover {
+  box-shadow: 0 4px 16px rgba(44,62,80,0.10);
+  background: #f5faff;
+}
+.collaborator-card h5 {
+  font-weight: bold;
+}
+.collaborator-card ul {
+  padding-right: 1rem;
+}
+.collaborator-card .badge {
+  font-size: 1rem;
+  padding: 0.5em 0.9em;
+}
+@media (max-width: 991px) {
+  .collaborator-card {
+    font-size: 0.95rem;
+    padding: 0.7rem 0.5rem;
+  }
+}
+
+/* استایل‌های پنل مدیریت */
+.admin-container {
+    min-height: calc(100vh - 200px); /* حداقل ارتفاع برای نمایش صحیح فوتر */
+    padding-top: 5rem; /* فاصله از منوی بالای صفحه */
+}
+
+.sidebar {
+    position: sticky;
+    top: 5rem; /* فاصله از منوی بالای صفحه */
+    height: calc(100vh - 5rem);
+    z-index: 100;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    border-left: 1px solid #dee2e6;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar-heading {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #6c757d;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.sidebar .nav-link {
+    color: #495057;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    margin: 0.25rem 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar .nav-link:hover {
+    color: #212529;
+    background-color: #e9ecef;
+    transform: translateX(-3px);
+}
+
+.sidebar .nav-link.active {
+    color: #fff;
+    background-color: #0d6efd;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
+}
+
+/* تنظیم فاصله برای منوی ثابت */
+.sidebar-content {
+    padding: 1rem 0;
+}
+
+/* تنظیم محتوای اصلی */
+.main-content {
+    padding-top: 1rem;
+}
+
+/* تنظیمات ریسپانسیو */
+@media (max-width: 767.98px) {
+    .admin-container {
+        padding-top: 1rem;
+        min-height: auto;
+    }
+    
+    .sidebar {
+        position: static;
+        height: auto;
+        top: auto;
+    }
+    
+    .main-content {
+        padding-top: 1rem;
+    }
+}
+
+/* بهبود ظاهر کارت‌های آمار */
+.card.border-left-primary,
+.card.border-left-success,
+.card.border-left-info,
+.card.border-left-warning {
+    border-left: 4px solid !important;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card.border-left-primary:hover,
+.card.border-left-success:hover,
+.card.border-left-info:hover,
+.card.border-left-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.card.border-left-primary {
+    border-left-color: #0d6efd !important;
+}
+
+.card.border-left-success {
+    border-left-color: #198754 !important;
+}
+
+.card.border-left-info {
+    border-left-color: #0dcaf0 !important;
+}
+
+.card.border-left-warning {
+    border-left-color: #ffc107 !important;
+}

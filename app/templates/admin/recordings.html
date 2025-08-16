@@ -1,0 +1,504 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت ضبط‌های صوتی - سایت فردوسی حسینی{% endblock %}
+
+{% block content %}
+<!-- اضافه کردن توکن CSRF -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
+<div class="admin-container">
+    <div class="row">
+        <!-- منوی کناری -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="sidebar-content">
+                <h5 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    پنل مدیریت
+                </h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                            داشبورد
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.users') }}">
+                            مدیریت کاربران
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.comments') }}">
+                            مدیریت نظرات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin.recordings') }}">
+                            مدیریت ضبط‌ها
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- محتوای اصلی -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">مدیریت ضبط‌های صوتی</h1>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="alert alert-info">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- جستجو و فیلتر -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <form method="GET" class="d-flex">
+                        <input class="form-control me-2" type="search" name="search" placeholder="جستجو بر اساس نام خواننده..." value="{{ request.args.get('search', '') }}" dir="rtl">
+                        <button class="btn btn-outline-primary" type="submit">جستجو</button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <form method="GET" class="d-flex">
+                        <select name="garden" class="form-select me-2" dir="rtl">
+                            <option value="">همه باغ‌ها</option>
+                            <option value="1" {% if request.args.get('garden') == '1' %}selected{% endif %}>باغ اول</option>
+                            <option value="2" {% if request.args.get('garden') == '2' %}selected{% endif %}>باغ دوم</option>
+                            <option value="3" {% if request.args.get('garden') == '3' %}selected{% endif %}>باغ سوم</option>
+                            <option value="4" {% if request.args.get('garden') == '4' %}selected{% endif %}>باغ چهارم</option>
+                        </select>
+                        <button class="btn btn-outline-secondary" type="submit">فیلتر</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- جدول ضبط‌ها -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>شناسه</th>
+                                    <th>خواننده</th>
+                                    <th>عنوان شعر</th>
+                                    <th>باغ</th>
+                                    <th>تاریخ ضبط</th>
+                                    <th>حجم فایل</th>
+                                    <th>وضعیت</th>
+                                    <th>پخش</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for recording in recordings.items %}
+                                <tr>
+                                    <td>{{ recording.id }}</td>
+                                    <td>{{ recording.user.username }}</td>
+                                    <td>{{ recording.title.title if recording.title else 'نامشخص' }}</td>
+                                    <td>
+                                        {% if recording.title %}
+                                            <span class="badge bg-info">باغ {{ recording.title.garden }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">نامشخص</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ recording.created_at.strftime('%Y/%m/%d %H:%M') }}</td>
+                                    <td>
+                                        <span class="text-muted">{{ recording.file_size_mb }} مگابایت</span>
+                                    </td>
+                                    <td>
+                                        {% if recording.is_approved %}
+                                            <span class="badge bg-success">تأیید شده</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">در انتظار تأیید</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if recording.filename %}
+                                        <audio controls preload="metadata" class="audio-small">
+                                            <source src="{{ url_for('verses.play_audio', recording_id=recording.id) }}" type="audio/mpeg">
+                                            مرورگر شما از پخش صوت پشتیبانی نمی‌کند.
+                                        </audio>
+                                        {% else %}
+                                        <span class="text-muted">فایل موجود نیست</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            {% if recording.filename %}
+                                            <a href="/static/uploads/{{ recording.filename }}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               download="{{ recording.original_filename }}">
+                                                دانلود
+                                            </a>
+                                            {% endif %}
+                                            
+                                            {% if not recording.is_approved %}
+                                            <button type="button" class="btn btn-sm btn-success approve-btn" 
+                                                    data-recording-id="{{ recording.id }}">
+                                                تأیید
+                                            </button>
+                                            {% else %}
+                                            <button type="button" class="btn btn-sm btn-warning reject-btn" 
+                                                    data-recording-id="{{ recording.id }}">
+                                                رد
+                                            </button>
+                                            {% endif %}
+                                            
+                                            <button type="button" class="btn btn-sm btn-outline-danger delete-btn" 
+                                                    data-recording-id="{{ recording.id }}">
+                                                حذف
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if not recordings.items %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">هیچ ضبط صوتی یافت نشد.</p>
+                        {% if request.args.get('search') or request.args.get('garden') %}
+                        <a href="{{ url_for('admin.recordings') }}" class="btn btn-outline-primary">مشاهده همه ضبط‌ها</a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- صفحه‌بندی -->
+            {% if recordings.pages > 1 %}
+            <nav aria-label="صفحه‌بندی ضبط‌ها" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <!-- دکمه صفحه قبل -->
+                    {% if recordings.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.recordings', page=recordings.prev_num, search=request.args.get('search', ''), garden=request.args.get('garden', '')) }}">
+                            <i class="fas fa-chevron-right"></i>
+                            قبلی
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            <i class="fas fa-chevron-right"></i>
+                            قبلی
+                        </span>
+                    </li>
+                    {% endif %}
+
+                    <!-- شماره صفحات -->
+                    {% for page_num in recordings.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+                        {% if page_num %}
+                            {% if page_num != recordings.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.recordings', page=page_num, search=request.args.get('search', ''), garden=request.args.get('garden', '')) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- دکمه صفحه بعد -->
+                    {% if recordings.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.recordings', page=recordings.next_num, search=request.args.get('search', ''), garden=request.args.get('garden', '')) }}">
+                            بعدی
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            بعدی
+                            <i class="fas fa-chevron-left"></i>
+                        </span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <!-- اطلاعات صفحه‌بندی -->
+            <div class="text-center text-muted mt-3">
+                <small>
+                    نمایش {{ recordings.items|length }} ضبط از {{ recordings.total }} ضبط
+                    {% if recordings.pages > 1 %}
+                    (صفحه {{ recordings.page }} از {{ recordings.pages }})
+                    {% endif %}
+                </small>
+            </div>
+            {% endif %}
+
+            <!-- آمار کلی -->
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">کل ضبط‌ها</h5>
+                            <h3 class="text-primary">{{ stats.total_recordings }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">کل حجم</h5>
+                            <h3 class="text-info">{{ "%.1f"|format(stats.total_size_mb) }} مگابایت</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">خوانندگان فعال</h5>
+                            <h3 class="text-success">{{ stats.active_readers }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">اشعار ضبط شده</h5>
+                            <h3 class="text-warning">{{ stats.recorded_poems }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+.audio-small {
+    width: 200px;
+    height: 40px;
+}
+
+/* استایل‌های جدید برای پلیر صوتی در پنل مدیریت */
+audio {
+    width: 100%;
+    height: 40px;
+}
+
+audio::-webkit-media-controls-panel {
+    background-color: #f8f9fa;
+}
+
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+    color: #495057;
+}
+
+audio::-webkit-media-controls-timeline {
+    border-radius: 10px;
+    margin: 0 10px;
+}
+
+audio::-webkit-media-controls-timeline-container {
+    padding: 5px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // دریافت توکن CSRF
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // تابع نمایش پیام به کاربر
+    function showMessage(message, type = 'success') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.row'));
+        
+        // حذف خودکار پیام بعد از ۵ ثانیه
+        setTimeout(() => alertDiv.remove(), 5000);
+    }
+    
+    // تابع نمایش/مخفی کردن نشانگر بارگذاری
+    function toggleLoading(button, show) {
+        if (show) {
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> در حال پردازش...';
+        } else {
+            button.disabled = false;
+            button.innerHTML = button.dataset.originalText;
+        }
+    }
+    
+    // تنظیمات پیش‌فرض برای همه درخواست‌های fetch
+    const fetchConfig = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+            }
+    };
+    
+    // ذخیره متن اصلی دکمه‌ها
+    document.querySelectorAll('.approve-btn, .reject-btn, .delete-btn').forEach(button => {
+        button.dataset.originalText = button.innerHTML;
+    });
+    
+    // تابع تأیید ضبط
+    const approveHandler = async function() {
+        const recordingId = this.dataset.recordingId;
+        if (confirm('آیا مطمئن هستید که می‌خواهید این ضبط صوتی را تأیید کنید؟')) {
+            try {
+                toggleLoading(this, true);
+                const response = await fetch(`/admin/recordings/${recordingId}/approve`, fetchConfig);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('ضبط صوتی با موفقیت تأیید شد');
+                    // به‌روزرسانی وضعیت در صفحه
+                    const row = this.closest('tr');
+                    row.querySelector('td:nth-child(7)').innerHTML = '<span class="badge bg-success">تأیید شده</span>';
+                    // جایگزینی دکمه‌ها
+                    const btnGroup = this.closest('.btn-group');
+                    const downloadBtn = btnGroup.querySelector('a.btn-outline-primary');
+                    const deleteBtn = btnGroup.querySelector('.delete-btn');
+                    btnGroup.innerHTML = `
+                        ${downloadBtn ? downloadBtn.outerHTML : ''}
+                        <button type="button" class="btn btn-sm btn-warning reject-btn" data-recording-id="${recordingId}">
+                            رد
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger delete-btn" data-recording-id="${recordingId}">
+                            حذف
+                        </button>
+                    `;
+                    
+                    // اضافه کردن مجدد event listener به دکمه‌های جدید
+                    const newRejectBtn = btnGroup.querySelector('.reject-btn');
+                    const newDeleteBtn = btnGroup.querySelector('.delete-btn');
+                    if (newRejectBtn) {
+                        newRejectBtn.dataset.originalText = newRejectBtn.innerHTML;
+                        newRejectBtn.addEventListener('click', rejectHandler);
+                    }
+                    if (newDeleteBtn) {
+                        newDeleteBtn.dataset.originalText = newDeleteBtn.innerHTML;
+                        newDeleteBtn.addEventListener('click', deleteHandler);
+                    }
+                } else {
+                    showMessage(data.message || 'خطا در تأیید ضبط صوتی', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('خطا در ارتباط با سرور', 'danger');
+            } finally {
+                toggleLoading(this, false);
+            }
+        }
+    };
+
+    // تابع رد ضبط
+    const rejectHandler = async function() {
+        const recordingId = this.dataset.recordingId;
+        if (confirm('آیا مطمئن هستید که می‌خواهید این ضبط صوتی را رد کنید؟')) {
+            try {
+                toggleLoading(this, true);
+                const response = await fetch(`/admin/recordings/${recordingId}/reject`, fetchConfig);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('ضبط صوتی با موفقیت رد شد');
+                    // به‌روزرسانی وضعیت در صفحه
+                    const row = this.closest('tr');
+                    row.querySelector('td:nth-child(7)').innerHTML = '<span class="badge bg-warning">در انتظار تأیید</span>';
+                    // جایگزینی دکمه‌ها
+                    const btnGroup = this.closest('.btn-group');
+                    const downloadBtn = btnGroup.querySelector('a.btn-outline-primary');
+                    const deleteBtn = btnGroup.querySelector('.delete-btn');
+                    btnGroup.innerHTML = `
+                        ${downloadBtn ? downloadBtn.outerHTML : ''}
+                        <button type="button" class="btn btn-sm btn-success approve-btn" data-recording-id="${recordingId}">
+                            تأیید
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger delete-btn" data-recording-id="${recordingId}">
+                            حذف
+                        </button>
+                    `;
+                    
+                    // اضافه کردن مجدد event listener به دکمه‌های جدید
+                    const newApproveBtn = btnGroup.querySelector('.approve-btn');
+                    const newDeleteBtn = btnGroup.querySelector('.delete-btn');
+                    if (newApproveBtn) {
+                        newApproveBtn.dataset.originalText = newApproveBtn.innerHTML;
+                        newApproveBtn.addEventListener('click', approveHandler);
+                    }
+                    if (newDeleteBtn) {
+                        newDeleteBtn.dataset.originalText = newDeleteBtn.innerHTML;
+                        newDeleteBtn.addEventListener('click', deleteHandler);
+                    }
+                } else {
+                    showMessage(data.message || 'خطا در رد ضبط صوتی', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('خطا در ارتباط با سرور', 'danger');
+            } finally {
+                toggleLoading(this, false);
+            }
+        }
+    };
+
+    // تابع حذف ضبط
+    const deleteHandler = async function() {
+        const recordingId = this.dataset.recordingId;
+        if (confirm('آیا مطمئن هستید که می‌خواهید این ضبط صوتی را حذف کنید؟ این عمل قابل بازگشت نیست.')) {
+            try {
+                toggleLoading(this, true);
+                const response = await fetch(`/admin/recordings/${recordingId}/delete`, fetchConfig);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('ضبط صوتی با موفقیت حذف شد');
+                    // حذف ردیف از جدول
+                    this.closest('tr').remove();
+                } else {
+                    showMessage(data.message || 'خطا در حذف ضبط صوتی', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('خطا در ارتباط با سرور', 'danger');
+            } finally {
+                toggleLoading(this, false);
+            }
+        }
+    };
+
+    // اضافه کردن event listeners به دکمه‌های موجود
+    document.querySelectorAll('.approve-btn').forEach(button => {
+        button.addEventListener('click', approveHandler);
+    });
+
+    document.querySelectorAll('.reject-btn').forEach(button => {
+        button.addEventListener('click', rejectHandler);
+        });
+
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', deleteHandler);
+    });
+});
+</script>
+{% endblock %}

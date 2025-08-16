@@ -1,0 +1,336 @@
+{% extends "research/base_form.html" %}
+
+{% block form_title %}
+    ویرایش نظر پژوهشی برای شعر: {{ poem_title }}
+    <small class="text-muted">(نظر {{ comment.author_name }})</small>
+{% endblock %}
+
+{% block form_hidden_fields %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="return_url" value="{{ url_for('admin.comments') }}">
+{% endblock %}
+
+{% block add_subtopic_button %}
+    <button type="button" class="btn btn-secondary mt-2" id="addSubtopic">افزودن زیر موضوع</button>
+{% endblock %}
+
+{% block form_buttons %}
+    <div class="row">
+        <div class="col-md-6">
+            <button type="submit" class="btn btn-primary w-100">ویرایش نظر</button>
+        </div>
+        <div class="col-md-6">
+            <button type="button" class="btn btn-secondary w-100" id="cancelButton">بازگشت</button>
+        </div>
+    </div>
+    
+    <!-- Admin specific buttons -->
+    <div class="row mt-3">
+        <div class="col-md-4">
+            <button type="button" class="btn btn-success w-100" id="approveButton">تایید نظر</button>
+        </div>
+        <div class="col-md-4">
+            <button type="button" class="btn btn-warning w-100" id="rejectButton">رد نظر</button>
+        </div>
+        <div class="col-md-4">
+            <button type="button" class="btn btn-danger w-100" id="deleteButton">حذف نظر</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block form_scripts %}
+<script>
+// Extend BaseFormManager for admin form functionality
+class AdminFormManager extends BaseFormManager {
+    constructor() {
+        super();
+        this.commentId = {{ comment.id | tojson }};
+        this.initAdminFormSpecifics();
+    }
+    
+    initAdminFormSpecifics() {
+        // Load existing images
+        this.loadExistingImages();
+        
+        // Bind form submission
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        
+        // Bind admin-specific buttons
+        this.bindAdminButtons();
+        
+        // Initialize with at least one subtopic if none exist
+        if (document.querySelectorAll('.subtopic-row').length === 0) {
+            this.addSubtopic();
+        }
+    }
+    
+    bindAdminButtons() {
+        // Approve button
+        const approveBtn = document.getElementById('approveButton');
+        if (approveBtn) {
+            approveBtn.addEventListener('click', () => this.handleStatusChange('approved'));
+        }
+        
+        // Reject button
+        const rejectBtn = document.getElementById('rejectButton');
+        if (rejectBtn) {
+            rejectBtn.addEventListener('click', () => this.handleStatusChange('rejected'));
+        }
+        
+        // Delete button
+        const deleteBtn = document.getElementById('deleteButton');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => this.handleDelete());
+        }
+    }
+    
+    async loadExistingImages() {
+        if (this.commentId !== null) {
+            const subtopicRows = document.querySelectorAll('.subtopic-row');
+            
+            for (let i = 0; i < subtopicRows.length; i++) {
+                const row = subtopicRows[i];
+                const block = row.querySelector('.research-images-block');
+                const subtopicIndex = block.getAttribute('data-subtopic-index');
+                
+                if (!this.researchImages[subtopicIndex]) {
+                    this.researchImages[subtopicIndex] = [];
+                }
+                
+                try {
+                    const response = await fetch(`/verses/get_research_images/${this.commentId}/${subtopicIndex}`);
+                    const data = await response.json();
+                    
+                    if (data.images && Array.isArray(data.images)) {
+                        data.images.forEach(img => {
+                            this.researchImages[subtopicIndex].push({
+                                id: img.id,
+                                preview: researchImageUrlPrefix + img.filename,
+                                caption: img.caption || '',
+                                isServer: true
+                            });
+                        });
+                        this.renderResearchImages(subtopicIndex, block);
+                    }
+                } catch (error) {
+                    console.error('Error loading images for subtopic', subtopicIndex, ':', error);
+                }
+            }
+        }
+    }
+    
+    // Override renderResearchImages to handle server images
+    renderResearchImages(subtopicIndex, block) {
+        const listDiv = block.querySelector('.research-images-list');
+        listDiv.innerHTML = '';
+        
+        (this.researchImages[subtopicIndex] || []).forEach((imgObj, idx) => {
+            const imgDiv = document.createElement('div');
+            imgDiv.className = 'd-inline-block m-1 position-relative';
+            imgDiv.innerHTML = `
+                <img src="${imgObj.preview}" style="max-width:100px;max-height:100px;border:1px solid #ccc;border-radius:4px;" alt="تصویر پژوهشی">
+                <input type="text" class="form-control form-control-sm mt-1 research-image-caption" 
+                       placeholder="کپشن" value="${imgObj.caption || ''}" 
+                       data-img-idx="${idx}" style="max-width:100px;">
+                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-image-btn" 
+                        data-img-idx="${idx}" ${imgObj.isServer ? `data-server-id="${imgObj.id}"` : ''} 
+                        style="z-index:2;" title="حذف تصویر">×</button>
+            `;
+            listDiv.appendChild(imgDiv);
+        });
+    }
+    
+    // Override handleImageRemoval to handle server images
+    handleImageRemoval(e) {
+        const block = e.target.closest('.research-images-block');
+        const subtopicIndex = block.getAttribute('data-subtopic-index');
+        const idx = parseInt(e.target.getAttribute('data-img-idx'));
+        const serverId = e.target.getAttribute('data-server-id');
+        
+        if (serverId) {
+            // Remove server image
+            if (confirm('آیا از حذف این عکس مطمئن هستید؟')) {
+                this.removeServerImage(serverId, subtopicIndex, idx, block);
+            }
+        } else {
+            // Remove local image
+            this.researchImages[subtopicIndex].splice(idx, 1);
+            this.renderResearchImages(subtopicIndex, block);
+        }
+    }
+    
+    async removeServerImage(serverId, subtopicIndex, idx, block) {
+        try {
+            const response = await fetch(`/verses/delete_research_image/${serverId}`, {
+                method: 'POST',
+                headers: { 
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.researchImages[subtopicIndex].splice(idx, 1);
+                this.renderResearchImages(subtopicIndex, block);
+            } else {
+                alert(data.message || 'خطا در حذف عکس');
+            }
+        } catch (error) {
+            console.error('Error removing server image:', error);
+            alert('خطا در حذف عکس: ' + error.message);
+        }
+    }
+    
+    async handleSubmit(e) {
+        e.preventDefault();
+        
+        try {
+            this.showLoading(true);
+            
+            const subtopics = this.collectSubtopicsData();
+            if (subtopics.length === 0) {
+                alert('لطفا حداقل یک زیرموضوع وارد کنید');
+                return;
+            }
+            
+            const formData = this.buildFormData(subtopics);
+            
+            const response = await fetch(`/admin/comments/${this.commentId}/research-update`, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            });
+            
+            const data = await this.handleResponse(response);
+            
+            if (data.success) {
+                alert(data.message || 'نظر با موفقیت ویرایش شد');
+                window.location.href = data.return_url || this.returnUrl;
+            } else {
+                alert(data.message || 'خطا در ویرایش نظر');
+            }
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('خطا در ویرایش نظر: ' + error.message);
+        } finally {
+            this.showLoading(false);
+        }
+    }
+    
+    buildFormData(subtopics) {
+        const formData = new FormData();
+        
+        // Add basic form fields
+        formData.append('extra_info', document.getElementById('extraInfo').value.trim());
+        formData.append('topic_narrative', document.getElementById('topicNarrative').value.trim());
+        formData.append('historical_flaw', document.getElementById('historicalFlaw').value.trim());
+        formData.append('reform_theory', document.getElementById('reformTheory').value.trim());
+        formData.append('return_url', this.returnUrl);
+        formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+        formData.append('subtopics', JSON.stringify(subtopics));
+        
+        // Add images
+        Object.keys(this.researchImages).forEach(subIdx => {
+            (this.researchImages[subIdx] || []).forEach((imgObj) => {
+                if (!imgObj.isServer && imgObj.file) {
+                    // New images
+                    formData.append(`images_${subIdx}[]`, imgObj.file);
+                    formData.append(`captions_${subIdx}[]`, imgObj.caption || '');
+                } else if (imgObj.isServer) {
+                    // Existing images with updated captions
+                    formData.append(`existing_captions_${subIdx}[]`, imgObj.caption || '');
+                    formData.append(`existing_image_ids_${subIdx}[]`, imgObj.id);
+                }
+            });
+        });
+        
+        return formData;
+    }
+    
+    async handleResponse(response) {
+        let data;
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType && contentType.indexOf('application/json') !== -1) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            throw new Error('Unexpected server error: ' + text.substring(0, 200));
+        }
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Error updating comment');
+        }
+        
+        return data;
+    }
+    
+    async handleStatusChange(status) {
+        const confirmMessage = status === 'approved' ? 'آیا از تایید این نظر مطمئن هستید؟' : 'آیا از رد این نظر مطمئن هستید؟';
+        
+        if (confirm(confirmMessage)) {
+            try {
+                const response = await fetch(`/admin/comments/${this.commentId}/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                    },
+                    body: JSON.stringify({ status: status }),
+                    credentials: 'same-origin'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(data.message || `نظر با موفقیت ${status === 'approved' ? 'تایید' : 'رد'} شد`);
+                    window.location.href = this.returnUrl;
+                } else {
+                    alert(data.message || 'خطا در تغییر وضعیت نظر');
+                }
+            } catch (error) {
+                console.error('Error changing status:', error);
+                alert('خطا در تغییر وضعیت نظر: ' + error.message);
+            }
+        }
+    }
+    
+    async handleDelete() {
+        if (confirm('آیا از حذف این نظر مطمئن هستید؟ این عمل قابل بازگشت نیست.')) {
+            if (confirm('توجه: تمام اطلاعات مربوط به این نظر از جمله تصاویر حذف خواهد شد. آیا مطمئن هستید؟')) {
+                try {
+                    const response = await fetch(`/admin/comments/${this.commentId}/delete`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                        },
+                        credentials: 'same-origin'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert(data.message || 'نظر با موفقیت حذف شد');
+                        window.location.href = this.returnUrl;
+                    } else {
+                        alert(data.message || 'خطا در حذف نظر');
+                    }
+                } catch (error) {
+                    console.error('Error deleting comment:', error);
+                    alert('خطا در حذف نظر: ' + error.message);
+                }
+            }
+        }
+    }
+}
+
+// Initialize admin form manager when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    window.formManager = new AdminFormManager();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,43 @@
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppRoot "/home/qouyvwti/myflaskapp"
+PassengerBaseURI "/"
+PassengerPython "/home/qouyvwti/virtualenv/myflaskapp/3.11/bin/python"
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION BEGIN
+<IfModule Litespeed>
+</IfModule>
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
+
+# Enable HTTPS
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Enable HSTS
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+# Security Headers
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Content Security Policy
+Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdnjs.cloudflare.com"
+
+# PHP Upload Limits
+SetEnv UPLOAD_MAX_SIZE ${UPLOAD_MAX_SIZE}
+php_value upload_max_filesize ${UPLOAD_MAX_SIZE}
+php_value post_max_size ${UPLOAD_MAX_SIZE}
+php_value max_execution_time 300
+php_value max_input_time 300
+
+# Environment Variables
+SetEnv ENABLE_SSL true
+SetEnv FLASK_ENV production
+SetEnv MAX_UPLOAD_SIZE 10485760 
+
+
+<IfModule mod_headers.c>
+Header set Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'; frame-src 'self' https://www.aparat.com;"
+</IfModule>

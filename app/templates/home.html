@@ -1,0 +1,477 @@
+{% extends "base.html" %}
+
+{% block title %}صفحه اصلی - سایت فردوسی حسینی{% endblock %}
+
+{% block head %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 100px 0 60px;
+        margin-top: 56px;
+    }
+    
+    .poet-image {
+        width: 200px;
+        height: 250px;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        transition: transform 0.3s ease;
+    }
+    
+    .poet-image:hover {
+        transform: scale(1.05);
+    }
+    
+    .search-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 30px;
+        margin: 30px 0;
+    }
+    
+    .garden-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .garden-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .garden-header {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .garden-body {
+        padding: 25px;
+        text-align: center;
+    }
+    
+    .search-results {
+        background: white;
+        border-radius: 10px;
+        margin-top: 20px;
+        max-height: 400px;
+        overflow-y: auto;
+        display: none;
+    }
+    
+    .search-result-item {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .search-result-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .search-result-item:last-child {
+        border-bottom: none;
+    }
+    
+    .verse-preview {
+        font-family: 'Vazir', Tahoma, sans-serif;
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 80px 0 40px;
+        }
+        
+        .poet-image {
+            width: 150px;
+            height: 200px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="text-center text-lg-start">
+                    <h1 class="display-4 fw-bold mb-3" style="font-family: 'Sahel', Tahoma, sans-serif;">
+                        چهار خیابان باغ فردوس
+                    </h1>
+                    <p class="lead mb-4">
+                        از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی
+                    </p>
+                    <p class="mb-0">
+                        مجموعه‌ای از اشعار زیبا در چهار باغ (فصل) که هر کدام حاوی درگاه‌هایی از شعر و حکمت است
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center">
+                    <img src="{{ url_for('static', filename='images/poet.png') }}" 
+                         alt="حکیم میرزا احمد الهامی کرمانشاهی" 
+                         class="poet-image">
+                    <h5 class="mt-3 mb-0">حکیم میرزا احمد الهامی</h5>
+                    <small class="text-light">کرمانشاهی</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search Section -->
+        <div class="search-container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h4 class="text-center mb-4">جستجو در اشعار</h4>
+                    <div class="d-flex gap-2">
+                        <input type="text" 
+                               id="searchInput" 
+                               class="form-control form-control-lg" 
+                               placeholder="جستجو در عناوین و ابیات..."
+                               autocomplete="off">
+                        <button type="button" class="btn btn-light btn-lg px-4" id="searchButton">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Gardens Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-4" style="font-family: 'Sahel', Tahoma, sans-serif;">باغ‌های چهارگانه</h2>
+                <p class="text-muted">هر باغ حاوی مجموعه‌ای از اشعار زیبا و پرمعنا</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% for garden_num in range(1, 5) %}
+            <div class="col-lg-6 col-xl-3">
+                <div class="garden-card">
+                    <div class="garden-header">
+                        <h3 class="mb-0" style="font-family: 'Sahel', Tahoma, sans-serif;">
+                            {% if garden_num == 1 %}خیابان اول
+                            {% elif garden_num == 2 %}خیابان دوم
+                            {% elif garden_num == 3 %}خیابان سوم
+                            {% else %}خیابان چهارم
+                            {% endif %}
+                        </h3>
+                        <small>باغ {{ garden_num|persian_number }}</small>
+                    </div>
+                    <div class="garden-body">
+                        <div class="mb-4">
+                            <i class="fas fa-leaf fa-3x text-success"></i>
+                        </div>
+                        <p class="text-muted mb-4">
+                            مجموعه اشعار باغ 
+                            {% if garden_num == 1 %}اول
+                            {% elif garden_num == 2 %}دوم
+                            {% elif garden_num == 3 %}سوم
+                            {% else %}چهارم
+                            {% endif %}
+                        </p>
+                        <a href="{{ url_for('main.garden', garden_num=garden_num) }}" 
+                           class="btn btn-outline-primary btn-lg w-100">
+                            <i class="fas fa-book-open me-2"></i>
+                            مشاهده اشعار
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Articles Section -->
+<section class="articles-section py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-4" style="font-family: 'Sahel', Tahoma, sans-serif;">پژوهش های فردوسی حسینی</h2>
+                <p class="text-muted">پژوهش‌ها و مطالعات در خصوص حکیم میرزا احمد الهامی کرمانشاهی</p>
+            </div>
+        </div>
+        
+
+
+
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <i class="fas fa-newspaper fa-3x text-primary"></i>
+                        </div>
+                        <h4 class="mb-3" style="font-family: 'Sahel', Tahoma, sans-serif;">مقالات علمی</h4>
+                        <p class="text-muted mb-4">
+                            مطالعات تخصصی در مورد زندگی، آثار و اندیشه‌های حکیم میرزا احمد الهامی کرمانشاهی و تأثیر او بر ادبیات فارسی
+                        </p>
+                        <a href="{{ url_for('main.articles') }}" class="btn btn-primary">
+                            <i class="fas fa-book-reader me-2"></i>
+                            مطالعه مقالات
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <i class="fas fa-lightbulb fa-3x text-primary"></i>
+                        </div>
+                        <h4 class="mb-3" style="font-family: 'Sahel', Tahoma, sans-serif;">نوشته‌های پژوهشی</h4>
+                        <p class="text-muted mb-4">
+                            تحلیل‌ها و بررسی‌های ادبی از اشعار چهار خیابان باغ فردوس و جایگاه آن در ادبیات کلاسیک فارسی
+                        </p>
+                        <a href="{{ url_for('main.articles') }}#research" class="btn btn-primary">
+                            <i class="fas fa-microscope me-2"></i>
+                            مشاهده پژوهش‌ها
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <i class="fas fa-file-alt fa-3x text-primary"></i>
+                        </div>
+                        <h4 class="mb-3" style="font-family: 'Sahel', Tahoma, sans-serif;">مستندسازی و تطبیق تاریخی</h4>
+                        <p class="text-muted mb-4">
+                            شرح کامل فرآیند مستندسازی، اهداف پژوهش و تطبیق تاریخی اشعار الهامی با منابع معتبر.
+                        </p>
+                        <a href="{{ url_for('main.documentation_page') }}" class="btn btn-primary">
+                            <i class="fas fa-file-alt me-2"></i>
+                            مشاهده صفحه مستندسازی
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+    </div>
+</section>
+
+<!-- Research Collaboration Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <i class="fas fa-users fa-4x text-primary"></i>
+                        </div>
+                        <h2 class="mb-4" style="font-family: 'Sahel', Tahoma, sans-serif;">
+                            فراخوان همکاری پژوهشی
+                        </h2>
+                        <h5 class="mb-4">
+                            پژوهش جامع کتاب «چهار خیابان باغ فردوس»
+                        </h5>
+                        <p class="lead mb-4">
+                            از همه پژوهشگران، محققان ادبیات فارسی، اساتید دانشگاه و علاقه‌مندان به ادبیات کلاسیک دعوت می‌کنیم تا در پروژه بزرگ پژوهش و تحقیق درباره کتاب «چهار خیابان باغ فردوس» اثر حکیم میرزا احمد الهامی کرمانشاهی مشارکت کنند.
+                        </p>
+                        <style>.h_iframe-aparat_embed_frame{position:relative;}.h_iframe-aparat_embed_frame .ratio{display:block;width:100%;height:auto;}.h_iframe-aparat_embed_frame iframe{position:absolute;top:0;left:0;width:100%;height:100%;}</style>
+                        <div class="h_iframe-aparat_embed_frame mb-4">
+                            <span style="display: block;padding-top: 57%"></span>
+                            <iframe src="https://www.aparat.com/video/video/embed/videohash/eyao2od/vt/frame?titleShow=true&startTime=0" allowFullScreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+                        </div>
+                        
+                        <div class="row mt-4 mb-4">
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-search fa-2x me-3"></i>
+                                    <div class="text-start">
+                                        <h6 class="mb-1">تحقیق و بررسی</h6>
+                                        <small>بررسی تطبیقی و تحلیل تاریخی اشعار</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-edit fa-2x me-3"></i>
+                                    <div class="text-start">
+                                        <h6 class="mb-1">تصحیح و ویرایش</h6>
+                                        <small>بررسی نسخه‌های خطی</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-comments fa-2x me-3"></i>
+                                    <div class="text-start">
+                                        <h6 class="mb-1">تفسیر و شرح</h6>
+                                        <small>تبیین مفاهیم و مقاصد</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <a href="{{ url_for('main.research_collaboration') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-hand-holding-heart me-2"></i>
+                                شرکت در پروژه
+                            </a>
+                            <a href="{{ url_for('main.contact') }}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-info-circle me-2"></i>
+                                تماس با ما
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-4">
+                <div class="h2 text-primary fw-bold">{{ stats.total_poems|default(0)|persian_number }}</div>
+                <p class="text-muted mb-0">عنوان شعر</p>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="h2 text-success fw-bold">{{ stats.total_verses|default(0)|persian_number }}</div>
+                <p class="text-muted mb-0">بیت شعر</p>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="h2 text-warning fw-bold">{{ stats.total_comments|default(0)|persian_number }}</div>
+                <p class="text-muted mb-0">نظر پژوهشی</p>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="h2 text-info fw-bold">{{ stats.total_recordings|default(0)|persian_number }}</div>
+                <p class="text-muted mb-0">ضبط صوتی</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const searchResults = document.getElementById('searchResults');
+    let searchTimeout;
+    let lastSearchTerm = '';
+    let cachedResults = {};
+
+    // Real-time search
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const searchTerm = this.value.trim();
+        
+        if (searchTerm.length < 2) {
+            searchResults.style.display = 'none';
+            return;
+        }
+        
+        if (searchTerm === lastSearchTerm) {
+            return;
+        }
+        
+        if (cachedResults[searchTerm]) {
+            displayResults(cachedResults[searchTerm]);
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            performSearch(searchTerm);
+        }, 300);
+    });
+
+    // Search button click
+    searchButton.addEventListener('click', function() {
+        const searchTerm = searchInput.value.trim();
+        if (searchTerm.length >= 2) {
+            performSearch(searchTerm);
+        }
+    });
+
+    // Handle Enter key
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const searchTerm = searchInput.value.trim();
+            if (searchTerm.length >= 2) {
+                performSearch(searchTerm);
+            }
+        }
+    });
+
+    function performSearch(searchTerm) {
+        fetch(`/search?q=${encodeURIComponent(searchTerm)}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            cachedResults[searchTerm] = data;
+            lastSearchTerm = searchTerm;
+            displayResults(data);
+        })
+        .catch(error => {
+            console.error('خطا در جستجو:', error);
+            searchResults.innerHTML = '<div class="p-3 text-center text-danger">خطا در جستجو</div>';
+            searchResults.style.display = 'block';
+        });
+    }
+
+    function displayResults(results) {
+        if (!results || results.length === 0) {
+            searchResults.innerHTML = '<div class="p-3 text-center text-muted">نتیجه‌ای یافت نشد</div>';
+        } else {
+            const resultsHtml = results.map(result => `
+                <div class="search-result-item" onclick="goToPoem(${result.title_id})">
+                    <div class="fw-bold text-primary">${result.title}</div>
+                    <div class="small text-muted">باغ ${result.garden}</div>
+                    ${result.verse_preview ? `<div class="verse-preview">${result.verse_preview}</div>` : ''}
+                </div>
+            `).join('');
+            searchResults.innerHTML = resultsHtml;
+        }
+        searchResults.style.display = 'block';
+    }
+
+    // Hide results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target) && !searchButton.contains(e.target)) {
+            searchResults.style.display = 'none';
+        }
+    });
+});
+
+function goToPoem(titleId) {
+    window.location.href = `/title/${titleId}`;
+}
+</script>
+{% endblock %}
