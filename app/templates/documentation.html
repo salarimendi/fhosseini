@@ -159,6 +159,171 @@
     .garden-titles-list::-webkit-scrollbar-thumb:hover {
         background: #a8a8a8;
     }
+    
+    /* داشبورد بصری تیترها */
+    .visual-dashboard {
+        margin-top: 1rem;
+    }
+    
+    .garden-visual-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    .garden-visual-title {
+        color: #495057;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    
+    .garden-count {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: normal;
+    }
+    
+    .titles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 8px;
+        margin-bottom: 1.5rem;
+        justify-items: center;
+    }
+    
+    .title-square {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        border: 2px solid transparent;
+    }
+    
+    .title-square.documented {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+    }
+    
+    .title-square.not-documented {
+        background: white;
+        color: #6c757d;
+        border: 2px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .title-square:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .title-square.documented:hover {
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    }
+    
+    .square-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+    
+    .title-number {
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 1;
+    }
+    
+    .title-square.documented .title-number {
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+    }
+    
+    .title-square.documented i {
+        font-size: 0.8rem;
+        margin-top: 2px;
+    }
+    
+    .garden-legend {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 2px solid transparent;
+    }
+    
+    .legend-color.documented {
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
+    
+    .legend-color.not-documented {
+        background: white;
+        border-color: #dee2e6;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .titles-grid {
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 6px;
+        }
+        
+        .title-square {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .title-number {
+            font-size: 0.7rem;
+        }
+        
+        .title-square.documented .title-number {
+            font-size: 0.6rem;
+        }
+        
+        .title-square.documented i {
+            font-size: 0.7rem;
+        }
+        
+        .garden-visual-title {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .garden-legend {
+            gap: 1rem;
+        }
+    }
 </style>
 {% endblock %}
 {% block content %}
@@ -223,7 +388,7 @@
                     <div class="garden-header-dashboard">
                         <h5 class="garden-title-dashboard">
                             <i class="fas fa-seedling text-success me-2"></i>
-                            {{ garden.name }}
+                            خیابان {{ garden.number|persian_number }} باغ فردوس
                         </h5>
                         <div class="garden-stats">
                             {% set documented_count = garden.titles | selectattr('is_documented') | list | length %}
@@ -256,6 +421,45 @@
                             </div>
                         </div>
                         {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- داشبورد بصری تیترها -->
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-th-large doc-icon"></i> نمای کلی تیترها</h4>
+        <div class="visual-dashboard">
+            {% for garden in garden_details %}
+            <div class="garden-visual-section mb-4">
+                <h5 class="garden-visual-title">
+                    <i class="fas fa-seedling text-success me-2"></i>
+                    خیابان {{ garden.number|persian_number }} باغ فردوس
+                    <span class="garden-count">({{ garden.titles|length|persian_number }} تیتر)</span>
+                </h5>
+                <div class="titles-grid">
+                    {% for title in garden.titles %}
+                    <div class="title-square {% if title.is_documented %}documented{% else %}not-documented{% endif %}" 
+                         title="{{ title.order|persian_number }}. {{ title.title }} - {% if title.is_documented %}مستندسازی شده{% else %}مستندسازی نشده{% endif %}">
+                        <div class="square-content">
+                            <span class="title-number">{{ title.order|persian_number }}</span>
+                            {% if title.is_documented %}
+                                <i class="fas fa-check text-white"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="garden-legend">
+                    <div class="legend-item">
+                        <span class="legend-color documented"></span>
+                        <span>مستندسازی شده</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color not-documented"></span>
+                        <span>مستندسازی نشده</span>
                     </div>
                 </div>
             </div>

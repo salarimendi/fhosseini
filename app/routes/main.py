@@ -468,7 +468,7 @@ def documentation_page():
         
         garden_data = {
             'number': garden_num,
-            'name': f'خیابان {garden_num} باغ فردوس' if garden_num == 1 else f'خیابان {garden_num} باغ فردوس',
+            'name': f'خیابان {garden_num} باغ فردوس',
             'titles': []
         }
         
