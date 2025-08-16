@@ -192,7 +192,7 @@ class ResearchImage(db.Model):
     file_size = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    comment = db.relationship('Comment', backref=db.backref('research_images', lazy='dynamic'))
+    comment = db.relationship('Comment', backref=db.backref('research_images', lazy='dynamic', cascade='all, delete-orphan'))
 
     def __repr__(self):
         return f'<ResearchImage {self.filename} for comment {self.comment_id}>'
