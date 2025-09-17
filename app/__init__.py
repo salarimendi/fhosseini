@@ -39,6 +39,15 @@ def create_app(config_name=None):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
+    # تضمین ریلود قالب‌ها و عدم کش استاتیک در توسعه
+    if app.config.get('DEBUG'):
+        app.config['TEMPLATES_AUTO_RELOAD'] = True
+        app.jinja_env.auto_reload = True
+        # غیرفعال‌کردن کش Jinja برای تشخیص سریع حذف/تغییر فایل‌های قالب
+        app.jinja_env.cache = {}
+        # جلوگیری از کش فایل‌های استاتیک در توسعه
+        app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
     # اطمینان از وجود پوشه instance
     os.makedirs(app.instance_path, exist_ok=True)
     

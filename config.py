@@ -93,12 +93,15 @@ class Config:
 class DevelopmentConfig(Config):
     """تنظیمات محیط توسعه"""
     DEBUG = True
+    TEMPLATES_AUTO_RELOAD = True
     # در محیط توسعه از مسیر نسبی استفاده می‌کنیم
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         f'sqlite:///{os.path.join(basedir, "instance", "ferdosi.db")}'
     PREFERRED_URL_SCHEME = 'http'
     SESSION_COOKIE_SECURE = False
     REMEMBER_COOKIE_SECURE = False
+    # استفاده صریح از حافظه برای rate-limit تا هشدار Redis نمایش داده نشود
+    RATELIMIT_STORAGE_URL = "memory://"
     
     # تنظیمات Rate Limiting برای محیط توسعه - محدودیت بسیار کم برای تست راحت‌تر
     RATELIMIT_DEFAULT = "5000 per day;1000 per hour;200 per minute"  # محدودیت بسیار کم برای توسعه
