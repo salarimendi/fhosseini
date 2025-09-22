@@ -4,7 +4,7 @@
 مسیرهای اصلی پروژه فردوسی حسینی
 """
 
-from flask import Blueprint, render_template, request, jsonify, current_app, flash, redirect, url_for
+from flask import Blueprint, render_template, request, jsonify, current_app, flash, redirect, url_for, Response, send_from_directory
 from flask_login import current_user, login_required
 from sqlalchemy import or_, func
 from app.models import Title, Verse, Comment, Recording, User, SearchResult
@@ -508,6 +508,21 @@ def biography_page():
 def ilhami_manuscript_studies():
     """صفحه نسخه شناسی الهامی"""
     return render_template('ilhami_manuscript_studies.html')
+
+
+# -----------------------------
+# SEO: robots.txt و sitemap.xml
+# -----------------------------
+@main_bp.route('/robots.txt')
+def robots_txt():
+    """ارائه robots.txt از فایل استاتیک"""
+    return send_from_directory('static', 'robots.txt')
+
+
+@main_bp.route('/sitemap.xml')
+def sitemap_xml():
+    """ارائه sitemap.xml از فایل استاتیک"""
+    return send_from_directory('static', 'sitemap.xml')
 
 @main_bp.errorhandler(404)
 def not_found_error(error):

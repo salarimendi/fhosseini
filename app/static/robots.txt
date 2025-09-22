@@ -1,0 +1,13 @@
+User-agent: *
+# جلوگیری از ایندکس صفحات حساس
+Disallow: /auth/
+Disallow: /admin/
+Disallow: /comments/
+Disallow: /verses/record
+Disallow: /verses/my_recordings
+Disallow: /profile
+
+# نقشه سایت
+Sitemap: /sitemap.xml
+
+
