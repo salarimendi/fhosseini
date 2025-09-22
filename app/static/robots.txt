@@ -8,6 +8,4 @@ Disallow: /verses/my_recordings
 Disallow: /profile
 
 # نقشه سایت
-Sitemap: /sitemap.xml
-
-
+Sitemap: https://ferdowsihosseini.ir/sitemap.xml
