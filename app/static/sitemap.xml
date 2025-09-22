@@ -1,75 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>/</loc>
+    <loc>https://ferdowsihosseini.ir/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>/articles</loc>
+    <loc>https://ferdowsihosseini.ir/articles</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>/statistics</loc>
+    <loc>https://ferdowsihosseini.ir/statistics</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>/documentation</loc>
+    <loc>https://ferdowsihosseini.ir/documentation</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>/textual-criticism</loc>
+    <loc>https://ferdowsihosseini.ir/textual-criticism</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>/biography</loc>
+    <loc>https://ferdowsihosseini.ir/biography</loc>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>/ilhami-manuscript-studies</loc>
+    <loc>https://ferdowsihosseini.ir/ilhami-manuscript-studies</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>/research-collaboration</loc>
+    <loc>https://ferdowsihosseini.ir/research-collaboration</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>/about</loc>
+    <loc>https://ferdowsihosseini.ir/about</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>/contact</loc>
+    <loc>https://ferdowsihosseini.ir/contact</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>/garden/1</loc>
+    <loc>https://ferdowsihosseini.ir/garden/1</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>/garden/2</loc>
+    <loc>https://ferdowsihosseini.ir/garden/2</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>/garden/3</loc>
+    <loc>https://ferdowsihosseini.ir/garden/3</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>/garden/4</loc>
+    <loc>https://ferdowsihosseini.ir/garden/4</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 </urlset>
-
-
