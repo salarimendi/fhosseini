@@ -449,18 +449,16 @@ def update_comment_research(comment_id):
             # حذف حلقه getlist کپشن
         else:
             if not request.is_json:
-                flash('درخواست باید به صورت JSON یا فرم باشد', 'error')
-                return redirect(url_for('admin.comments'))
+                return jsonify({'success': False, 'message': 'درخواست باید به صورت JSON یا فرم باشد'} )
             data = request.get_json()
             files = None
         # user_id و title_id را از comment اصلی می‌گیریم تا تغییر نکند
         data['user_id'] = comment.user_id
         data['title_id'] = comment.title_id
         comment_obj, message = save_research_form(comment, data, files, current_app.config, is_admin=True)
-        flash(message, 'success')
+        return jsonify({'success': True, 'message': message, 'return_url': url_for('admin.comments')})
     except ValueError as ve:
-        flash(str(ve), 'error')
+        return jsonify({'success': False, 'message': str(ve)})
     except Exception as e:
         current_app.logger.error(f"Error saving research form (admin): {e}")
-        flash('خطا در ثبت فرم پژوهشی', 'error')
-    return redirect(url_for('admin.comments'))
+        return jsonify({'success': False, 'message': 'خطا در ثبت فرم پژوهشی'})

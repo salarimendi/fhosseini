@@ -273,7 +273,10 @@ class AdminFormManager extends BaseFormManager {
         
         if (confirm(confirmMessage)) {
             try {
-                const response = await fetch(`/admin/comments/${this.commentId}/status`, {
+                const endpoint = status === 'approved' 
+                    ? `/admin/comments/${this.commentId}/approve` 
+                    : `/admin/comments/${this.commentId}/reject`;
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -302,7 +305,7 @@ class AdminFormManager extends BaseFormManager {
         if (confirm('آیا از حذف این نظر مطمئن هستید؟ این عمل قابل بازگشت نیست.')) {
             if (confirm('توجه: تمام اطلاعات مربوط به این نظر از جمله تصاویر حذف خواهد شد. آیا مطمئن هستید؟')) {
                 try {
-                    const response = await fetch(`/admin/comments/${this.commentId}/delete`, {
+                    const response = await fetch(`/admin/comments/delete/${this.commentId}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
