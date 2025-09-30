@@ -130,6 +130,10 @@
                                             <a href="{{ url_for('admin.change_user_role', user_id=user.id) }}" class="btn btn-sm btn-primary">
                                                 تغییر نقش
                                             </a>
+                                            <!-- دکمه بازنشانی رمز -->
+                                            <button type="button" class="btn btn-sm btn-warning ms-1" onclick="resetUserPassword({{ user.id }})">
+                                                بازنشانی رمز
+                                            </button>
                                         </div>
                                         {% endif %}
                                     </td>
@@ -224,5 +228,27 @@
         </main>
     </div>
 </div>
+
+<script>
+async function resetUserPassword(userId) {
+    if (!confirm('آیا از بازنشانی رمز این کاربر مطمئن هستید؟')) return;
+    try {
+        const resp = await fetch(`{{ url_for('admin.reset_password', user_id=0) }}`.replace('0', userId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        });
+        const data = await resp.json();
+        if (data.success) {
+            alert(data.message);
+        } else {
+            alert(data.message || 'خطا در بازنشانی رمز عبور');
+        }
+    } catch (e) {
+        alert('خطای شبکه در بازنشانی رمز عبور');
+    }
+}
+</script>
 
 {% endblock %}
