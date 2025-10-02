@@ -12,25 +12,19 @@
    - قابل گسترش توسط سایر فرم‌ها
    - شامل استایل‌های مشترک
 
-2. **`add_research_form.html`** - فرم اضافه کردن نظر (محقق)
-   - برای محققین در صفحه شعر
-   - امکان اضافه کردن نظر جدید
-   - مدیریت کامل عکس‌ها و زیرموضوعات
-   - endpoint: `/verses/submit_research_form/`
-
-3. **`researcher_form.html`** - فرم ویرایش نظر (محقق)
+2. **`researcher_form.html`** - فرم ویرایش نظر (محقق)
    - برای محققین در صفحه شعر
    - امکان ویرایش نظر موجود
    - مدیریت کامل عکس‌ها و زیرموضوعات
    - endpoint: `/verses/submit_research_form/`
 
-4. **`view_only_form.html`** - فرم مشاهده
+3. **`view_only_form.html`** - فرم مشاهده
    - حالت فقط خواندنی
    - نمایش عکس‌ها بدون امکان ویرایش
    - برای مشاهده عمومی در انتهای شعر
    - auto-resize برای textarea ها
 
-5. **`admin_form.html`** - فرم ادمین
+4. **`admin_form.html`** - فرم ادمین
    - برای ادمین در پنل مدیریت
    - امکان ویرایش نظر (بدون اضافه کردن)
    - مدیریت کامل عکس‌ها و زیرموضوعات
@@ -59,13 +53,6 @@
 ## نحوه استفاده:
 
 ### برای محقق (اضافه کردن نظر جدید):
-```python
-return render_template('research/add_research_form.html', 
-    title_id=title_id, 
-    poem_title=poem_title, 
-    comment_data=None)
-```
-
 ### برای محقق (ویرایش نظر موجود):
 ```python
 return render_template('research/researcher_form.html', 

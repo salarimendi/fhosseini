@@ -55,6 +55,13 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return f'<User {self.username}>'
 
+class Visit(db.Model):
+    """مدل آمار بازدید روزانه"""
+    __tablename__ = 'visits'
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(10), unique=True, nullable=False)  # YYYY-MM-DD
+    count = db.Column(db.Integer, default=0)
+
 class Title(db.Model):
     """مدل عناوین اشعار"""
     __tablename__ = 'titles'

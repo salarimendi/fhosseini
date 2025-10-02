@@ -1,77 +1,33 @@
-import json
-import os
 from datetime import datetime
-from flask import current_app
-
-def get_visit_file_path():
-    """مسیر فایل آمار بازدید را برمی‌گرداند"""
-    instance_path = current_app.instance_path
-    if not os.path.exists(instance_path):
-        os.makedirs(instance_path)
-    return os.path.join(instance_path, 'daily_visits.json')
-
-def load_visit_data():
-    """داده‌های بازدید را از فایل JSON بارگذاری می‌کند"""
-    visit_file = get_visit_file_path()
-    
-    if not os.path.exists(visit_file):
-        return {}
-    
-    try:
-        with open(visit_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            # اطمینان از اینکه داده‌ها dictionary است
-            if not isinstance(data, dict):
-                return {}
-            return data
-    except (json.JSONDecodeError, IOError, OSError) as e:
-        current_app.logger.error(f"خطا در خواندن فایل آمار بازدید: {e}")
-        return {}
-
-def save_visit_data(data):
-    """داده‌های بازدید را در فایل JSON ذخیره می‌کند"""
-    visit_file = get_visit_file_path()
-    
-    try:
-        with open(visit_file, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-        return True
-    except (IOError, OSError) as e:
-        current_app.logger.error(f"خطا در ذخیره فایل آمار بازدید: {e}")
-        return False
-
 def increment_visit():
-    """تعداد بازدید امروز را یک واحد افزایش می‌دهد"""
+    """تعداد بازدید امروز را یک واحد افزایش می‌دهد (دیتابیس)"""
+    from app import db
+    from app.models import Visit
     today = datetime.now().strftime('%Y-%m-%d')
-    
-    data = load_visit_data()
-    data[today] = data.get(today, 0) + 1
-    
-    if save_visit_data(data):
-        return data[today]
-    return 0
+    visit = Visit.query.filter_by(date=today).first()
+    if not visit:
+        visit = Visit(date=today, count=1)
+        db.session.add(visit)
+    else:
+        visit.count += 1
+    db.session.commit()
+    return visit.count
 
 def get_today_visits():
-    """تعداد بازدید امروز را برمی‌گرداند"""
+    """تعداد بازدید امروز را برمی‌گرداند (دیتابیس)"""
+    from app.models import Visit
     today = datetime.now().strftime('%Y-%m-%d')
-    data = load_visit_data()
-    return data.get(today, 0)
+    visit = Visit.query.filter_by(date=today).first()
+    return visit.count if visit else 0
 
 def get_total_visits():
-    """مجموع کل بازدیدها را برمی‌گرداند"""
-    data = load_visit_data()
-    if not data:
-        return 0
-    
-    total = 0
-    for date_str, visits in data.items():
-        if isinstance(visits, int) and visits > 0:
-            total += visits
-    
-    return total
+    """مجموع کل بازدیدها را برمی‌گرداند (دیتابیس)"""
+    from app import db
+    from app.models import Visit
+    total = db.session.query(db.func.sum(Visit.count)).scalar()
+    return total if total else 0
 
 def get_visit_stats():
-    """آمار کامل بازدیدها را برمی‌گرداند"""
     return {
         'today_visits': get_today_visits(),
         'total_visits': get_total_visits()
