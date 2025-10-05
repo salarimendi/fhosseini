@@ -306,7 +306,7 @@ def download_audio(recording_id):
     
     if not recording.is_approved:
         flash('این ضبط صوتی هنوز تأیید نشده است.', 'error')
-        return redirect(url_for('main.home'))
+        return redirect(url_for('main.index'))
     
     upload_folder = ensure_upload_folder()
     file_path = os.path.join(upload_folder, recording.filename)
@@ -502,19 +502,16 @@ def submit_research_form(title_id):
     except Exception as e:
         current_app.logger.error(f"Error in submit_research_form: {e}")
         return jsonify({'success': False, 'message': 'خطایی سیستمی رخ داده است'}), 500
+    
+
 @verses_bp.route('/view_research_comment/<int:comment_id>')
 def view_research_comment(comment_id):
     """نمایش نظر پژوهشی در حالت فقط خواندنی"""
     try:
-        # دریافت comment
         comment = Comment.query.get_or_404(comment_id)
         
-        # دریافت عنوان شعر از relationship
-        # فرض می‌کنیم که در model Comment رابطه‌ای با Title وجود دارد
-        title_obj = comment.poem_title  # اگر relationship با این نام وجود دارد
-        if not title_obj:
-            # اگر relationship مستقیم نیست، از title_id استفاده کنیم
-            title_obj = Title.query.get(comment.title_id)
+        # دریافت عنوان شعر
+        title_obj = comment.poem_title if hasattr(comment, 'poem_title') else Title.query.get(comment.title_id)
         
         if not title_obj:
             flash('شعر مربوط به این نظر یافت نشد', 'error')
@@ -522,7 +519,7 @@ def view_research_comment(comment_id):
         
         poem_title = title_obj.title
         
-        # تبدیل JSON نظر به دیکشنری
+        # تبدیل JSON نظر
         try:
             if isinstance(comment.comment, str):
                 comment_data = json.loads(comment.comment)
@@ -532,13 +529,7 @@ def view_research_comment(comment_id):
                 comment_data = {}
         except (json.JSONDecodeError, TypeError):
             current_app.logger.error(f"Error parsing comment JSON for comment_id: {comment_id}")
-            comment_data = {
-                'subtopics': [],
-                'extra_info': '',
-                'topic_narrative': '',
-                'historical_flaw': '',
-                'reform_theory': ''
-            }
+            comment_data = {}
         
         # اطمینان از وجود کلیدهای مورد نیاز
         default_data = {
@@ -553,34 +544,36 @@ def view_research_comment(comment_id):
             if key not in comment_data:
                 comment_data[key] = default_value
         
-        # دریافت نام نویسنده نظر
-        author_name = comment.author_name if hasattr(comment, 'author_name') and comment.author_name else 'نامشخص'
+        # دریافت نام نویسنده
+        author_name = getattr(comment, 'author_name', None) or 'نامشخص'
         if not author_name or author_name == 'نامشخص':
-            # اگر author_name خالی است، از user relationship استفاده کنیم
-            if hasattr(comment, 'user') and comment.user:
-                author_name = comment.user.username
+            if hasattr(comment, 'author') and comment.author:
+                author_name = comment.author.username
             elif hasattr(comment, 'user_id'):
                 user = User.query.get(comment.user_id)
                 author_name = user.username if user else 'نامشخص'
         
-        # دریافت مسیر بازگشت از پارامترهای URL
         return_url = request.args.get('return_url') or url_for('main.title', title_id=comment.title_id)
         
-        # رندر template
         return render_template('research/view_only_form.html', 
-                             title_id=comment.title_id,
-                             poem_title=poem_title,
-                             view_mode=True,
-                             comment_data=comment_data,
-                             username=author_name,
-                             comment=comment,
-                             return_url=return_url,
-                             config=current_app.config)
+                            title_id=comment.title_id,
+                            poem_title=poem_title,
+                            view_mode=True,
+                            comment_data=comment_data,
+                            username=author_name,
+                            comment=comment,
+                            comment_id_js=comment.id,  # اضافه شد
+                            return_url=return_url,
+                            research_image_url_prefix='/verses/research_image_file/',
+                            config=current_app.config)
         
     except Exception as e:
         current_app.logger.error(f"Error in view_research_comment: {e}")
         flash('خطا در نمایش نظر پژوهشی', 'error')
         return redirect(url_for('main.index'))
+
+
+
 
 @verses_bp.route('/research_image_file/<path:filename>')
 def research_image_file(filename):

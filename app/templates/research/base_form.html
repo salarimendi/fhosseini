@@ -51,10 +51,31 @@
             </div>
             {% endif %}
         {% endblock %}
+        
+        <!-- بلوک نمایش تصاویر در حالت فقط خواندنی -->
+{% block subtopic_images %}
+    {# نمایش تصاویر در حالت فقط خواندنی #}
+    {% if view_mode %}
+    <div class="col-12 mt-3">
+        <div class="research-images-block" data-subtopic-index="{{ loop.index0 }}">
+            <h6 class="text-muted mb-2">
+                <i class="fas fa-images"></i> تصاویر این زیرموضوع:
+            </h6>
+            <div class="research-images-list d-flex flex-wrap gap-2">
+                <div class="text-muted small">در حال بارگذاری تصاویر...</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
+		
+		
+		
+		
+		
+		
     </div>
 {% endfor %}
-
-
 
 
 
@@ -121,11 +142,11 @@
 {% endblock %}
 
 {% block scripts %}
-{% set comment_id_js = (comment.id if comment and comment.id is not none else None) | tojson %}
+{% set comment_id_js = comment.id if (comment and comment.id) else None %}
 
 <script>
 // متغیرهای سراسری برای تمپلیت‌های فرزند
-var commentId = {{ comment_id_js if comment_id_js is not none else 'null' }};
+var commentId = {% if comment_id_js %}{{ comment_id_js }}{% else %}null{% endif %};
 var viewMode = {{ 'true' if view_mode else 'false' }};
 
 // کلاس مدیریت فرم پایه (بدون مدیریت عکس)
@@ -340,20 +361,6 @@ class BaseFormManager {
         }
     }
 }
-
-// راه‌اندازی مدیر فرم پایه
-
-//document.addEventListener('DOMContentLoaded', function() {
-//    if (!window.baseFormManager && !window.formManager) {  // جلوگیری از ساخت دوباره
-//        window.baseFormManager = new BaseFormManager();
-
-//        const event = new CustomEvent('baseFormManagerReady', {
-//            detail: { baseFormManager: window.baseFormManager }
-//        });
-//        document.dispatchEvent(event);
-//    }
-//});
-
 
 
 
