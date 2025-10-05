@@ -25,34 +25,34 @@
 
 
 {% if comment_data and comment_data.subtopics %}
-    {% for subtopic in comment_data.subtopics %}
-        <div class="row mb-2 subtopic-row" data-index="{{ loop.index0 }}">
-            <div class="col-md-5">
-                <textarea class="form-control auto-resize subtopic-title" 
-                       placeholder="زیرموضوع" 
-                       {% if view_mode %}readonly{% else %}required{% endif %}>{{ subtopic.title if subtopic.title else '' }}</textarea>
-            </div>
-            <div class="col-md-5">
-                <textarea class="form-control auto-resize subtopic-sources" 
-                       placeholder="منابع تاریخی"
-                       {% if view_mode %}readonly{% endif %}>{{ subtopic.sources if subtopic.sources else '' }}</textarea>
-            </div>
-            
-            {% block subtopic_buttons %}
-                {% if not view_mode %}
-                <div class="col-md-1">
-                    <button type="button" class="btn btn-danger btn-sm remove-subtopic" title="حذف زیرموضوع">×</button>
-                </div>
 
-                <div class="col-md-1">
-                    <button type="button" class="btn btn-info btn-sm manage-images-btn"
-                        data-subtopic-index="{{ loop.index0 if loop is defined else 0 }}"
-                        title="مدیریت عکس‌های این زیرموضوع">📷</button>
-                </div>
-                {% endif %}
-            {% endblock %}
+{% for subtopic in comment_data.subtopics %}
+    <div class="row mb-2 subtopic-row" data-index="{{ loop.index0 }}">
+        <div class="col-md-5">
+            <textarea class="form-control auto-resize subtopic-title" 
+                   placeholder="زیرموضوع" 
+                   {% if view_mode %}readonly{% else %}required{% endif %}>{{ subtopic.title if subtopic.title else '' }}</textarea>
         </div>
-    {% endfor %}
+        <div class="col-md-5">
+            <textarea class="form-control auto-resize subtopic-sources" 
+                   placeholder="منابع تاریخی"
+                   {% if view_mode %}readonly{% endif %}>{{ subtopic.sources if subtopic.sources else '' }}</textarea>
+        </div>
+        
+        {% block subtopic_buttons %}
+            {% if not view_mode %}
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger btn-sm remove-subtopic" title="حذف زیرموضوع">×</button>
+            </div>
+
+            <div class="col-md-1">
+                <button type="button" class="btn btn-info btn-sm manage-images-btn"
+    title="مدیریت عکس‌های این زیرموضوع">📷</button>
+            </div>
+            {% endif %}
+        {% endblock %}
+    </div>
+{% endfor %}
 
 
 
@@ -184,37 +184,46 @@ class BaseFormManager {
             }
         });
         
-        // دکمه مدیریت عکس‌ها
-        document.addEventListener('click', (e) => {
-            const button = e.target.closest('.manage-images-btn');
-            if (button) {
-                e.preventDefault();
-                const subtopicIndex = button.getAttribute('data-subtopic-index');
-                console.log('Clicked button with index:', subtopicIndex); // برای دیباگ
-                this.openImageManager(subtopicIndex);
-            }
-        });
+
+		
+
+		// دکمه مدیریت عکس‌ها
+		document.addEventListener('click', (e) => {
+			const button = e.target.closest('.manage-images-btn');
+			if (button) {
+				e.preventDefault();
+				const row = button.closest('.subtopic-row');
+				const subtopicIndex = row.getAttribute('data-index');
+				console.log('Clicked button with index:', subtopicIndex);
+				this.openImageManager(subtopicIndex);
+			}
+		});		
+		
+		
     }
     
-    // باز کردن صفحه مدیریت عکس‌ها
-    openImageManager(subtopicIndex) {
-        console.log('Opening for index:', subtopicIndex, 'commentId:', commentId); // برای دیباگ
-        
-        if (!commentId) {
-            alert('ابتدا باید فرم پژوهشی را ذخیره کنید');
-            return;
-        }
-        
-        if (subtopicIndex === null || subtopicIndex === undefined || subtopicIndex === '') {
-            alert('خطا: شماره زیرموضوع یافت نشد');
-            return;
-        }
-        
-        const url = `/verses/manage_research_images/${commentId}/${subtopicIndex}`;
-        console.log('Opening URL:', url); // برای دیباگ
-        window.open(url, '_blank', 'width=900,height=700');
-    }
-
+	 // باز کردن صفحه مدیریت عکس‌ها
+	openImageManager(subtopicIndex) {
+		console.log('Opening for index:', subtopicIndex, 'commentId:', commentId);
+		
+		if (!commentId) {
+			alert('ابتدا باید فرم پژوهشی را ذخیره کنید');
+			return;
+		}
+		
+		// تبدیل به عدد و اعتبارسنجی
+		const index = parseInt(subtopicIndex, 10);
+		if (isNaN(index) || index < 0) {
+			alert('خطا: شماره زیرموضوع نامعتبر است');
+			console.error('Invalid subtopic index:', subtopicIndex);
+			return;
+		}
+		
+		const url = `/verses/manage_research_images/${commentId}/${index}`;
+		console.log('Opening URL:', url);
+		window.open(url, '_blank', 'width=900,height=700');
+	}
+   
 
     // افزودن زیرموضوع جدید
     addSubtopic() {
