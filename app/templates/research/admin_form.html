@@ -40,7 +40,7 @@
 
 {% block form_scripts %}
 <script>
-// Extend BaseFormManager for admin form functionality
+// کلاس مدیر فرم ادمین - مشابه ResearcherFormManager با قابلیت‌های اضافی
 class AdminFormManager extends BaseFormManager {
     constructor() {
         super();
@@ -49,137 +49,35 @@ class AdminFormManager extends BaseFormManager {
     }
     
     initAdminFormSpecifics() {
-        // Load existing images
-        this.loadExistingImages();
-        
-        // Bind form submission
+        // اتصال رویداد ارسال فرم
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
         
-        // Bind admin-specific buttons
+        // اتصال دکمه‌های ادمین
         this.bindAdminButtons();
         
-        // Initialize with at least one subtopic if none exist
+        // اطمینان از وجود حداقل یک زیرموضوع
         if (document.querySelectorAll('.subtopic-row').length === 0) {
             this.addSubtopic();
         }
     }
     
     bindAdminButtons() {
-        // Approve button
+        // دکمه تایید
         const approveBtn = document.getElementById('approveButton');
         if (approveBtn) {
             approveBtn.addEventListener('click', () => this.handleStatusChange('approved'));
         }
         
-        // Reject button
+        // دکمه رد
         const rejectBtn = document.getElementById('rejectButton');
         if (rejectBtn) {
             rejectBtn.addEventListener('click', () => this.handleStatusChange('rejected'));
         }
         
-        // Delete button
+        // دکمه حذف
         const deleteBtn = document.getElementById('deleteButton');
         if (deleteBtn) {
             deleteBtn.addEventListener('click', () => this.handleDelete());
-        }
-    }
-    
-    async loadExistingImages() {
-        if (this.commentId !== null) {
-            const subtopicRows = document.querySelectorAll('.subtopic-row');
-            
-            for (let i = 0; i < subtopicRows.length; i++) {
-                const row = subtopicRows[i];
-                const block = row.querySelector('.research-images-block');
-                const subtopicIndex = block.getAttribute('data-subtopic-index');
-                
-                if (!this.researchImages[subtopicIndex]) {
-                    this.researchImages[subtopicIndex] = [];
-                }
-                
-                try {
-                    const response = await fetch(`/verses/get_research_images/${this.commentId}/${subtopicIndex}`);
-                    const data = await response.json();
-                    
-                    if (data.images && Array.isArray(data.images)) {
-                        data.images.forEach(img => {
-                            this.researchImages[subtopicIndex].push({
-                                id: img.id,
-                                preview: researchImageUrlPrefix + img.filename,
-                                caption: img.caption || '',
-                                isServer: true
-                            });
-                        });
-                        this.renderResearchImages(subtopicIndex, block);
-                    }
-                } catch (error) {
-                    console.error('Error loading images for subtopic', subtopicIndex, ':', error);
-                }
-            }
-        }
-    }
-    
-    // Override renderResearchImages to handle server images
-    renderResearchImages(subtopicIndex, block) {
-        const listDiv = block.querySelector('.research-images-list');
-        listDiv.innerHTML = '';
-        
-        (this.researchImages[subtopicIndex] || []).forEach((imgObj, idx) => {
-            const imgDiv = document.createElement('div');
-            imgDiv.className = 'd-inline-block m-1 position-relative';
-            imgDiv.innerHTML = `
-                <img src="${imgObj.preview}" style="max-width:100px;max-height:100px;border:1px solid #ccc;border-radius:4px;" alt="تصویر پژوهشی">
-                <input type="text" class="form-control form-control-sm mt-1 research-image-caption" 
-                       placeholder="کپشن" value="${imgObj.caption || ''}" 
-                       data-img-idx="${idx}" style="max-width:100px;">
-                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-image-btn" 
-                        data-img-idx="${idx}" ${imgObj.isServer ? `data-server-id="${imgObj.id}"` : ''} 
-                        style="z-index:2;" title="حذف تصویر">×</button>
-            `;
-            listDiv.appendChild(imgDiv);
-        });
-    }
-    
-    // Override handleImageRemoval to handle server images
-    handleImageRemoval(e) {
-        const block = e.target.closest('.research-images-block');
-        const subtopicIndex = block.getAttribute('data-subtopic-index');
-        const idx = parseInt(e.target.getAttribute('data-img-idx'));
-        const serverId = e.target.getAttribute('data-server-id');
-        
-        if (serverId) {
-            // Remove server image
-            if (confirm('آیا از حذف این عکس مطمئن هستید؟')) {
-                this.removeServerImage(serverId, subtopicIndex, idx, block);
-            }
-        } else {
-            // Remove local image
-            this.researchImages[subtopicIndex].splice(idx, 1);
-            this.renderResearchImages(subtopicIndex, block);
-        }
-    }
-    
-    async removeServerImage(serverId, subtopicIndex, idx, block) {
-        try {
-            const response = await fetch(`/verses/delete_research_image/${serverId}`, {
-                method: 'POST',
-                headers: { 
-                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                this.researchImages[subtopicIndex].splice(idx, 1);
-                this.renderResearchImages(subtopicIndex, block);
-            } else {
-                alert(data.message || 'خطا در حذف عکس');
-            }
-        } catch (error) {
-            console.error('Error removing server image:', error);
-            alert('خطا در حذف عکس: ' + error.message);
         }
     }
     
@@ -189,14 +87,18 @@ class AdminFormManager extends BaseFormManager {
         try {
             this.showLoading(true);
             
+            // جمع‌آوری داده‌های زیرموضوعات
             const subtopics = this.collectSubtopicsData();
+            
             if (subtopics.length === 0) {
                 alert('لطفا حداقل یک زیرموضوع وارد کنید');
                 return;
             }
             
+            // ساخت FormData برای ارسال
             const formData = this.buildFormData(subtopics);
             
+            // ارسال به سرور
             const response = await fetch(`/admin/comments/${this.commentId}/research-update`, {
                 method: 'POST',
                 body: formData,
@@ -223,29 +125,16 @@ class AdminFormManager extends BaseFormManager {
     buildFormData(subtopics) {
         const formData = new FormData();
         
-        // Add basic form fields
+        // افزودن فیلدهای اصلی فرم
         formData.append('extra_info', document.getElementById('extraInfo').value.trim());
         formData.append('topic_narrative', document.getElementById('topicNarrative').value.trim());
         formData.append('historical_flaw', document.getElementById('historicalFlaw').value.trim());
         formData.append('reform_theory', document.getElementById('reformTheory').value.trim());
         formData.append('return_url', this.returnUrl);
         formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
-        formData.append('subtopics', JSON.stringify(subtopics));
         
-        // Add images
-        Object.keys(this.researchImages).forEach(subIdx => {
-            (this.researchImages[subIdx] || []).forEach((imgObj) => {
-                if (!imgObj.isServer && imgObj.file) {
-                    // New images
-                    formData.append(`images_${subIdx}[]`, imgObj.file);
-                    formData.append(`captions_${subIdx}[]`, imgObj.caption || '');
-                } else if (imgObj.isServer) {
-                    // Existing images with updated captions
-                    formData.append(`existing_captions_${subIdx}[]`, imgObj.caption || '');
-                    formData.append(`existing_image_ids_${subIdx}[]`, imgObj.id);
-                }
-            });
-        });
+        // افزودن زیرموضوعات به صورت JSON
+        formData.append('subtopics', JSON.stringify(subtopics));
         
         return formData;
     }
@@ -258,31 +147,33 @@ class AdminFormManager extends BaseFormManager {
             data = await response.json();
         } else {
             const text = await response.text();
-            throw new Error('Unexpected server error: ' + text.substring(0, 200));
+            throw new Error('خطای غیرمنتظره سرور: ' + text.substring(0, 200));
         }
         
         if (!response.ok) {
-            throw new Error(data.message || 'Error updating comment');
+            throw new Error(data.message || 'خطا در بروزرسانی نظر');
         }
         
         return data;
     }
     
     async handleStatusChange(status) {
-        const confirmMessage = status === 'approved' ? 'آیا از تایید این نظر مطمئن هستید؟' : 'آیا از رد این نظر مطمئن هستید؟';
+        const confirmMessage = status === 'approved' 
+            ? 'آیا از تایید این نظر مطمئن هستید؟' 
+            : 'آیا از رد این نظر مطمئن هستید؟';
         
         if (confirm(confirmMessage)) {
             try {
                 const endpoint = status === 'approved' 
                     ? `/admin/comments/${this.commentId}/approve` 
                     : `/admin/comments/${this.commentId}/reject`;
+                    
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
                     },
-                    body: JSON.stringify({ status: status }),
                     credentials: 'same-origin'
                 });
                 
@@ -302,7 +193,7 @@ class AdminFormManager extends BaseFormManager {
     }
     
     async handleDelete() {
-        if (confirm('آیا از حذف این نظر مطمئن هستید؟ این عمل قابل بازگشت نیست.')) {
+        if (confirm('آیا از حذف این نظر مطمئن هستید? این عمل قابل بازگشت نیست.')) {
             if (confirm('توجه: تمام اطلاعات مربوط به این نظر از جمله تصاویر حذف خواهد شد. آیا مطمئن هستید؟')) {
                 try {
                     const response = await fetch(`/admin/comments/delete/${this.commentId}`, {
@@ -331,7 +222,7 @@ class AdminFormManager extends BaseFormManager {
     }
 }
 
-// Initialize admin form manager when DOM is loaded
+// راه‌اندازی مدیر فرم ادمین
 document.addEventListener('DOMContentLoaded', function() {
     window.formManager = new AdminFormManager();
 });

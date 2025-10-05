@@ -145,19 +145,12 @@ def get_statistics():
 
 def save_research_form(comment_obj, data, files, config, is_admin=False):
     """
-    ذخیره یا ویرایش فرم پژوهشی (زیرموضوعات، عکس‌ها و ...)
-    comment_obj: شیء Comment موجود یا None برای ایجاد جدید
-    data: dict داده‌های فرم (subtopics, extra_info, ...)
-    files: request.files
-    config: current_app.config
-    is_admin: اگر True باشد یعنی ادمین ویرایش می‌کند
-    خروجی: (comment_obj, message)
+    ذخیره یا ویرایش فرم پژوهشی (فقط زیرموضوعات و فیلدهای متنی)
+    مدیریت عکس‌ها به صورت جداگانه انجام می‌شود
     """
-    import os, uuid, json
+    import json
     from datetime import datetime
-    from werkzeug.utils import secure_filename
     from app import db
-    from app.models import ResearchImage
 
     subtopics = data.get('subtopics', [])
     extra_info = data.get('extra_info', '')
@@ -191,7 +184,7 @@ def save_research_form(comment_obj, data, files, config, is_admin=False):
         comment_obj.updated_at = datetime.utcnow()
         message = 'فرم پژوهشی با موفقیت ویرایش شد'
     else:
-        # ایجاد نظر جدید (باید user_id و title_id ست شود قبل از فراخوانی این تابع)
+        # ایجاد نظر جدید
         from app.models import Comment
         comment_obj = Comment(
             user_id=data['user_id'],
@@ -200,62 +193,6 @@ def save_research_form(comment_obj, data, files, config, is_admin=False):
             status='approved' if is_admin or data.get('is_admin') else 'pending'
         )
         db.session.add(comment_obj)
-        db.session.flush()  # تا id داشته باشیم
-        message = 'فرم پژوهشی با موفقیت ثبت شد' + ('' if is_admin else ' و پس از تأیید نمایش داده خواهد شد')
-
-    # اضافه کردن عکس‌های جدید و به‌روزرسانی کپشن‌های عکس‌های موجود
-    for idx, subtopic in enumerate(subtopics):
-        # پردازش عکس‌های جدید
-        img_files = files.getlist(f'images_{idx}[]') if files else []
-        captions = data.get(f'captions_{idx}[]', [])
-        if not isinstance(captions, list):
-            # اگر فقط یک مقدار است
-            captions = [captions]
-        for i, file in enumerate(img_files):
-            if file and file.filename:
-                ext = file.filename.rsplit('.', 1)[1].lower()
-                allowed_exts = config['RESEARCH_IMAGE_ALLOWED_EXTENSIONS']
-                if ext not in allowed_exts:
-                    continue
-                file.seek(0, os.SEEK_END)
-                file_size = file.tell()
-                file.seek(0)
-                max_size = config['RESEARCH_IMAGE_MAX_SIZE_MB'] * 1024 * 1024
-                if file_size > max_size:
-                    continue
-                unique_filename = f"comment{comment_obj.id}_subtopic{idx}_{uuid.uuid4().hex}.{ext}"
-                upload_folder = config['RESEARCH_IMAGE_UPLOAD_FOLDER']
-                os.makedirs(upload_folder, exist_ok=True)
-                file_path = os.path.join(upload_folder, unique_filename)
-                file.save(file_path)
-                caption = captions[i] if i < len(captions) else ''
-                image = ResearchImage(
-                    comment_id=comment_obj.id,
-                    subtopic_index=idx,
-                    filename=unique_filename,
-                    original_filename=secure_filename(file.filename),
-                    caption=caption,
-                    file_size=file_size,
-                    created_at=datetime.utcnow()
-                )
-                db.session.add(image)
-        
-        # به‌روزرسانی کپشن‌های عکس‌های موجود
-        existing_captions = data.get(f'existing_captions_{idx}[]', [])
-        existing_image_ids = data.get(f'existing_image_ids_{idx}[]', [])
-        if not isinstance(existing_captions, list):
-            existing_captions = [existing_captions]
-        if not isinstance(existing_image_ids, list):
-            existing_image_ids = [existing_image_ids]
-        
-        for i, image_id in enumerate(existing_image_ids):
-            if i < len(existing_captions):
-                # به‌روزرسانی کپشن عکس موجود
-                existing_image = ResearchImage.query.filter_by(
-                    id=image_id, 
-                    comment_id=comment_obj.id
-                ).first()
-                if existing_image:
-                    existing_image.caption = existing_captions[i]
+    
     db.session.commit()
     return comment_obj, message

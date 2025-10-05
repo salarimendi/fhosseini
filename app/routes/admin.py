@@ -324,7 +324,7 @@ def recordings():
 
     stats = {
         'total_recordings': total_recordings,
-        'total_size_mb': round(total_size_mb, 1),  # گرد کردن تا یک رقم اعشار
+        'total_size_mb': round(total_size_mb, 1),
         'active_readers': active_readers,
         'recorded_poems': recorded_poems
     }
@@ -412,7 +412,7 @@ def reject_recording(recording_id):
 @login_required
 @admin_required
 def edit_comment_research(comment_id):
-    """ویرایش نظر با فرم پژوهشی"""
+    """ویرایش نظر با فرم پژوهشی - بدون مدیریت عکس در این صفحه"""
     comment = Comment.query.get_or_404(comment_id)
     title = Title.query.get(comment.title_id) if comment.title_id else None
     
@@ -435,30 +435,47 @@ def edit_comment_research(comment_id):
 @login_required
 @admin_required
 def update_comment_research(comment_id):
-    """به‌روزرسانی نظر از فرم پژوهشی توسط ادمین (بدون تغییر user_id)"""
+    """به‌روزرسانی نظر از فرم پژوهشی توسط ادمین - فقط بخش متنی (بدون عکس)"""
     comment = Comment.query.get_or_404(comment_id)
+    
     try:
+        # دریافت داده‌ها
         if request.content_type and request.content_type.startswith('multipart/form-data'):
             data = request.form.to_dict(flat=False)
+            # تبدیل مقادیر تک مقداری به مقدار ساده
             for k, v in data.items():
                 if isinstance(v, list) and len(v) == 1:
                     data[k] = v[0]
+            
+            # تبدیل JSON subtopics
             subtopics = json.loads(data.get('subtopics', '[]'))
             data['subtopics'] = subtopics
-            files = request.files
-            # حذف حلقه getlist کپشن
         else:
             if not request.is_json:
-                return jsonify({'success': False, 'message': 'درخواست باید به صورت JSON یا فرم باشد'} )
+                return jsonify({'success': False, 'message': 'درخواست باید به صورت JSON یا فرم باشد'}), 400
             data = request.get_json()
-            files = None
+        
         # user_id و title_id را از comment اصلی می‌گیریم تا تغییر نکند
         data['user_id'] = comment.user_id
         data['title_id'] = comment.title_id
-        comment_obj, message = save_research_form(comment, data, files, current_app.config, is_admin=True)
-        return jsonify({'success': True, 'message': message, 'return_url': url_for('admin.comments')})
+        
+        # ذخیره فرم پژوهشی (فقط بخش متنی، بدون عکس)
+        comment_obj, message = save_research_form(
+            comment, 
+            data, 
+            None,  # files=None چون عکس‌ها جداگانه مدیریت می‌شوند
+            current_app.config, 
+            is_admin=True
+        )
+        
+        return jsonify({
+            'success': True, 
+            'message': message, 
+            'return_url': url_for('admin.comments')
+        })
+        
     except ValueError as ve:
-        return jsonify({'success': False, 'message': str(ve)})
+        return jsonify({'success': False, 'message': str(ve)}), 400
     except Exception as e:
         current_app.logger.error(f"Error saving research form (admin): {e}")
-        return jsonify({'success': False, 'message': 'خطا در ثبت فرم پژوهشی'})
+        return jsonify({'success': False, 'message': 'خطا در ثبت فرم پژوهشی'}), 500

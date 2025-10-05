@@ -416,50 +416,68 @@ def get_research_form():
 @verses_bp.route('/submit_research_form/<int:title_id>', methods=['POST'])
 @login_required
 def submit_research_form(title_id):
+    """ثبت یا ویرایش فرم پژوهشی (بدون مدیریت عکس)"""
     try:
         if current_user.role != 'researcher':
             return jsonify({'success': False, 'message': 'شما مجاز به ثبت فرم پژوهشی نیستید'}), 403
+        
         title = Title.query.get(title_id)
         if not title:
             return jsonify({'success': False, 'message': 'شعر مورد نظر یافت نشد'}), 404
+        
+        # دریافت داده‌ها
         if request.content_type and request.content_type.startswith('multipart/form-data'):
             data = request.form.to_dict(flat=False)
             # تبدیل مقادیر تک مقداری به مقدار ساده
             for k, v in data.items():
                 if isinstance(v, list) and len(v) == 1:
                     data[k] = v[0]
+            
+            # تبدیل JSON subtopics
             subtopics = json.loads(data.get('subtopics', '[]'))
             data['subtopics'] = subtopics
-            data['user_id'] = current_user.id
-            data['title_id'] = title_id
-            data['is_admin'] = current_user.is_admin() if hasattr(current_user, 'is_admin') else False
-            files = request.files
-            # حذف حلقه getlist کپشن
-            return_url = data.get('return_url') or url_for('main.title', title_id=title_id)
         else:
             if not request.is_json:
                 return jsonify({'success': False, 'message': 'درخواست باید به صورت JSON یا فرم باشد'}), 400
             data = request.get_json()
-            data['user_id'] = current_user.id
-            data['title_id'] = title_id
-            data['is_admin'] = current_user.is_admin() if hasattr(current_user, 'is_admin') else False
-            files = None
-            return_url = data.get('return_url') or url_for('main.title', title_id=title_id)
+        
+        # افزودن اطلاعات ضروری
+        data['user_id'] = current_user.id
+        data['title_id'] = title_id
+        data['is_admin'] = current_user.is_admin() if hasattr(current_user, 'is_admin') else False
+        
+        return_url = data.get('return_url') or url_for('main.title', title_id=title_id)
+        
         # پیدا کردن comment موجود
         from app.models import Comment
         existing_comment = Comment.query.filter_by(user_id=current_user.id, title_id=title_id).first()
+        
         try:
-            comment_obj, message = save_research_form(existing_comment, data, files, current_app.config, is_admin=current_user.is_admin() if hasattr(current_user, 'is_admin') else False)
-            return jsonify({'success': True, 'message': message, 'return_url': return_url})
+            # ذخیره فرم (بدون عکس‌ها)
+            comment_obj, message = save_research_form(
+                existing_comment, 
+                data, 
+                None,  # files=None چون دیگر اینجا عکس آپلود نمی‌شود
+                current_app.config, 
+                is_admin=data['is_admin']
+            )
+            
+            return jsonify({
+                'success': True, 
+                'message': message, 
+                'comment_id': comment_obj.id,
+                'return_url': return_url
+            })
+            
         except ValueError as ve:
             return jsonify({'success': False, 'message': str(ve)}), 400
         except Exception as e:
             current_app.logger.error(f"Error saving research form: {e}")
             return jsonify({'success': False, 'message': 'خطا در ثبت فرم پژوهشی'}), 500
+            
     except Exception as e:
         current_app.logger.error(f"Error in submit_research_form: {e}")
-        return jsonify({'success': False, 'message': 'خطای سیستمی رخ داده است'}), 500
-
+        return jsonify({'success': False, 'message': 'خطایی سیستمی رخ داده است'}), 500
 @verses_bp.route('/view_research_comment/<int:comment_id>')
 def view_research_comment(comment_id):
     """نمایش نظر پژوهشی در حالت فقط خواندنی"""
@@ -563,3 +581,52 @@ def research_image_file(filename):
     except Exception as e:
         current_app.logger.error(f"Error serving research image: {e}")
         return "خطا در بارگذاری تصویر", 500
+        
+        
+@verses_bp.route('/manage_research_images/<int:comment_id>/<int:subtopic_index>')
+@login_required
+def manage_research_images(comment_id, subtopic_index):
+    """صفحه مدیریت عکس‌های یک زیرموضوع خاص"""
+    comment = Comment.query.get_or_404(comment_id)
+    
+    # بررسی دسترسی
+    is_readonly = True
+    if current_user.id == comment.user_id or current_user.is_admin():
+        is_readonly = False
+    
+    # دریافت عنوان زیرموضوع از JSON
+    try:
+        comment_data = json.loads(comment.comment) if isinstance(comment.comment, str) else comment.comment
+        subtopics = comment_data.get('subtopics', [])
+        subtopic_title = subtopics[subtopic_index]['title'] if subtopic_index < len(subtopics) else f'زیرموضوع {subtopic_index + 1}'
+    except:
+        subtopic_title = f'زیرموضوع {subtopic_index + 1}'
+    
+    return render_template('research/manage_images.html',
+                         comment_id=comment_id,
+                         subtopic_index=subtopic_index,
+                         subtopic_title=subtopic_title,
+                         is_readonly=is_readonly,
+                         config=current_app.config)
+
+@verses_bp.route('/update_research_image_caption/<int:image_id>', methods=['POST'])
+@login_required
+def update_research_image_caption(image_id):
+    """به‌روزرسانی کپشن عکس پژوهشی"""
+    image = ResearchImage.query.get_or_404(image_id)
+    comment = image.comment
+    
+    if not (current_user.id == comment.user_id or current_user.is_admin()):
+        return jsonify({'success': False, 'message': 'شما مجوز ندارید.'}), 403
+    
+    data = request.get_json()
+    caption = data.get('caption', '')
+    
+    try:
+        image.caption = caption
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'کپشن با موفقیت به‌روزرسانی شد'})
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error updating caption: {e}")
+        return jsonify({'success': False, 'message': 'خطا در به‌روزرسانی کپشن'}), 500
