@@ -196,3 +196,56 @@ def save_research_form(comment_obj, data, files, config, is_admin=False):
     
     db.session.commit()
     return comment_obj, message
+
+##### توابع جدید برای فرم عکس
+
+
+
+def get_subtopic_images(comment_id, subtopic_index):
+    """دریافت تصاویر یک زیرموضوع خاص"""
+    from app.models import ResearchImage
+    return ResearchImage.query.filter_by(
+        comment_id=comment_id,
+        subtopic_index=subtopic_index
+    ).order_by(ResearchImage.created_at).all()
+
+def delete_all_subtopic_images(comment_id, subtopic_index):
+    """حذف تمام تصاویر یک زیرموضوع"""
+    import os
+    from flask import current_app
+    from app.models import ResearchImage
+    
+    images = ResearchImage.query.filter_by(
+        comment_id=comment_id,
+        subtopic_index=subtopic_index
+    ).all()
+    
+    folder = current_app.config['RESEARCH_IMAGE_UPLOAD_FOLDER']
+    
+    for image in images:
+        # حذف فایل فیزیکی
+        file_path = os.path.join(folder, image.filename)
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                current_app.logger.error(f"Error deleting image file {file_path}: {e}")
+        
+        # حذف رکورد از دیتابیس
+        db.session.delete(image)
+    
+    db.session.commit()
+
+def validate_image_access(image_id, user_id, is_admin=False):
+    """بررسی دسترسی کاربر به یک تصویر"""
+    from app.models import ResearchImage
+    
+    image = ResearchImage.query.get(image_id)
+    if not image:
+        return None, "تصویر یافت نشد"
+    
+    comment = image.comment
+    if not (user_id == comment.user_id or is_admin):
+        return None, "شما مجوز دسترسی به این تصویر را ندارید"
+    
+    return image, None

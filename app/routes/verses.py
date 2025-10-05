@@ -51,48 +51,72 @@ def get_research_image_upload_folder():
 
 from app.models import ResearchImage
 
+
+######## 
+# اصلاح تابع upload_research_image برای error handling بهتر
 @verses_bp.route('/upload_research_image/<int:comment_id>/<int:subtopic_index>', methods=['POST'])
 @login_required
 def upload_research_image(comment_id, subtopic_index):
-    comment = Comment.query.get_or_404(comment_id)
-    if not (current_user.id == comment.user_id or current_user.is_admin()):
-        return jsonify({'success': False, 'message': 'شما مجوز ندارید.'}), 403
+    try:
+        comment = Comment.query.get_or_404(comment_id)
+        if not (current_user.id == comment.user_id or current_user.is_admin()):
+            return jsonify({'success': False, 'message': 'شما مجوز ندارید.'}), 403
 
-    if 'image' not in request.files:
-        return jsonify({'success': False, 'message': 'فایل انتخاب نشده است.'}), 400
+        if 'image' not in request.files:
+            return jsonify({'success': False, 'message': 'فایل انتخاب نشده است.'}), 400
 
-    file = request.files['image']
-    if file.filename == '':
-        return jsonify({'success': False, 'message': 'فایل انتخاب نشده است.'}), 400
+        file = request.files['image']
+        if file.filename == '':
+            return jsonify({'success': False, 'message': 'فایل انتخاب نشده است.'}), 400
 
-    if not allowed_research_image(file.filename):
-        return jsonify({'success': False, 'message': 'فرمت فایل مجاز نیست.'}), 400
+        if not allowed_research_image(file.filename):
+            return jsonify({'success': False, 'message': 'فرمت فایل مجاز نیست.'}), 400
 
-    file.seek(0, os.SEEK_END)
-    file_size = file.tell()
-    file.seek(0)
-    max_size = current_app.config['RESEARCH_IMAGE_MAX_SIZE_MB'] * 1024 * 1024
-    if file_size > max_size:
-        return jsonify({'success': False, 'message': f'حجم فایل نباید بیشتر از {current_app.config["RESEARCH_IMAGE_MAX_SIZE_MB"]} مگابایت باشد.'}), 400
+        # بررسی حجم فایل
+        file.seek(0, os.SEEK_END)
+        file_size = file.tell()
+        file.seek(0)
+        max_size = current_app.config.get('RESEARCH_IMAGE_MAX_SIZE_MB', 5) * 1024 * 1024
+        
+        if file_size > max_size:
+            return jsonify({
+                'success': False, 
+                'message': f'حجم فایل نباید بیشتر از {current_app.config.get("RESEARCH_IMAGE_MAX_SIZE_MB", 5)} مگابایت باشد.'
+            }), 400
 
-    ext = file.filename.rsplit('.', 1)[1].lower()
-    unique_filename = f"comment{comment_id}_subtopic{subtopic_index}_{uuid.uuid4().hex}.{ext}"
-    upload_folder = get_research_image_upload_folder()
-    file_path = os.path.join(upload_folder, unique_filename)
-    file.save(file_path)
+        # ذخیره فایل
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        unique_filename = f"comment{comment_id}_subtopic{subtopic_index}_{uuid.uuid4().hex}.{ext}"
+        upload_folder = get_research_image_upload_folder()
+        file_path = os.path.join(upload_folder, unique_filename)
+        
+        file.save(file_path)
 
-    image = ResearchImage(
-        comment_id=comment_id,
-        subtopic_index=subtopic_index,
-        filename=unique_filename,
-        original_filename=secure_filename(file.filename),
-        file_size=file_size,
-        created_at=datetime.utcnow()
-    )
-    db.session.add(image)
-    db.session.commit()
-    return jsonify({'success': True, 'image_id': image.id, 'filename': unique_filename})
-
+        # ذخیره در دیتابیس
+        image = ResearchImage(
+            comment_id=comment_id,
+            subtopic_index=subtopic_index,
+            filename=unique_filename,
+            original_filename=secure_filename(file.filename),
+            file_size=file_size,
+            created_at=datetime.utcnow()
+        )
+        db.session.add(image)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True, 
+            'image_id': image.id, 
+            'filename': unique_filename,
+            'message': 'تصویر با موفقیت آپلود شد'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error uploading research image: {e}")
+        return jsonify({'success': False, 'message': 'خطا در آپلود تصویر'}), 500
+    
+    
 @verses_bp.route('/delete_research_image/<int:image_id>', methods=['POST'])
 @login_required
 def delete_research_image(image_id):

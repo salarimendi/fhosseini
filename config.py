@@ -48,8 +48,9 @@ class Config:
     # تنظیمات تصاویر پژوهشی
     RESEARCH_IMAGE_UPLOAD_FOLDER = os.path.join(basedir, 'uploads', 'research_images')
     RESEARCH_IMAGE_MAX_SIZE_MB = 5  # حجم به مگابایت
-    RESEARCH_IMAGE_ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
+    RESEARCH_IMAGE_ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
     
+
     # تنظیمات Session
     PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
     
