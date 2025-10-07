@@ -122,22 +122,30 @@ class AdminFormManager extends BaseFormManager {
         }
     }
     
-    buildFormData(subtopics) {
-        const formData = new FormData();
-        
-        // افزودن فیلدهای اصلی فرم
-        formData.append('extra_info', document.getElementById('extraInfo').value.trim());
-        formData.append('topic_narrative', document.getElementById('topicNarrative').value.trim());
-        formData.append('historical_flaw', document.getElementById('historicalFlaw').value.trim());
-        formData.append('reform_theory', document.getElementById('reformTheory').value.trim());
-        formData.append('return_url', this.returnUrl);
-        formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
-        
-        // افزودن زیرموضوعات به صورت JSON
-        formData.append('subtopics', JSON.stringify(subtopics));
-        
-        return formData;
-    }
+	
+// برای researcher_form.html و admin_form.html
+// در متد buildFormData، فیلدهای قدیمی را حذف و فیلدهای جدید اضافه کنید:
+
+	buildFormData(subtopics) {
+		const formData = new FormData();
+		
+		// افزودن فیلدهای اصلی فرم
+		formData.append('extra_info', document.getElementById('extraInfo').value.trim());
+		formData.append('topic_narrative', document.getElementById('topicNarrative').value.trim());
+		
+		// فیلدهای جدید نظریه پژوهشی
+		formData.append('primary_theory', document.getElementById('primaryTheory').value.trim());
+		formData.append('review_theory', document.getElementById('reviewTheory').value.trim());
+		formData.append('final_theory', document.getElementById('finalTheory').value.trim());
+		
+		formData.append('return_url', this.returnUrl);
+		formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+		
+		// افزودن زیرموضوعات به صورت JSON
+		formData.append('subtopics', JSON.stringify(subtopics));
+		
+		return formData;
+	}
     
     async handleResponse(response) {
         let data;

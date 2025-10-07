@@ -143,6 +143,9 @@ def get_statistics():
     }
     return stats
 
+
+
+
 def save_research_form(comment_obj, data, files, config, is_admin=False):
     """
     ذخیره یا ویرایش فرم پژوهشی (فقط زیرموضوعات و فیلدهای متنی)
@@ -155,8 +158,11 @@ def save_research_form(comment_obj, data, files, config, is_admin=False):
     subtopics = data.get('subtopics', [])
     extra_info = data.get('extra_info', '')
     topic_narrative = data.get('topic_narrative', '')
-    historical_flaw = data.get('historical_flaw', '')
-    reform_theory = data.get('reform_theory', '')
+    
+    # فیلدهای جدید نظریه پژوهشی
+    primary_theory = data.get('primary_theory', '')
+    review_theory = data.get('review_theory', '')
+    final_theory = data.get('final_theory', '')
 
     # اعتبارسنجی داده‌ها
     if not isinstance(subtopics, list):
@@ -173,8 +179,9 @@ def save_research_form(comment_obj, data, files, config, is_admin=False):
         'subtopics': [{ 'title': s.get('title'), 'sources': s.get('sources', '') } for s in subtopics],
         'extra_info': extra_info,
         'topic_narrative': topic_narrative,
-        'historical_flaw': historical_flaw,
-        'reform_theory': reform_theory,
+        'primary_theory': primary_theory,
+        'review_theory': review_theory,
+        'final_theory': final_theory,
         'form_type': 'research_form'
     }
 
@@ -196,6 +203,8 @@ def save_research_form(comment_obj, data, files, config, is_admin=False):
     
     db.session.commit()
     return comment_obj, message
+
+
 
 ##### توابع جدید برای فرم عکس
 

@@ -104,6 +104,9 @@
                             {% block add_subtopic_button %}{% endblock %}
                         </div>
 
+
+<!-- جایگزینی برای بخش فیلدهای انتهایی در base_form.html -->
+
                         <div class="mb-3">
                             <label for="extraInfo" class="form-label">اطلاعات تکمیلی</label>
                             <textarea class="form-control auto-resize" id="extraInfo" name="extra_info"
@@ -116,23 +119,49 @@
                                     {% if view_mode %}readonly{% endif %}>{{ comment_data.topic_narrative if comment_data else '' }}</textarea>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="historicalFlaw" class="form-label">نقص تاریخی</label>
-                            <textarea class="form-control auto-resize" id="historicalFlaw" name="historical_flaw"
-                                    {% if view_mode %}readonly{% endif %}>{{ comment_data.historical_flaw if comment_data else '' }}</textarea>
-                        </div>
+                        <!-- بخش جدید: نظریه پژوهشی -->
+                        <div class="research-theory-section {% if view_mode %}view-only{% endif %}">
+                            <label class="form-label fw-bold">نظریه پژوهشی (نقص تاریخی اشعار الهامی یا نیاز به اصلاح تاریخ)</label>
+                            
+                            <!-- نظریه محقق اصلی -->
+                            <div class="theory-field-wrapper theory-primary">
+                                <label for="primaryTheory" class="form-label">
+                                    <i class="fas fa-user-edit"></i> نظریه محقق اصلی
+                                </label>
+                                <textarea class="form-control auto-resize" id="primaryTheory" name="primary_theory"
+                                        {% if view_mode %}readonly{% endif %}
+                                        placeholder="نظریه اولیه محقق در مورد نقص تاریخی یا نیاز به اصلاح...">{{ comment_data.primary_theory if comment_data else '' }}</textarea>
+                            </div>
 
-                        <div class="mb-3">
-                            <label for="reformTheory" class="form-label">نظریه اصلاحی</label>
-                            <textarea class="form-control auto-resize" id="reformTheory" name="reform_theory"
-                                    {% if view_mode %}readonly{% endif %}>{{ comment_data.reform_theory if comment_data else '' }}</textarea>
+                            <!-- نظریه بازبینی -->
+                            <div class="theory-field-wrapper theory-review">
+                                <label for="reviewTheory" class="form-label">
+                                    <i class="fas fa-sync-alt"></i> نظریه بازبینی
+                                </label>
+                                <textarea class="form-control auto-resize" id="reviewTheory" name="review_theory"
+                                        {% if view_mode %}readonly{% endif %}
+                                        placeholder="بازبینی و اصلاح نظریه اولیه پس از بررسی بیشتر...">{{ comment_data.review_theory if comment_data else '' }}</textarea>
+                                <small class="text-muted">این فیلد برای بازبینی و تکمیل نظریه اولیه است</small>
+                            </div>
+
+                            <!-- نظریه نهایی -->
+                            <div class="theory-field-wrapper theory-final">
+                                <label for="finalTheory" class="form-label">
+                                    <i class="fas fa-check-circle"></i> نظریه نهایی
+                                </label>
+                                <textarea class="form-control auto-resize" id="finalTheory" name="final_theory"
+                                        {% if view_mode %}readonly{% endif %}
+                                        placeholder="نظریه نهایی و قطعی پس از تمام بررسی‌ها...">{{ comment_data.final_theory if comment_data else '' }}</textarea>
+                                <small class="text-muted">این فیلد نظریه نهایی و تثبیت شده را نمایش می‌دهد</small>
+                            </div>
                         </div>
 
                         <div class="d-grid gap-2">
                             {% block form_buttons %}
                                 <button type="button" class="btn btn-secondary" id="cancelButton">بازگشت</button>
                             {% endblock %}
-                        </div>
+                        </div>						
+						
                     </form>
                 </div>
             </div>
@@ -418,5 +447,133 @@ textarea.form-control {
     padding: 0.75rem 1.25rem;
     margin-bottom: 1rem;
 }
+
+/* ==========================================
+   استایل‌های جدید برای بخش نظریه پژوهشی
+   ========================================== */
+
+/* Container نظریه پژوهشی */
+.research-theory-section {
+    background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+    border: 2px solid #dee2e6;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-top: 2rem !important;
+    margin-bottom: 2rem !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Label اصلی */
+.research-theory-section > .form-label.fw-bold {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 3px solid #3498db;
+    display: block;
+}
+
+/* هر بخش نظریه */
+.theory-field-wrapper {
+    background: #ffffff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.theory-field-wrapper:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+/* Label‌های داخلی با آیکون */
+.theory-field-wrapper .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.theory-field-wrapper .form-label i {
+    font-size: 1rem;
+}
+
+/* رنگ‌بندی آیکون‌ها */
+.theory-primary .form-label i {
+    color: #3498db; /* آبی برای محقق اصلی */
+}
+
+.theory-review .form-label i {
+    color: #f39c12; /* نارنجی برای بازبینی */
+}
+
+.theory-final .form-label i {
+    color: #27ae60; /* سبز برای نهایی */
+}
+
+/* Textarea داخل بخش نظریه */
+.theory-field-wrapper textarea {
+    min-height: 120px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+.theory-field-wrapper textarea:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.theory-field-wrapper textarea[readonly] {
+    background-color: #f8f9fa;
+    cursor: default;
+}
+
+/* متن راهنما */
+.theory-field-wrapper small.text-muted {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: #6c757d;
+}
+
+/* حالت View-Only */
+.research-theory-section.view-only {
+    background: #ffffff;
+    border-color: #3498db;
+}
+
+.research-theory-section.view-only .theory-field-wrapper {
+    border-left: 4px solid #3498db;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .research-theory-section {
+        padding: 1rem;
+    }
+    
+    .research-theory-section > .form-label.fw-bold {
+        font-size: 1rem;
+    }
+    
+    .theory-field-wrapper {
+        padding: 0.75rem;
+    }
+    
+    .theory-field-wrapper textarea {
+        min-height: 100px;
+        font-size: 0.9rem;
+    }
+}
+
+
+
 </style>
 {% endblock %}
