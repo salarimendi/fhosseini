@@ -178,6 +178,9 @@ def delete_user(user_id):
         db.session.rollback()
         return jsonify({'success': False, 'message': 'خطا در حذف کاربر'})
 
+
+
+
 @admin_bp.route('/comments')
 @login_required
 @admin_required
@@ -186,8 +189,8 @@ def comments():
     page = request.args.get('page', 1, type=int)
     per_page = 20
     
-    # شروع query
-    query = Comment.query
+    # شروع query با join به Title
+    query = Comment.query.join(Title, Comment.title_id == Title.id, isouter=True)
     
     # اعمال فیلتر جستجو
     search = request.args.get('search', '')
@@ -204,12 +207,39 @@ def comments():
     if status_filter:
         query = query.filter(Comment.status == status_filter)
     
+    # اعمال فیلتر باغ
+    garden_filter = request.args.get('garden', '', type=str)
+    if garden_filter:
+        try:
+            garden_num = int(garden_filter)
+            query = query.filter(Title.garden == garden_num)
+        except ValueError:
+            pass
+    
+    # اعمال فیلتر ترتیب شعر در باغ
+    order_filter = request.args.get('order', '', type=str)
+    if order_filter:
+        try:
+            order_num = int(order_filter)
+            query = query.filter(Title.order_in_garden == order_num)
+        except ValueError:
+            pass
+    
     # مرتب‌سازی و صفحه‌بندی
     comments = query.order_by(Comment.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
     
-    return render_template('admin/comments.html', comments=comments)
+    # دریافت لیست باغ‌ها برای dropdown
+    gardens = db.session.query(
+        Title.garden,
+        db.func.count(db.distinct(Title.id)).label('count')
+    ).group_by(Title.garden).order_by(Title.garden).all()
+    
+    return render_template('admin/comments.html', 
+                         comments=comments, 
+                         gardens=gardens)
+
 
 @admin_bp.route('/comments/<int:comment_id>/edit', methods=['GET', 'POST'])
 @login_required

@@ -199,8 +199,6 @@ def save_research_form(comment_obj, data, files, config, is_admin=False):
 
 ##### توابع جدید برای فرم عکس
 
-
-
 def get_subtopic_images(comment_id, subtopic_index):
     """دریافت تصاویر یک زیرموضوع خاص"""
     from app.models import ResearchImage
@@ -249,3 +247,45 @@ def validate_image_access(image_id, user_id, is_admin=False):
         return None, "شما مجوز دسترسی به این تصویر را ندارید"
     
     return image, None
+
+
+def get_comments_filtered(page=1, per_page=20, search='', status='', garden=None, order=None):
+    """
+    دریافت نظرات با فیلترهای مختلف
+    """
+    query = Comment.query.join(Title, Comment.title_id == Title.id, isouter=True)
+    
+    # فیلتر جستجو
+    if search:
+        query = query.join(User).filter(
+            db.or_(
+                User.username.ilike(f'%{search}%'),
+                Comment.comment.ilike(f'%{search}%')
+            )
+        )
+    
+    # فیلتر وضعیت
+    if status:
+        query = query.filter(Comment.status == status)
+    
+    # فیلتر باغ
+    if garden is not None:
+        query = query.filter(Title.garden == garden)
+    
+    # فیلتر ترتیب
+    if order is not None:
+        query = query.filter(Title.order_in_garden == order)
+    
+    return query.order_by(Comment.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+def get_available_gardens():
+    """
+    دریافت لیست باغ‌های موجود با تعداد اشعار
+    """
+    from sqlalchemy import func
+    return db.session.query(
+        Title.garden,
+        func.count(db.distinct(Title.id)).label('poems_count')
+    ).group_by(Title.garden).order_by(Title.garden).all()
