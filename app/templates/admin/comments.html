@@ -69,6 +69,22 @@
                                        dir="rtl">
                             </div>
                             
+							<!-- فیلتر محقق - جدید -->
+							<div class="col-md-3">
+								<label class="form-label">محقق:</label>
+								<select name="researcher" class="form-select" dir="rtl">
+									<option value="">همه محققین</option>
+									{% for researcher in researchers %}
+									<option value="{{ researcher.id }}" 
+											{% if request.args.get('researcher') == researcher.id|string %}selected{% endif %}>
+										{{ researcher.username }} ({{ researcher.comment_count }} نظر)
+									</option>
+									{% endfor %}
+								</select>
+							</div>
+							
+							
+							
                             <!-- فیلتر وضعیت -->
                             <div class="col-md-2">
                                 <label class="form-label">وضعیت:</label>
@@ -122,35 +138,42 @@
             </div>
 
             <!-- نمایش فیلترهای فعال -->
-            {% if request.args.get('search') or request.args.get('status') or request.args.get('garden') or request.args.get('order') %}
-            <div class="alert alert-info mb-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>فیلترهای فعال:</strong>
-                        {% if request.args.get('search') %}
-                            <span class="badge bg-primary me-2">جستجو: {{ request.args.get('search') }}</span>
-                        {% endif %}
-                        {% if request.args.get('status') %}
-                            <span class="badge bg-info me-2">وضعیت: 
-                                {% if request.args.get('status') == 'approved' %}تأیید شده
-                                {% elif request.args.get('status') == 'pending' %}در انتظار
-                                {% else %}رد شده{% endif %}
-                            </span>
-                        {% endif %}
-                        {% if request.args.get('garden') %}
-                            <span class="badge bg-success me-2">باغ: {{ request.args.get('garden') }}</span>
-                        {% endif %}
-                        {% if request.args.get('order') %}
-                            <span class="badge bg-warning me-2">ترتیب: {{ request.args.get('order') }}</span>
-                        {% endif %}
-                    </div>
-                    <a href="{{ url_for('admin.comments') }}" class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-times me-1"></i>
-                        پاک کردن فیلترها
-                    </a>
-                </div>
-            </div>
-            {% endif %}
+			{% if request.args.get('search') or request.args.get('researcher') or request.args.get('status') or request.args.get('garden') or request.args.get('order') %}
+			<div class="alert alert-info mb-3">
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<strong>فیلترهای فعال:</strong>
+						{% if request.args.get('search') %}
+							<span class="badge bg-primary me-2">جستجو: {{ request.args.get('search') }}</span>
+						{% endif %}
+						{% if request.args.get('researcher') %}
+							<span class="badge bg-secondary me-2">محقق: 
+								{% for r in researchers %}
+									{% if r.id|string == request.args.get('researcher') %}{{ r.username }}{% endif %}
+								{% endfor %}
+							</span>
+						{% endif %}
+						{% if request.args.get('status') %}
+							<span class="badge bg-info me-2">وضعیت: 
+								{% if request.args.get('status') == 'approved' %}تأیید شده
+								{% elif request.args.get('status') == 'pending' %}در انتظار
+								{% else %}رد شده{% endif %}
+							</span>
+						{% endif %}
+						{% if request.args.get('garden') %}
+							<span class="badge bg-success me-2">باغ: {{ request.args.get('garden') }}</span>
+						{% endif %}
+						{% if request.args.get('order') %}
+							<span class="badge bg-warning me-2">ترتیب: {{ request.args.get('order') }}</span>
+						{% endif %}
+					</div>
+					<a href="{{ url_for('admin.comments') }}" class="btn btn-sm btn-outline-secondary">
+						<i class="fas fa-times me-1"></i>
+						پاک کردن فیلترها
+					</a>
+				</div>
+			</div>
+			{% endif %}
 
             <!-- لیست نظرات -->
             {% for comment in comments.items %}

@@ -180,7 +180,6 @@ def delete_user(user_id):
 
 
 
-
 @admin_bp.route('/comments')
 @login_required
 @admin_required
@@ -201,6 +200,15 @@ def comments():
                 Comment.comment.ilike(f'%{search}%')
             )
         )
+    
+    # اعمال فیلتر محقق
+    researcher_filter = request.args.get('researcher', '', type=str)
+    if researcher_filter:
+        try:
+            researcher_id = int(researcher_filter)
+            query = query.filter(Comment.user_id == researcher_id)
+        except ValueError:
+            pass
     
     # اعمال فیلتر وضعیت
     status_filter = request.args.get('status', '')
@@ -236,9 +244,23 @@ def comments():
         db.func.count(db.distinct(Title.id)).label('count')
     ).group_by(Title.garden).order_by(Title.garden).all()
     
+    # دریافت لیست محققین با تعداد نظرات - اصلاح شده
+    researchers = db.session.query(
+        User.id,
+        User.username,
+        db.func.count(Comment.id).label('comment_count')
+    ).outerjoin(Comment, User.id == Comment.user_id)\
+     .filter(User.role == 'researcher')\
+     .group_by(User.id, User.username)\
+     .order_by(User.username)\
+     .all()
+    
     return render_template('admin/comments.html', 
                          comments=comments, 
-                         gardens=gardens)
+                         gardens=gardens,
+                         researchers=researchers)
+
+
 
 
 @admin_bp.route('/comments/<int:comment_id>/edit', methods=['GET', 'POST'])
