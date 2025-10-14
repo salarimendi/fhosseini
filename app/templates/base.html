@@ -76,6 +76,46 @@
                         </a>
                     </li>
                     
+					
+					<!-- Theme Selector -->
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle text-white" href="#" id="themeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<i class="fas fa-palette text-white me-1"></i>
+							تم
+						</a>
+						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeDropdown">
+							<li><h6 class="dropdown-header">انتخاب رنگ</h6></li>
+							<li><a class="dropdown-item" href="#" onclick="changeTheme('default')">
+								<i class="fas fa-circle text-primary me-2"></i>بنفش (پیش‌فرض)
+							</a></li>
+							<li><a class="dropdown-item" href="#" onclick="changeTheme('turquoise')">
+								<i class="fas fa-circle me-2" style="color: #1abc9c;"></i>فیروزه‌ای
+							</a></li>
+							<li><a class="dropdown-item" href="#" onclick="changeTheme('navy')">
+								<i class="fas fa-circle me-2" style="color: #2c3e50;"></i>آبی نیلی
+							</a></li>
+							<li><a class="dropdown-item" href="#" onclick="changeTheme('crimson')">
+								<i class="fas fa-circle me-2" style="color: #e74c3c;"></i>قرمز لاجوردی
+							</a></li>
+							<li><a class="dropdown-item" href="#" onclick="changeTheme('brown')">
+								<i class="fas fa-circle me-2" style="color: #8b7355;"></i>قهوه‌ای ملایم
+							</a></li>
+							<li><hr class="dropdown-divider"></li>
+							<li><h6 class="dropdown-header">حالت نمایش</h6></li>
+							<li><a class="dropdown-item" href="#" onclick="toggleDarkMode()">
+								<i class="fas fa-moon me-2"></i>
+								<span id="darkModeText">حالت شب</span>
+							</a></li>
+						</ul>
+					</li>
+					
+					
+					
+					
+					
+					
+					
+					
                     {% if current_user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
@@ -128,39 +168,54 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: #fff;">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-info">
-                    <h6 class="footer-title text-white">چهار خیابان باغ فردوس</h6>
-                    <p class="footer-description text-white-50">از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی</p>
-                </div>
-                
-                <div class="social-links">
-                    <a href="https://instagram.com/Ferdowsi_Hosseini" target="_blank" class="social-link text-white">
-                        <i class="fab fa-instagram text-white"></i>
-                    </a>
-                    <a href="https://t.me/Ferdowsi_Hosseini" target="_blank" class="social-link text-white">
-                        <i class="fab fa-telegram-plane text-white"></i>
-                    </a>
-                </div>
-                
-                <div class="copyright d-flex justify-content-between align-items-center text-white" style="width:100%;">
-                    <span>© تمامی حقوق برای سایت فردوسی حسینی محفوظ است</span>
-                    <span style="font-size:1.05rem; color:#fff;">
+<!-- Footer - جایگزین کنید در base.html -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-info">
+                <h6 class="footer-title">چهار خیابان باغ فردوس</h6>
+                <p class="footer-description">از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی</p>
+            </div>
+            
+            <div class="social-links">
+                <a href="https://instagram.com/Ferdowsi_Hosseini" 
+                   target="_blank" 
+                   class="social-link"
+                   title="اینستاگرام فردوسی حسینی">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://t.me/Ferdowsi_Hosseini" 
+                   target="_blank" 
+                   class="social-link"
+                   title="کانال تلگرام فردوسی حسینی">
+                    <i class="fab fa-telegram"></i>
+                </a>
+                <a href="https://t.me/MoonSightIran" 
+                   target="_blank" 
+                   class="social-link"
+                   title="کانال رصد و استهلال ملامظفر گنابادی">
+                    <i class="fas fa-moon"></i>
+                </a>
+            </div>
+            
+            <div class="copyright">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center w-100 gap-2">
+                    <span class="text-center text-md-start">© تمامی حقوق برای سایت فردوسی حسینی محفوظ است</span>
+                    <span class="visit-stats">
                         {% if today_visits is defined and total_visits is defined %}
+                            <i class="fas fa-eye me-1"></i>
                             آمار بازدید امروز: {{ today_visits|persian_number }}
                             &nbsp;|&nbsp;
-                            آمار بازدید کل: {{ total_visits|persian_number }}
+                            کل: {{ total_visits|persian_number }}
                         {% else %}
                             آمار بازدید در حال بارگذاری...
                         {% endif %}
                     </span>
                 </div>
-                
             </div>
         </div>
-    </footer>
+    </div>
+</footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

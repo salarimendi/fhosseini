@@ -103,6 +103,56 @@
 {% endblock %}
 
 {% block content %}
+
+<!-- Hero Section with Daily Poem -->
+<section class="hero-banner">
+    <div class="container">
+        <div class="row align-items-center min-vh-50">
+            <div class="col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
+                <h1 class="display-3 fw-bold mb-4 animate-fade-in">
+                    چهار خیابان باغ فردوس
+                </h1>
+                <p class="lead mb-4 animate-fade-in-delay-1">
+                    از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی
+                </p>
+                <div class="d-flex gap-3 justify-content-center justify-content-lg-start animate-fade-in-delay-2">
+                    <a href="#gardens" class="btn btn-light btn-lg rounded-pill px-4">
+                        <i class="fas fa-book-open me-2"></i>
+                        مشاهده باغ‌ها
+                    </a>
+                    <a href="{{ url_for('main.articles') }}" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                        <i class="fas fa-graduation-cap me-2"></i>
+                        پژوهش‌ها
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="daily-poem-card animate-slide-in">
+                    <div class="poem-badge">
+                        <i class="fas fa-star me-2"></i>
+                        شعر روزانه
+                    </div>
+                    <div class="daily-poem-content">
+                        <!-- این بخش بعداً با داده واقعی پر می‌شود -->
+                        <p class="verse-line mb-3">گل نازنین من که ز باغ دل برخاست</p>
+                        <p class="verse-line mb-3">در سینه‌ام جای نه در باغ و چمن یافت</p>
+                        <small class="text-muted d-block mt-3">
+                            <i class="fas fa-book me-1"></i>
+                            از باغ سوم - گلستان عشق
+                        </small>
+                    </div>
+                    <a href="#" class="btn btn-sm btn-outline-primary mt-3 w-100">
+                        مشاهده شعر کامل
+                        <i class="fas fa-arrow-left ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container">
@@ -154,7 +204,7 @@
 </section>
 
 <!-- Gardens Section -->
-<section class="py-5">
+<section class="py-5" id="gardens">
     <div class="container">
         <div class="row justify-content-center mb-5">
             <div class="col-lg-8 text-center">

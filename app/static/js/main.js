@@ -1,5 +1,68 @@
 // اسکریپت اصلی سایت فردوسی حسینی
 
+// سیستم مدیریت تم
+(function() {
+    // بارگذاری تم ذخیره‌شده
+    const savedTheme = localStorage.getItem('siteTheme') || 'default';
+    const savedMode = localStorage.getItem('themeMode') || 'light';
+    
+    if (savedTheme !== 'default') {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+    
+    if (savedMode === 'dark') {
+        document.documentElement.setAttribute('data-theme-mode', 'dark');
+        updateDarkModeText(true);
+    }
+})();
+
+// تابع تغییر تم رنگی
+function changeTheme(themeName) {
+    if (themeName === 'default') {
+        document.documentElement.removeAttribute('data-theme');
+    } else {
+        document.documentElement.setAttribute('data-theme', themeName);
+    }
+    localStorage.setItem('siteTheme', themeName);
+    
+    // جلوگیری از رفرش صفحه
+    event.preventDefault();
+}
+
+// تابع تغییر حالت روز/شب
+function toggleDarkMode() {
+    const currentMode = document.documentElement.getAttribute('data-theme-mode');
+    const isDark = currentMode === 'dark';
+    
+    if (isDark) {
+        document.documentElement.removeAttribute('data-theme-mode');
+        localStorage.setItem('themeMode', 'light');
+        updateDarkModeText(false);
+    } else {
+        document.documentElement.setAttribute('data-theme-mode', 'dark');
+        localStorage.setItem('themeMode', 'dark');
+        updateDarkModeText(true);
+    }
+    
+    event.preventDefault();
+}
+
+// به‌روزرسانی متن دکمه حالت شب
+function updateDarkModeText(isDark) {
+    const darkModeText = document.getElementById('darkModeText');
+    if (darkModeText) {
+        darkModeText.innerHTML = isDark ? 
+            '<i class="fas fa-sun me-2"></i>حالت روز' : 
+            '<i class="fas fa-moon me-2"></i>حالت شب';
+    }
+}
+
+
+
+
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
     
     // انیمیشن ورود ابیات
@@ -21,20 +84,61 @@ document.addEventListener('DOMContentLoaded', function() {
     handleAdminPanel();
 });
 
+// اسکرول نرم برای لینک‌های داخلی
+document.addEventListener('DOMContentLoaded', function() {
+    // اسکرول نرم
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (href !== '#' && href.length > 1) {
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+    });
+});
+
+// بهینه‌سازی عملکرد
+if ('loading' in HTMLImageElement.prototype) {
+    const images = document.querySelectorAll('img[loading="lazy"]');
+    images.forEach(img => {
+        img.src = img.dataset.src;
+    });
+} else {
+    // Fallback for browsers that don't support lazy loading
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js';
+    document.body.appendChild(script);
+}
+
 // انیمیشن ورود ابیات
+// انیمیشن ورود ابیات - نسخه بهینه‌شده
 function animateVerses() {
-    const verses = document.querySelectorAll('.verse');
+    const verses = document.querySelectorAll('.verse, .title-card, .garden-card');
+    
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry, index) => {
             if (entry.isIntersecting) {
+                // انیمیشن سریع‌تر با تاخیر کمتر
                 setTimeout(() => {
                     entry.target.classList.add('show');
-                }, index * 200);
+                }, index * 50); // کاهش از 200 به 50 میلی‌ثانیه
+                observer.unobserve(entry.target); // حذف observer بعد از نمایش
             }
         });
-    }, { threshold: 0.1 });
+    }, {
+        threshold: 0.1,
+        rootMargin: '50px' // شروع انیمیشن زودتر
+    });
 
     verses.forEach(verse => {
+        verse.classList.add('animate-on-scroll');
         observer.observe(verse);
     });
 }

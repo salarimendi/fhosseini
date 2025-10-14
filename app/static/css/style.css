@@ -1,11 +1,225 @@
 /* استایل‌های اصلی سایت فردوسی حسینی */
 
 
+/* سیستم متغیرهای رنگی */
+:root {
+    /* پالت پیش‌فرض - بنفش گرادیانت */
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --accent-color: #5a6fd8;
+    --bg-light: #f5f7fa;
+    --bg-dark: #2c3e50;
+    --text-dark: #2c3e50;
+    --text-light: #ecf0f1;
+    --card-bg: #ffffff;
+    --shadow: rgba(0,0,0,0.1);
+    
+    /* رنگ‌های مکمل */
+    --border-color: #e0e0e0;
+    --hover-bg: #f8f9ff;
+}
+
+/* پالت فیروزه‌ای */
+[data-theme="turquoise"] {
+    --primary-color: #1abc9c;
+    --secondary-color: #16a085;
+    --accent-color: #0fb89c;
+    --hover-bg: #e8f8f5;
+}
+
+/* پالت آبی نیلی */
+[data-theme="navy"] {
+    --primary-color: #2c3e50;
+    --secondary-color: #34495e;
+    --accent-color: #1a252f;
+    --hover-bg: #ecf0f1;
+}
+
+/* پالت قرمز لاجوردی */
+[data-theme="crimson"] {
+    --primary-color: #e74c3c;
+    --secondary-color: #c0392b;
+    --accent-color: #d62c1a;
+    --hover-bg: #fadbd8;
+}
+
+/* پالت قهوه‌ای ملایم */
+[data-theme="brown"] {
+    --primary-color: #8b7355;
+    --secondary-color: #6f5643;
+    --accent-color: #a0826d;
+    --hover-bg: #f4f1ed;
+}
+
+/* حالت تاریک */
+[data-theme-mode="dark"] {
+    --bg-light: #1a1a1a;
+    --card-bg: #2d2d2d;
+    --text-dark: #ecf0f1;
+    --text-light: #2c3e50;
+    --border-color: #444;
+    --shadow: rgba(0,0,0,0.5);
+    --hover-bg: #3a3a3a;
+}
+
+
+/* استایل‌های خاص حالت تاریک */
+[data-theme-mode="dark"] .navbar {
+    background: linear-gradient(90deg, #1a252f 0%, #2c3e50 100%) !important;
+}
+
+[data-theme-mode="dark"] .footer {
+    background: #1a1a1a;
+    border-top-color: #333;
+}
+
+[data-theme-mode="dark"] .verse-row {
+    background: #2d2d2d;
+}
+
+[data-theme-mode="dark"] .verse-row:hover {
+    background: #3a3a3a;
+}
+
+[data-theme-mode="dark"] .search-input,
+[data-theme-mode="dark"] .form-control {
+    background: #2d2d2d;
+    color: var(--text-dark);
+    border-color: #444;
+}
+
+[data-theme-mode="dark"] .dropdown-menu {
+    background: #2d2d2d;
+    border-color: #444;
+}
+
+[data-theme-mode="dark"] .dropdown-item {
+    color: var(--text-dark);
+}
+
+[data-theme-mode="dark"] .dropdown-item:hover {
+    background: #3a3a3a;
+}
+
+
+
+/* Hero Banner */
+.hero-banner {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 120px 0 80px;
+    margin-top: 56px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('../images/pattern.png') repeat;
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+.min-vh-50 {
+    min-height: 50vh;
+}
+
+/* Daily Poem Card */
+.daily-poem-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme-mode="dark"] .daily-poem-card {
+    background: rgba(45, 45, 45, 0.95);
+}
+
+.poem-badge {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.daily-poem-content {
+    color: var(--text-dark);
+    font-family: 'Vazir', Tahoma, sans-serif;
+}
+
+.daily-poem-content .verse-line {
+    font-size: 1.3rem;
+    line-height: 2;
+    text-align: center;
+    color: var(--text-dark);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-fade-in-delay-1 {
+    animation: fadeIn 0.8s ease-out 0.2s forwards;
+    opacity: 0;
+}
+
+.animate-fade-in-delay-2 {
+    animation: fadeIn 0.8s ease-out 0.4s forwards;
+    opacity: 0;
+}
+
+.animate-slide-in {
+    animation: slideIn 0.8s ease-out 0.3s forwards;
+    opacity: 0;
+}
+
+
+
+
+
 /* تنظیمات کلی */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+
 }
 
 
@@ -43,7 +257,9 @@ body {
     font-family: 'Vazir', 'Tahoma', sans-serif;
     direction: rtl;
     text-align: right;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: var(--bg-light);
+    color: var(--text-dark);
+    transition: background-color 0.3s ease, color 0.3s ease;
     min-height: 100vh;
     line-height: 1.8;
 }
@@ -78,11 +294,13 @@ button,
 .btn,
 .form-control {
     font-family: 'Vazir', Tahoma, sans-serif;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* هدر */
 .header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+
     color: white;
     padding: 2rem 0;
     text-align: center;
@@ -110,12 +328,15 @@ button,
 
 /* کارت‌ها */
 .card {
-    background: white;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 25px var(--shadow);
     border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     margin-bottom: 2rem;
     padding: 2rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s ease,
+                background-color 0.3s ease;
 }
 
 .card:hover {
@@ -154,13 +375,16 @@ button,
 }
 
 .garden-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+	color: white;
     border-radius: 15px;
     padding: 2rem;
     text-align: center;
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s ease,
+                background-color 0.3s ease;
     text-decoration: none;
 }
 
@@ -1019,6 +1243,114 @@ button,
   }
 }
 
+@media (max-width: 991px) {
+    .hero-banner {
+        padding: 100px 0 60px;
+    }
+    
+    .hero-banner h1 {
+        font-size: 2.5rem;
+    }
+    
+    .daily-poem-card {
+        margin-top: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-banner {
+        padding: 80px 0 40px;
+    }
+    
+    .hero-banner h1 {
+        font-size: 2rem;
+    }
+    
+    .daily-poem-content .verse-line {
+        font-size: 1.1rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* اضافه کردن این قوانین به انتهای بخش تم‌ها در style.css */
+
+/* اعمال تم روی navbar */
+.navbar {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+}
+
+/* اعمال تم روی footer */
+.footer {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+}
+
+/* اعمال تم روی hero-banner */
+.hero-banner {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+/* اعمال تم روی دکمه‌ها */
+.btn-primary,
+.search-btn,
+.form-btn,
+.play-btn {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* اعمال تم روی garden-card */
+.garden-card {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+/* اعمال تم روی poem-badge */
+.poem-badge {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+/* اعمال تم روی audio-player */
+.audio-player {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+/* اعمال تم روی stat-card */
+.stat-card {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+/* اعمال تم روی لینک‌ها و hover states */
+a:hover,
+.nav-link:hover {
+    color: var(--accent-color) !important;
+}
+
+.verse {
+    border-right-color: var(--primary-color);
+}
+
+.comment {
+    border-right-color: var(--primary-color);
+}
+
+.search-result-item {
+    border-right-color: var(--primary-color);
+}
+
+.result-garden,
+.comment-author {
+    color: var(--primary-color);
+}
+
+/* تنظیم رنگ آیکون‌های social */
+.social-link:hover {
+    color: var(--accent-color) !important;
+}
+
+
 /* استایل‌های پنل مدیریت */
 .admin-container {
     min-height: calc(100vh - 200px); /* حداقل ارتفاع برای نمایش صحیح فوتر */
@@ -1126,4 +1458,146 @@ button,
 
 .card.border-left-warning {
     border-left-color: #ffc107 !important;
+}
+
+/* کلاس برای عناصری که باید انیمیت شوند */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* استایل‌های بهبود یافته فوتر - جایگزین کنید در style.css */
+
+.footer {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: #fff;
+    padding: 2.5rem 0;
+    margin-top: 4rem;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.footer-info {
+    flex: 1;
+    min-width: 250px;
+}
+
+.footer-title {
+    font-family: 'Sahel', Tahoma, sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+
+.footer-description {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-size: 1.3rem;
+    backdrop-filter: blur(10px);
+}
+
+.social-link:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    color: #fff;
+}
+
+.social-link i {
+    color: #fff;
+}
+
+.copyright {
+    width: 100%;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.copyright span {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.visit-stats {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* حالت تاریک برای فوتر */
+[data-theme-mode="dark"] .footer {
+    background: linear-gradient(90deg, #1a252f 0%, #2c3e50 100%);
+    border-top: 1px solid #444;
+}
+
+[data-theme-mode="dark"] .social-link {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme-mode="dark"] .social-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ریسپانسیو */
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .footer-info {
+        text-align: center;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+    
+    .copyright {
+        text-align: center;
+    }
+    
+    .copyright > div {
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+    
+    .visit-stats {
+        justify-content: center;
+    }
 }
