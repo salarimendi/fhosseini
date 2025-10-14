@@ -4,110 +4,130 @@
 
 {% block head %}
 <style>
-    .hero-section {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 100px 0 60px;
-        margin-top: 56px;
+/* استایل‌های اضافی برای hero-banner یکپارچه */
+.poet-intro-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+}
+
+.poet-intro-card:hover {
+    transform: translateY(-5px);
+}
+
+.poet-intro-card .poet-image {
+    width: 180px;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 4px solid rgba(255,255,255,0.3);
+    transition: transform 0.3s ease;
+}
+
+.poet-intro-card .poet-image:hover {
+    transform: scale(1.05);
+}
+
+/* بهبود نمایش کادر جستجو */
+.search-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 30px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.search-container h4 {
+    color: white;
+    font-weight: 600;
+}
+
+/* بهبود دکمه‌های باغ */
+.garden-card .btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+    border: none !important;
+    transition: all 0.3s ease;
+}
+
+.garden-card .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* بهبود نتایج جستجو */
+.search-results {
+    background: white;
+    border-radius: 15px;
+    margin-top: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+[data-theme-mode="dark"] .search-results {
+    background: #2d2d2d;
+}
+
+.search-result-item {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+    background-color: var(--hover-bg);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.verse-preview {
+    font-family: 'Vazir', Tahoma, sans-serif;
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+[data-theme-mode="dark"] .verse-preview {
+    color: #aaa;
+}
+
+/* رسپانسیو */
+@media (max-width: 768px) {
+    .poet-intro-card {
+        padding: 1.5rem;
     }
     
-    .poet-image {
-        width: 200px;
-        height: 250px;
-        object-fit: cover;
-        border-radius: 10px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        transition: transform 0.3s ease;
-    }
-    
-    .poet-image:hover {
-        transform: scale(1.05);
+    .poet-intro-card .poet-image {
+        width: 140px;
+        height: 180px;
     }
     
     .search-container {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        padding: 30px;
-        margin: 30px 0;
+        padding: 1.5rem;
     }
     
-    .garden-card {
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-        overflow: hidden;
-        margin-bottom: 30px;
+    .hero-banner .display-3 {
+        font-size: 2rem;
     }
-    
-    .garden-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-    }
-    
-    .garden-header {
-        background: linear-gradient(45deg, #667eea, #764ba2);
-        color: white;
-        padding: 20px;
-        text-align: center;
-    }
-    
-    .garden-body {
-        padding: 25px;
-        text-align: center;
-    }
-    
-    .search-results {
-        background: white;
-        border-radius: 10px;
-        margin-top: 20px;
-        max-height: 400px;
-        overflow-y: auto;
-        display: none;
-    }
-    
-    .search-result-item {
-        padding: 15px;
-        border-bottom: 1px solid #eee;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-    
-    .search-result-item:hover {
-        background-color: #f8f9fa;
-    }
-    
-    .search-result-item:last-child {
-        border-bottom: none;
-    }
-    
-    .verse-preview {
-        font-family: 'Vazir', Tahoma, sans-serif;
-        color: #666;
-        font-size: 0.9rem;
-        margin-top: 5px;
-    }
-    
-    @media (max-width: 768px) {
-        .hero-section {
-            padding: 80px 0 40px;
-        }
-        
-        .poet-image {
-            width: 150px;
-            height: 200px;
-        }
-    }
+}
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- Hero Section with Daily Poem -->
+<!-- Hero Banner یکپارچه با تمام المان‌ها -->
 <section class="hero-banner">
     <div class="container">
-        <div class="row align-items-center min-vh-50">
+        <!-- بخش بالا: شعر روزانه + عنوان اصلی -->
+        <div class="row align-items-center min-vh-50 mb-4">
             <div class="col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
                 <h1 class="display-3 fw-bold mb-4 animate-fade-in">
                     چهار خیابان باغ فردوس
@@ -115,7 +135,7 @@
                 <p class="lead mb-4 animate-fade-in-delay-1">
                     از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی
                 </p>
-                <div class="d-flex gap-3 justify-content-center justify-content-lg-start animate-fade-in-delay-2">
+                <div class="d-flex gap-3 justify-content-center justify-content-lg-start animate-fade-in-delay-2 flex-wrap">
                     <a href="#gardens" class="btn btn-light btn-lg rounded-pill px-4">
                         <i class="fas fa-book-open me-2"></i>
                         مشاهده باغ‌ها
@@ -134,7 +154,6 @@
                         شعر روزانه
                     </div>
                     <div class="daily-poem-content">
-                        <!-- این بخش بعداً با داده واقعی پر می‌شود -->
                         <p class="verse-line mb-3">گل نازنین من که ز باغ دل برخاست</p>
                         <p class="verse-line mb-3">در سینه‌ام جای نه در باغ و چمن یافت</p>
                         <small class="text-muted d-block mt-3">
@@ -149,43 +168,15 @@
                 </div>
             </div>
         </div>
-    </div>
-</section>
-
-
-<!-- Hero Section -->
-<section class="hero-section">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <div class="text-center text-lg-start">
-                    <h1 class="display-4 fw-bold mb-3" style="font-family: 'Sahel', Tahoma, sans-serif;">
-                        چهار خیابان باغ فردوس
-                    </h1>
-                    <p class="lead mb-4">
-                        از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی
-                    </p>
-                    <p class="mb-0">
-                        مجموعه‌ای از اشعار زیبا در چهار باغ (فصل) که هر کدام حاوی درگاه‌هایی از شعر و حکمت است
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="text-center">
-                    <img src="{{ url_for('static', filename='images/poet.png') }}" 
-                         alt="حکیم میرزا احمد الهامی کرمانشاهی" 
-                         class="poet-image">
-                    <h5 class="mt-3 mb-0">حکیم میرزا احمد الهامی</h5>
-                    <small class="text-light">کرمانشاهی</small>
-                </div>
-            </div>
-        </div>
         
-        <!-- Search Section -->
+        <!-- بخش جستجو -->
         <div class="search-container">
             <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <h4 class="text-center mb-4">جستجو در اشعار</h4>
+                <div class="col-lg-10">
+                    <h4 class="text-center mb-4">
+                        <i class="fas fa-search me-2"></i>
+                        جستجو در اشعار
+                    </h4>
                     <div class="d-flex gap-2">
                         <input type="text" 
                                id="searchInput" 
@@ -200,6 +191,28 @@
                 </div>
             </div>
         </div>
+        
+        <!-- بخش عکس و معرفی حکیم الهامی -->
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-8">
+                <div class="poet-intro-card">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 text-center mb-3 mb-md-0">
+                            <img src="{{ url_for('static', filename='images/poet.png') }}" 
+                                 alt="حکیم میرزا احمد الهامی کرمانشاهی" 
+                                 class="poet-image">
+                        </div>
+                        <div class="col-md-8 text-center text-md-start">
+                            <h3 class="text-white mb-2">حکیم میرزا احمد الهامی</h3>
+                            <h5 class="text-white-50 mb-3">کرمانشاهی</h5>
+                            <p class="text-white mb-0" style="line-height: 1.8;">
+                                مجموعه‌ای از اشعار زیبا در چهار باغ (فصل) که هر کدام حاوی درگاه‌هایی از شعر و حکمت است
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -208,7 +221,7 @@
     <div class="container">
         <div class="row justify-content-center mb-5">
             <div class="col-lg-8 text-center">
-                <h2 class="mb-4" style="font-family: 'Sahel', Tahoma, sans-serif;">باغ‌های چهارگانه</h2>
+                <h2 class="mb-4">باغ‌های چهارگانه</h2>
                 <p class="text-muted">هر باغ حاوی مجموعه‌ای از اشعار زیبا و پرمعنا</p>
             </div>
         </div>
@@ -218,7 +231,7 @@
             <div class="col-lg-6 col-xl-3">
                 <div class="garden-card">
                     <div class="garden-header">
-                        <h3 class="mb-0" style="font-family: 'Sahel', Tahoma, sans-serif;">
+                        <h3 class="mb-0">
                             {% if garden_num == 1 %}خیابان اول
                             {% elif garden_num == 2 %}خیابان دوم
                             {% elif garden_num == 3 %}خیابان سوم
@@ -240,7 +253,7 @@
                             {% endif %}
                         </p>
                         <a href="{{ url_for('main.garden', garden_num=garden_num) }}" 
-                           class="btn btn-outline-primary btn-lg w-100">
+                           class="btn btn-primary btn-lg w-100">
                             <i class="fas fa-book-open me-2"></i>
                             مشاهده اشعار
                         </a>
@@ -257,14 +270,11 @@
     <div class="container">
         <div class="row justify-content-center mb-5">
             <div class="col-lg-8 text-center">
-                <h2 class="mb-4" style="font-family: 'Sahel', Tahoma, sans-serif;">پژوهش های فردوسی حسینی</h2>
+                <h2 class="mb-4">پژوهش های فردوسی حسینی</h2>
                 <p class="text-muted">پژوهش‌ها و مطالعات در خصوص حکیم میرزا احمد الهامی کرمانشاهی</p>
             </div>
         </div>
         
-
-
-
         <div class="row">
             <div class="col-lg-4">
                 <div class="card mb-4">
@@ -272,7 +282,7 @@
                         <div class="mb-4">
                             <i class="fas fa-newspaper fa-3x text-primary"></i>
                         </div>
-                        <h4 class="mb-3" style="font-family: 'Sahel', Tahoma, sans-serif;">مقالات علمی</h4>
+                        <h4 class="mb-3">مقالات علمی</h4>
                         <p class="text-muted mb-4">
                             مطالعات تخصصی در مورد زندگی، آثار و اندیشه‌های حکیم میرزا احمد الهامی کرمانشاهی و تأثیر او بر ادبیات فارسی
                         </p>
@@ -289,7 +299,7 @@
                         <div class="mb-4">
                             <i class="fas fa-lightbulb fa-3x text-primary"></i>
                         </div>
-                        <h4 class="mb-3" style="font-family: 'Sahel', Tahoma, sans-serif;">نوشته‌های پژوهشی</h4>
+                        <h4 class="mb-3">نوشته‌های پژوهشی</h4>
                         <p class="text-muted mb-4">
                             تحلیل‌ها و بررسی‌های ادبی از اشعار چهار خیابان باغ فردوس و جایگاه آن در ادبیات کلاسیک فارسی
                         </p>
@@ -306,7 +316,7 @@
                         <div class="mb-4">
                             <i class="fas fa-file-alt fa-3x text-primary"></i>
                         </div>
-                        <h4 class="mb-3" style="font-family: 'Sahel', Tahoma, sans-serif;">مستندسازی و تطبیق تاریخی</h4>
+                        <h4 class="mb-3">مستندسازی و تطبیق تاریخی</h4>
                         <p class="text-muted mb-4">
                             شرح کامل فرآیند مستندسازی، اهداف پژوهش و تطبیق تاریخی اشعار الهامی با منابع معتبر.
                         </p>
@@ -318,11 +328,6 @@
                 </div>
             </div>
         </div>
-
-
-
-
-
     </div>
 </section>
 
@@ -336,7 +341,7 @@
                         <div class="mb-4">
                             <i class="fas fa-users fa-4x text-primary"></i>
                         </div>
-                        <h2 class="mb-4" style="font-family: 'Sahel', Tahoma, sans-serif;">
+                        <h2 class="mb-4">
                             فراخوان همکاری پژوهشی
                         </h2>
                         <h5 class="mb-4">
