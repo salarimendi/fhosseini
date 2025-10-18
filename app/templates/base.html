@@ -168,54 +168,103 @@
     </main>
 
     <!-- Footer -->
-<!-- Footer - جایگزین کنید در base.html -->
+<!-- Footer - نسخه بهبود یافته -->
 <footer class="footer">
     <div class="container">
-        <div class="footer-content">
-            <div class="footer-info">
-                <h6 class="footer-title">چهار خیابان باغ فردوس</h6>
-                <p class="footer-description">از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی</p>
-            </div>
-            
-            <div class="social-links">
-                <a href="https://instagram.com/Ferdowsi_Hosseini" 
-                   target="_blank" 
-                   class="social-link"
-                   title="اینستاگرام فردوسی حسینی">
-                    <i class="fab fa-instagram"></i>
-                </a>
-                <a href="https://t.me/Ferdowsi_Hosseini" 
-                   target="_blank" 
-                   class="social-link"
-                   title="کانال تلگرام فردوسی حسینی">
-                    <i class="fab fa-telegram"></i>
-                </a>
-                <a href="https://t.me/MoonSightIran" 
-                   target="_blank" 
-                   class="social-link"
-                   title="کانال رصد و استهلال ملامظفر گنابادی">
-                    <i class="fas fa-moon"></i>
-                </a>
-            </div>
-            
-            <div class="copyright">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center w-100 gap-2">
-                    <span class="text-center text-md-start">© تمامی حقوق برای سایت فردوسی حسینی محفوظ است</span>
-                    <span class="visit-stats">
-                        {% if today_visits is defined and total_visits is defined %}
-                            <i class="fas fa-eye me-1"></i>
-                            آمار بازدید امروز: {{ today_visits|persian_number }}
-                            &nbsp;|&nbsp;
-                            کل: {{ total_visits|persian_number }}
-                        {% else %}
-                            آمار بازدید در حال بارگذاری...
-                        {% endif %}
-                    </span>
+        <div class="row g-4">
+            <!-- ستون اول: اطلاعات سایت -->
+            <div class="col-lg-4 col-md-6">
+                <div class="footer-info">
+                    <h5 class="footer-title mb-3">چهار خیابان باغ فردوس</h5>
+                    <p class="footer-description mb-3">
+                        از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی
+                    </p>
+                    <p class="footer-description small mb-0">
+                        مجموعه‌ای از اشعار زیبا و پرمعنا در چهار باغ
+                    </p>
                 </div>
+            </div>
+            
+            <!-- ستون دوم: لینک‌های اجتماعی -->
+            <div class="col-lg-4 col-md-6">
+                <div class="footer-social-section">
+                    <h5 class="footer-title mb-3">
+                        <i class="fas fa-share-alt me-2"></i>
+                        ما را دنبال کنید
+                    </h5>
+                    <div class="social-links-improved">
+                        <a href="https://instagram.com/Ferdowsi_Hosseini" 
+                           target="_blank" 
+                           class="social-link-improved instagram"
+                           title="اینستاگرام فردوسی حسینی">
+                            <i class="fab fa-instagram"></i>
+                            <span>اینستاگرام</span>
+                        </a>
+                        <a href="https://t.me/Ferdowsi_Hosseini" 
+                           target="_blank" 
+                           class="social-link-improved telegram"
+                           title="کانال تلگرام فردوسی حسینی">
+                            <i class="fab fa-telegram"></i>
+                            <span>کانال تلگرام</span>
+                        </a>
+                        <a href="https://t.me/MoonSightIran" 
+                           target="_blank" 
+                           class="social-link-improved telegram-moon"
+                           title="کانال رصد و استهلال">
+                            <i class="fas fa-moon"></i>
+                            <span>رصد و استهلال</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ستون سوم: آمار بازدید -->
+            <div class="col-lg-4 col-md-12">
+                <div class="footer-stats">
+                    <h5 class="footer-title mb-3">
+                        <i class="fas fa-chart-line me-2"></i>
+                        آمار بازدید
+                    </h5>
+                    {% if today_visits is defined and total_visits is defined %}
+                    <div class="stats-box">
+                        <div class="stat-item-footer">
+                            <i class="fas fa-calendar-day"></i>
+                            <div>
+                                <span class="stat-label">امروز</span>
+                                <span class="stat-value">{{ today_visits|persian_number }}</span>
+                            </div>
+                        </div>
+                        <div class="stat-item-footer">
+                            <i class="fas fa-chart-bar"></i>
+                            <div>
+                                <span class="stat-label">کل بازدیدها</span>
+                                <span class="stat-value">{{ total_visits|persian_number }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center">
+                        <div class="spinner-border spinner-border-sm text-light" role="status">
+                            <span class="visually-hidden">در حال بارگذاری...</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- کپی رایت -->
+        <div class="footer-bottom">
+            <div class="text-center">
+                <p class="mb-0">
+                    © تمامی حقوق برای سایت فردوسی حسینی محفوظ است
+                </p>
             </div>
         </div>
     </div>
 </footer>
+
+
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

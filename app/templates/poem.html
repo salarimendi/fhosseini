@@ -348,6 +348,180 @@
     .research-meta .date {
         color: #6c757d;
     }
+	
+	
+	[data-theme-mode="dark"] .poem-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+[data-theme-mode="dark"] .poem-content {
+    background: var(--card-bg);
+}
+
+[data-theme-mode="dark"] .poem-title {
+    color: var(--text-dark);
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme-mode="dark"] .verse-row {
+    background: transparent;
+}
+
+[data-theme-mode="dark"] .verse-row:hover {
+    background: var(--hover-bg);
+}
+
+[data-theme-mode="dark"] .verse-text {
+    color: var(--text-dark);
+}
+
+[data-theme-mode="dark"] .audio-controls {
+    background: var(--card-bg);
+}
+
+[data-theme-mode="dark"] .audio-player {
+    background: var(--hover-bg);
+}
+
+[data-theme-mode="dark"] .comments-section {
+    background: var(--card-bg);
+}
+
+[data-theme-mode="dark"] .comment-card {
+    background: var(--hover-bg);
+    border-right-color: var(--primary-color);
+}
+
+[data-theme-mode="dark"] .comment-form {
+    background: var(--hover-bg);
+}
+
+[data-theme-mode="dark"] .upload-area {
+    background: var(--hover-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme-mode="dark"] .upload-area:hover {
+    background: var(--card-bg);
+    border-color: var(--primary-color);
+}
+
+[data-theme-mode="dark"] .research-form-display {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme-mode="dark"] .section-content {
+    background: var(--hover-bg);
+}
+
+[data-theme-mode="dark"] .subtopic-item {
+    background: var(--hover-bg);
+    border-color: var(--border-color);
+}
+	
+	
+/* اعمال تم‌های رنگی مختلف */
+.poem-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+.breadcrumb-custom a:hover {
+    color: var(--accent-color) !important;
+}
+
+.verse-row {
+    border-right-color: var(--primary-color);
+}
+
+.verse-row:hover {
+    border-right-color: var(--secondary-color);
+}
+
+.toggle-comments {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+}
+
+.toggle-comments:hover {
+    background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+}
+
+.comment-card {
+    border-right-color: var(--primary-color);
+}
+
+/* حالت تاریک - تکمیل استایل‌های موجود */
+[data-theme-mode="dark"] .poem-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+[data-theme-mode="dark"] .poem-content {
+    background: var(--card-bg);
+}
+
+[data-theme-mode="dark"] .poem-title {
+    color: var(--text-dark);
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme-mode="dark"] .verse-row {
+    background: transparent;
+}
+
+[data-theme-mode="dark"] .verse-row:hover {
+    background: var(--hover-bg);
+}
+
+[data-theme-mode="dark"] .verse-text {
+    color: var(--text-dark);
+}
+
+[data-theme-mode="dark"] .audio-controls {
+    background: var(--card-bg);
+}
+
+[data-theme-mode="dark"] .audio-player {
+    background: var(--hover-bg);
+}
+
+[data-theme-mode="dark"] .comments-section {
+    background: var(--card-bg);
+}
+
+[data-theme-mode="dark"] .comment-card {
+    background: var(--hover-bg);
+    border-right-color: var(--primary-color);
+}
+
+[data-theme-mode="dark"] .comment-form {
+    background: var(--hover-bg);
+}
+
+[data-theme-mode="dark"] .upload-area {
+    background: var(--hover-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme-mode="dark"] .upload-area:hover {
+    background: var(--card-bg);
+    border-color: var(--primary-color);
+}
+
+[data-theme-mode="dark"] .research-form-display {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme-mode="dark"] .section-content {
+    background: var(--hover-bg);
+}
+
+[data-theme-mode="dark"] .subtopic-item {
+    background: var(--hover-bg);
+    border-color: var(--border-color);
+}
+	
+	
 </style>
 {% endblock %}
 
@@ -378,7 +552,7 @@
         <div class="text-center">
             <p class="mb-2">
                 <span class="badge bg-light text-dark">باغ {{ title.garden|persian_number }}</span>
-                <span class="badge bg-light text-dark ms-2">{{ title.order_in_garden|persian_number }}ام</span>
+                <span class="badge bg-light text-dark ms-2">سروده {{ title.order_in_garden|persian_number }}</span>
                 <span class="badge bg-light text-dark ms-2">{{ verses|length|persian_number }} بیت</span>
             </p>
         </div>

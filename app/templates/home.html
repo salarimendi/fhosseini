@@ -118,103 +118,644 @@
         font-size: 2rem;
     }
 }
+
+
+
+
+/* ===========================================
+   HERO BANNER IMPROVED STYLES
+   =========================================== */
+
+
+
+/* محتوای اصلی */
+.hero-content {
+    color: white;
+    text-align: right;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: white;
+    text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+    margin-bottom: 1.5rem;
+}
+
+.hero-subtitle {
+    font-size: 1.4rem;
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.8;
+    text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.hero-buttons .btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
+}
+
+.hero-buttons .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* کارت شعر روزانه - نسخه بهبود یافته */
+.daily-poem-card-improved {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 2.5rem;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.daily-poem-card-improved:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme-mode="dark"] .daily-poem-card-improved {
+    background: rgba(45, 45, 45, 0.98);
+}
+
+.daily-poem-card-improved::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.poem-badge-improved {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 0.6rem 1.5rem;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.poem-content-improved {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1.5rem 0;
+}
+
+.verse-line-improved {
+    font-family: 'Vazir', Tahoma, sans-serif;
+    font-size: 1.5rem;
+    line-height: 2.2;
+    text-align: center;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+    position: relative;
+    padding: 0.5rem;
+}
+
+.verse-line-improved:last-child {
+    margin-bottom: 0;
+}
+
+.poem-meta-improved {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 0.95rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #eee;
+}
+
+[data-theme-mode="dark"] .poem-meta-improved {
+    color: #aaa;
+    border-top-color: #444;
+}
+
+.btn-poem-link {
+    margin-top: 1rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-poem-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    color: white;
+}
+
+/* کادر جستجو - نسخه بهبود یافته */
+.search-container-improved {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 2.5rem;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.search-header-improved {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.search-icon-improved {
+    font-size: 2rem;
+    color: white;
+    opacity: 0.9;
+}
+
+.search-title-improved {
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.search-input-group {
+    display: flex;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.search-input-improved {
+    flex: 1;
+    padding: 1.2rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-dark);
+    transition: all 0.3s ease;
+    font-family: 'Vazir', Tahoma, sans-serif;
+}
+
+.search-input-improved:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.6);
+    background: white;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.search-input-improved::placeholder {
+    color: #999;
+}
+
+[data-theme-mode="dark"] .search-input-improved {
+    background: rgba(45, 45, 45, 0.95);
+    color: var(--text-dark);
+}
+
+.btn-search-improved {
+    padding: 1.2rem 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--primary-color);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.btn-search-improved:hover {
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* نتایج جستجو */
+.search-results-improved {
+    background: white;
+    border-radius: 20px;
+    margin-top: 1.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: none;
+}
+
+.search-results-improved:not(:empty) {
+    display: block;
+}
+
+[data-theme-mode="dark"] .search-results-improved {
+    background: #2d2d2d;
+}
+
+/* کارت معرفی شاعر - نسخه بهبود یافته */
+.poet-intro-improved {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 30px;
+    padding: 3rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.poet-intro-improved:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+}
+
+.poet-image-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.poet-image-improved {
+    width: 220px;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.4s ease;
+}
+
+.poet-image-improved:hover {
+    transform: scale(1.05) rotate(2deg);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.poet-image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.poet-image-overlay i {
+    font-size: 4rem;
+    color: white;
+}
+
+.poet-image-wrapper:hover .poet-image-overlay {
+    opacity: 0.15;
+}
+
+.poet-info {
+    color: white;
+}
+
+.poet-name-improved {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.poet-title-improved {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1.5rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.poet-description-improved {
+    font-size: 1.1rem;
+    line-height: 2;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 2rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.poet-stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+}
+
+.stat-item i {
+    font-size: 1.3rem;
+}
+
+.stat-item span {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* انیمیشن‌ها */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-fade-in-delay-1 {
+    animation: fadeIn 0.8s ease-out 0.3s forwards;
+    opacity: 0;
+}
+
+.animate-fade-in-delay-2 {
+    animation: fadeIn 0.8s ease-out 0.6s forwards;
+    opacity: 0;
+}
+
+.animate-slide-in {
+    animation: slideIn 0.8s ease-out 0.4s forwards;
+    opacity: 0;
+}
+
+/* رسپانسیو */
+@media (max-width: 991px) {
+    .hero-banner-improved {
+        padding: 100px 0 60px;
+        min-height: auto;
+    }
+    
+    .hero-title {
+        font-size: 2.8rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .search-title-improved {
+        font-size: 1.5rem;
+    }
+    
+    .poet-name-improved {
+        font-size: 1.7rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-banner-improved {
+        padding: 80px 0 40px;
+    }
+    
+    .hero-title {
+        font-size: 2.2rem;
+        text-align: center;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+        text-align: center;
+    }
+    
+    .hero-buttons {
+        justify-content: center;
+    }
+    
+    .daily-poem-card-improved {
+        padding: 2rem;
+    }
+    
+    .verse-line-improved {
+        font-size: 1.3rem;
+    }
+    
+    .search-container-improved {
+        padding: 2rem;
+    }
+    
+    .search-input-group {
+        flex-direction: column;
+    }
+    
+    .btn-search-improved {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .poet-intro-improved {
+        padding: 2rem;
+    }
+    
+    .poet-image-improved {
+        width: 180px;
+        height: 230px;
+    }
+    
+    .poet-info {
+        text-align: center;
+    }
+    
+    .poet-stats {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .verse-line-improved {
+        font-size: 1.15rem;
+    }
+    
+    .search-title-improved {
+        font-size: 1.3rem;
+    }
+    
+    .poet-image-improved {
+        width: 150px;
+        height: 190px;
+    }
+    
+    .poet-name-improved {
+        font-size: 1.5rem;
+    }
+    
+    .poet-stats {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .stat-item {
+        justify-content: center;
+    }
+}
+
+
+
 </style>
 {% endblock %}
 
 {% block content %}
 
 <!-- Hero Banner یکپارچه با تمام المان‌ها -->
-<section class="hero-banner">
+<!-- Hero Banner یکپارچه با تمام المان‌ها -->
+<section class="hero-banner-improved">
     <div class="container">
-        <!-- بخش بالا: شعر روزانه + عنوان اصلی -->
-        <div class="row align-items-center min-vh-50 mb-4">
-            <div class="col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
-                <h1 class="display-3 fw-bold mb-4 animate-fade-in">
-                    چهار خیابان باغ فردوس
-                </h1>
-                <p class="lead mb-4 animate-fade-in-delay-1">
-                    از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی
-                </p>
-                <div class="d-flex gap-3 justify-content-center justify-content-lg-start animate-fade-in-delay-2 flex-wrap">
-                    <a href="#gardens" class="btn btn-light btn-lg rounded-pill px-4">
-                        <i class="fas fa-book-open me-2"></i>
-                        مشاهده باغ‌ها
-                    </a>
-                    <a href="{{ url_for('main.articles') }}" class="btn btn-outline-light btn-lg rounded-pill px-4">
-                        <i class="fas fa-graduation-cap me-2"></i>
-                        پژوهش‌ها
-                    </a>
+        <!-- بخش اول: عنوان اصلی و معرفی شاعر -->
+        <div class="row align-items-stretch g-4 mb-4">
+            <!-- ستون راست: عنوان و دکمه‌ها -->
+            <div class="col-lg-7 d-flex flex-column justify-content-center">
+                <div class="hero-content animate-fade-in">
+                    <h1 class="hero-title mb-4">
+                        چهار خیابان باغ فردوس
+                    </h1>
+                    <p class="hero-subtitle mb-4">
+                        از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی
+                    </p>
+                    <div class="hero-buttons d-flex gap-3 flex-wrap">
+                        <a href="#gardens" class="btn btn-light btn-lg rounded-pill px-4 shadow-sm">
+                            <i class="fas fa-book-open me-2"></i>
+                            مشاهده باغ‌ها
+                        </a>
+                        <a href="{{ url_for('main.articles') }}" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                            <i class="fas fa-graduation-cap me-2"></i>
+                            پژوهش‌ها
+                        </a>
+                    </div>
                 </div>
             </div>
             
+            <!-- ستون چپ: معرفی حکیم الهامی -->
+            <div class="col-lg-5">
+                <div class="poet-intro-improved animate-slide-in">
+                    <div class="text-center mb-3">
+                        <div class="poet-image-wrapper d-inline-block">
+                            <img src="{{ url_for('static', filename='images/poet.png') }}" 
+                                 alt="حکیم میرزا احمد الهامی کرمانشاهی" 
+                                 class="poet-image-improved" 
+                                 style="width: 160px; height: 200px;">
+                            <div class="poet-image-overlay">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="poet-info text-center">
+                        <h3 class="poet-name-improved" style="font-size: 1.5rem;">
+                            حکیم میرزا احمد الهامی
+                        </h3>
+                        <h5 class="poet-title-improved" style="font-size: 1.1rem;">
+                            کرمانشاهی
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- بخش دوم: شعر روزانه و جستجو -->
+        <div class="row g-4 mb-4">
+            <!-- شعر روزانه -->
             <div class="col-lg-6">
-                <div class="daily-poem-card animate-slide-in">
-                    <div class="poem-badge">
+                <div class="daily-poem-card-improved animate-fade-in-delay-1" style="height: auto; padding: 1.5rem;">
+                    <div class="poem-badge-improved" style="padding: 0.4rem 1rem; font-size: 0.85rem; margin-bottom: 1rem;">
                         <i class="fas fa-star me-2"></i>
                         شعر روزانه
                     </div>
-                    <div class="daily-poem-content">
-                        <p class="verse-line mb-3">گل نازنین من که ز باغ دل برخاست</p>
-                        <p class="verse-line mb-3">در سینه‌ام جای نه در باغ و چمن یافت</p>
-                        <small class="text-muted d-block mt-3">
-                            <i class="fas fa-book me-1"></i>
-                            از باغ سوم - گلستان عشق
-                        </small>
+                    <div class="poem-content-improved" style="padding: 0.5rem 0;">
+                        <div class="verse-line-improved" style="font-size: 1.2rem;">بدو گفت صبح امیدم دمید</div>
+                        <div class="verse-line-improved" style="font-size: 1.2rem;">که خورشیدم اندر سرای آرمید</div>
                     </div>
-                    <a href="#" class="btn btn-sm btn-outline-primary mt-3 w-100">
+                    <div class="poem-meta-improved" style="margin-top: 1rem; padding-top: 1rem;">
+                        <i class="fas fa-book me-2"></i>
+                        از باغ اول - عنوان ۵۰
+                    </div>
+                    <a href="#" class="btn btn-poem-link" style="margin-top: 0.75rem; padding: 0.6rem 1.2rem; font-size: 0.95rem;">
                         مشاهده شعر کامل
-                        <i class="fas fa-arrow-left ms-2"></i>
+                        <i class="fas fa-chevron-left ms-2"></i>
                     </a>
                 </div>
             </div>
-        </div>
-        
-        <!-- بخش جستجو -->
-        <div class="search-container">
-            <div class="row justify-content-center">
-                <div class="col-lg-10">
-                    <h4 class="text-center mb-4">
-                        <i class="fas fa-search me-2"></i>
-                        جستجو در اشعار
-                    </h4>
-                    <div class="d-flex gap-2">
+
+            <!-- جستجو -->
+            <div class="col-lg-6">
+                <div class="search-container-improved animate-fade-in-delay-1" style="height: 100%; padding: 1.5rem;">
+                    <div class="search-header-improved" style="margin-bottom: 1rem;">
+                        <i class="fas fa-search search-icon-improved" style="font-size: 1.5rem;"></i>
+                        <h4 class="search-title-improved" style="font-size: 1.4rem;">جستجو در اشعار</h4>
+                    </div>
+                    <div class="search-input-group">
                         <input type="text" 
                                id="searchInput" 
-                               class="form-control form-control-lg" 
+                               class="search-input-improved" 
                                placeholder="جستجو در عناوین و ابیات..."
-                               autocomplete="off">
-                        <button type="button" class="btn btn-light btn-lg px-4" id="searchButton">
+                               autocomplete="off"
+                               style="padding: 0.9rem 1.2rem; font-size: 1rem;">
+                        <button type="button" class="btn-search-improved" id="searchButton" style="padding: 0.9rem 1.5rem; font-size: 1rem;">
                             <i class="fas fa-search"></i>
+                            جستجو
                         </button>
                     </div>
-                    <div id="searchResults" class="search-results"></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- بخش عکس و معرفی حکیم الهامی -->
-        <div class="row justify-content-center mt-5">
-            <div class="col-lg-8">
-                <div class="poet-intro-card">
-                    <div class="row align-items-center">
-                        <div class="col-md-4 text-center mb-3 mb-md-0">
-                            <img src="{{ url_for('static', filename='images/poet.png') }}" 
-                                 alt="حکیم میرزا احمد الهامی کرمانشاهی" 
-                                 class="poet-image">
-                        </div>
-                        <div class="col-md-8 text-center text-md-start">
-                            <h3 class="text-white mb-2">حکیم میرزا احمد الهامی</h3>
-                            <h5 class="text-white-50 mb-3">کرمانشاهی</h5>
-                            <p class="text-white mb-0" style="line-height: 1.8;">
-                                مجموعه‌ای از اشعار زیبا در چهار باغ (فصل) که هر کدام حاوی درگاه‌هایی از شعر و حکمت است
-                            </p>
-                        </div>
-                    </div>
+                    <div id="searchResults" class="search-results-improved"></div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
 
 <!-- Gardens Section -->
 <section class="py-5" id="gardens">
