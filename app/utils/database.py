@@ -189,8 +189,11 @@ def save_research_form(comment_obj, data, files, config, is_admin=False):
         # ویرایش نظر موجود
         comment_obj.comment = json.dumps(research_data, ensure_ascii=False)
         comment_obj.updated_at = datetime.utcnow()
-        comment_obj.status = 'pending'  # وضعیت به منتظر تایید برمی‌گردد
-        message = 'فرم پژوهشی با موفقیت ویرایش شد و در انتظار تأیید مجدد است'
+        if not is_admin:
+            comment_obj.status = 'pending'
+            message = 'فرم پژوهشی با موفقیت ویرایش شد و در انتظار تأیید مجدد است'
+        else:
+            message = 'فرم پژوهشی با موفقیت ویرایش شد'
     else:
         # ایجاد نظر جدید
         from app.models import Comment
