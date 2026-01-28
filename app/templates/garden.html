@@ -249,6 +249,153 @@
     color: #aaa;
 }
 
+    /* ===== Garden Navigator Styles ===== */
+    .garden-navigator {
+        padding: 16px 25px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #f0f4f8 100%);
+        border-bottom: 1px solid #e5e7eb;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .garden-navigator-content {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .garden-navigator-label {
+        font-family: 'Vazir', Tahoma, sans-serif;
+        font-weight: 600;
+        color: #4b5563;
+        font-size: 0.95rem;
+        white-space: nowrap;
+    }
+
+    .garden-buttons {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .garden-btn {
+        padding: 8px 16px;
+        border-radius: 22px;
+        border: 2px solid #cbd5e1;
+        background: white;
+        color: #64748b;
+        text-decoration: none;
+        font-family: 'Vazir', Tahoma, sans-serif;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .garden-btn i {
+        font-size: 0.85rem;
+    }
+
+    .garden-btn:hover {
+        transform: translateY(-2px);
+        border-color: #667eea;
+        color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+
+    .garden-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+    }
+
+    .garden-btn.active:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.45);
+    }
+
+    /* Dark Mode - Garden Navigator */
+    [data-theme-mode="dark"] .garden-navigator {
+        background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+        border-bottom-color: #444;
+        border-top-color: #444;
+    }
+
+    [data-theme-mode="dark"] .garden-navigator-label {
+        color: #e0e0e0;
+    }
+
+    [data-theme-mode="dark"] .garden-btn {
+        background: var(--card-bg);
+        color: var(--text-dark);
+        border-color: #444;
+    }
+
+    [data-theme-mode="dark"] .garden-btn:hover {
+        border-color: #667eea;
+        color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    [data-theme-mode="dark"] .garden-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Responsive - Mobile */
+    @media (max-width: 768px) {
+        .garden-navigator {
+            padding: 12px 15px;
+        }
+
+        .garden-navigator-content {
+            gap: 12px;
+        }
+
+        .garden-navigator-label {
+            font-size: 0.85rem;
+        }
+
+        .garden-buttons {
+            gap: 8px;
+            width: 100%;
+        }
+
+        .garden-btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            flex: 1 1 calc(50% - 4px);
+            justify-content: center;
+        }
+
+        .garden-btn i {
+            font-size: 0.75rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .garden-btn {
+            flex: 1 1 calc(50% - 4px);
+            font-size: 0.75rem;
+            padding: 5px 10px;
+        }
+
+        .garden-navigator-label {
+            display: none;
+        }
+
+        .garden-buttons {
+            width: 100%;
+            gap: 6px;
+        }
+    }
+
 </style>
 {% endblock %}
 
@@ -291,6 +438,39 @@
             </span>
         </div>
         {% endif %}
+    </div>
+</section>
+
+<!-- Garden Quick Navigator -->
+<section>
+    <div class="garden-navigator">
+        <div class="container-fluid px-4">
+            <div class="garden-navigator-content">
+                <span class="garden-navigator-label">🌳 رفتن سریع:</span>
+                <div class="garden-buttons">
+                    <a href="{{ url_for('main.garden', garden_num=1) }}" 
+                       class="garden-btn {% if garden_num == 1 %}active{% endif %}"
+                       title="خیابان اول">
+                        <i class="fas fa-book"></i>خیابان اول
+                    </a>
+                    <a href="{{ url_for('main.garden', garden_num=2) }}" 
+                       class="garden-btn {% if garden_num == 2 %}active{% endif %}"
+                       title="خیابان دوم">
+                        <i class="fas fa-book"></i>خیابان دوم
+                    </a>
+                    <a href="{{ url_for('main.garden', garden_num=3) }}" 
+                       class="garden-btn {% if garden_num == 3 %}active{% endif %}"
+                       title="خیابان سوم">
+                        <i class="fas fa-book"></i>خیابان سوم
+                    </a>
+                    <a href="{{ url_for('main.garden', garden_num=4) }}" 
+                       class="garden-btn {% if garden_num == 4 %}active{% endif %}"
+                       title="خیابان چهارم">
+                        <i class="fas fa-book"></i>خیابان چهارم
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 

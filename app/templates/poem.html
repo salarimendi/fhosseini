@@ -30,6 +30,92 @@
         margin-bottom: 0;
     }
     
+    /* Breadcrumb Navigation */
+    .poem-breadcrumb {
+        padding: 12px 25px;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 0;
+    }
+    
+    .breadcrumb {
+        margin-bottom: 0;
+        background: transparent;
+        padding: 0;
+    }
+    
+    .breadcrumb-item a {
+        color: #667eea;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    
+    .breadcrumb-item a:hover {
+        color: #764ba2;
+    }
+    
+    .breadcrumb-item.active {
+        color: #495057;
+        font-weight: 600;
+    }
+    
+    /* Garden Quick Selector */
+    .garden-navigator {
+        padding: 16px 25px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #f0f4f8 100%);
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 0;
+    }
+    
+    .garden-navigator-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .garden-navigator-label {
+        font-weight: 600;
+        color: #475569;
+        font-size: 0.95rem;
+        min-width: auto;
+    }
+    
+    .garden-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .garden-btn {
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 2px solid #cbd5e1;
+        background: white;
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+    
+    .garden-btn:hover {
+        border-color: #667eea;
+        color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    }
+    
+    .garden-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+        font-weight: 600;
+    }
+    
     .verses-container {
         padding: 25px;
     }
@@ -379,6 +465,31 @@
             font-size: 0.8rem;
         }
         
+        .poem-breadcrumb {
+            padding: 10px 15px;
+        }
+        
+        .breadcrumb-item {
+            font-size: 0.9rem;
+        }
+        
+        .garden-navigator {
+            padding: 12px 15px;
+        }
+        
+        .garden-navigator-content {
+            gap: 8px;
+        }
+        
+        .garden-navigator-label {
+            font-size: 0.85rem;
+        }
+        
+        .garden-btn {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+        }
+        
         .verse-text {
             font-size: 1.2rem;
         }
@@ -531,6 +642,49 @@
 [data-theme-mode="dark"] .poem-title {
     color: var(--text-dark);
     border-bottom-color: var(--border-color);
+}
+
+[data-theme-mode="dark"] .poem-breadcrumb {
+    background: transparent;
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme-mode="dark"] .breadcrumb-item a {
+    color: #667eea;
+}
+
+[data-theme-mode="dark"] .breadcrumb-item a:hover {
+    color: #764ba2;
+}
+
+[data-theme-mode="dark"] .breadcrumb-item.active {
+    color: var(--text-dark);
+}
+
+[data-theme-mode="dark"] .garden-navigator {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.5) 0%, rgba(30, 41, 59, 0.5) 100%);
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme-mode="dark"] .garden-navigator-label {
+    color: #cbd5e1;
+}
+
+[data-theme-mode="dark"] .garden-btn {
+    border-color: rgba(203, 213, 225, 0.3);
+    background: transparent;
+    color: #9ca3af;
+}
+
+[data-theme-mode="dark"] .garden-btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+    background: transparent;
+}
+
+[data-theme-mode="dark"] .garden-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
 }
 
 [data-theme-mode="dark"] .verse-row-wrapper {
@@ -805,6 +959,46 @@
 <section class="pb-5">
     <div class="container">
         <div class="poem-content">
+            <!-- Breadcrumb Navigation -->
+            <div class="poem-breadcrumb">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="{{ url_for('main.home') }}">
+                                <i class="fas fa-home me-1"></i>صفحه اصلی
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ url_for('main.garden', garden_num=title.garden) }}">
+                                {{ title.garden_name }}
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item active">{{ title.title }}</li>
+                    </ol>
+                </nav>
+            </div>
+            
+            <!-- Garden Quick Selector -->
+            <div class="garden-navigator">
+                <div class="garden-navigator-content">
+                    <span class="garden-navigator-label">رفتن سریع:</span>
+                    <div class="garden-buttons">
+                        <a href="{{ url_for('main.garden', garden_num=1) }}" class="garden-btn {% if title.garden == 1 %}active{% endif %}">
+                            <i class="fas fa-book me-1"></i>خیابان اول
+                        </a>
+                        <a href="{{ url_for('main.garden', garden_num=2) }}" class="garden-btn {% if title.garden == 2 %}active{% endif %}">
+                            <i class="fas fa-book me-1"></i>خیابان دوم
+                        </a>
+                        <a href="{{ url_for('main.garden', garden_num=3) }}" class="garden-btn {% if title.garden == 3 %}active{% endif %}">
+                            <i class="fas fa-book me-1"></i>خیابان سوم
+                        </a>
+                        <a href="{{ url_for('main.garden', garden_num=4) }}" class="garden-btn {% if title.garden == 4 %}active{% endif %}">
+                            <i class="fas fa-book me-1"></i>خیابان چهارم
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Poem Title -->
             <h1 class="poem-title">{{ title.title }}</h1>
             
