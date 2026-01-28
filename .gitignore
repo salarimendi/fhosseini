@@ -168,3 +168,4 @@ deploy/
 *.zip
 uploads/
 instance/
+temp/
