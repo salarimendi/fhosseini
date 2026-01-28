@@ -95,6 +95,15 @@ def user_has_recording_for_title(user_id, title_id):
         title_id=title_id
     ).first() is not None
 
+def format_verse_versions(verse):
+    """
+    تنسیق و آماده‌سازی اطلاعات نسخ‌های موجود برای نمایش
+    Returns formatted versions info or None
+    """
+    if not verse.present_in_versions:
+        return None
+    return verse.present_in_versions.strip()
+
 def user_has_comment_for_title(user_id, title_id):
     """بررسی اینکه آیا کاربر قبلاً برای این تیتر نظر داده"""
     return Comment.query.filter_by(

@@ -34,17 +34,84 @@
         padding: 25px;
     }
     
-    .verse-row {
-        margin-bottom: 8px;
-        padding: 8px;
+    .verse-row-wrapper {
+        display: flex;
+        align-items: stretch;
+        margin-bottom: 12px;
         border-radius: 8px;
-        transition: all 0.2s ease;
-        border-right: 3px solid transparent;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
     }
     
-    .verse-row:hover {
-        background-color: #f8f9fa;
+    .verse-sidebar {
+        background: linear-gradient(135deg, #f0f4f8 0%, #e8eef5 100%);
+        padding: 12px 15px;
+        width: 160px;
+        flex-shrink: 0;
+        flex-grow: 0;
+        border-left: 2px solid #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .versions-info {
+        text-align: center;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .versions-info.empty {
+        opacity: 0.4;
+    }
+    
+    .versions-info i {
+        color: #64748b;
+        font-size: 1.1rem;
+        opacity: 0.8;
+        transition: all 0.3s ease;
+    }
+    
+    .versions-text {
+        font-size: 0.8rem;
+        color: #475569;
+        line-height: 1.4;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+    
+    .verse-row {
+        flex: 1;
+        padding: 12px 16px;
+        border-radius: 0;
+        transition: all 0.2s ease;
+        border-right: 3px solid transparent;
+        background: white;
+    }
+    
+    .verse-row-wrapper:hover {
+        background-color: #fafbfc;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .verse-row-wrapper:hover .verse-row {
         border-right-color: #667eea;
+    }
+    
+    .verse-row-wrapper:hover .verse-sidebar {
+        background: linear-gradient(135deg, #e8eef5 0%, #dfe7f0 100%);
+    }
+    
+    .verse-row-wrapper:hover .versions-info i {
+        opacity: 1;
+        transform: scale(1.1);
     }
     
     .verse-text {
@@ -209,6 +276,25 @@
             padding: 20px;
         }
         
+        .verse-row-wrapper {
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        
+        .verse-sidebar {
+            min-width: 100%;
+            max-width: 100%;
+            width: 100%;
+            border-left: none;
+            border-bottom: 2px solid #cbd5e1;
+            padding: 10px 12px;
+            min-height: 40px;
+        }
+        
+        .versions-text {
+            font-size: 0.75rem;
+        }
+        
         .verse-text {
             font-size: 1.2rem;
         }
@@ -363,12 +449,37 @@
     border-bottom-color: var(--border-color);
 }
 
+[data-theme-mode="dark"] .verse-row-wrapper {
+    background: transparent;
+}
+
+[data-theme-mode="dark"] .verse-row-wrapper:hover {
+    background-color: var(--hover-bg);
+}
+
+[data-theme-mode="dark"] .verse-sidebar {
+    background: linear-gradient(135deg, rgba(100, 116, 139, 0.15) 0%, rgba(100, 116, 139, 0.1) 100%);
+    border-left-color: rgba(203, 213, 225, 0.3);
+}
+
+[data-theme-mode="dark"] .verse-sidebar:hover {
+    background: linear-gradient(135deg, rgba(100, 116, 139, 0.2) 0%, rgba(100, 116, 139, 0.15) 100%);
+}
+
+[data-theme-mode="dark"] .versions-info i {
+    color: #cbd5e1;
+}
+
+[data-theme-mode="dark"] .versions-text {
+    color: #cbd5e1;
+}
+
 [data-theme-mode="dark"] .verse-row {
     background: transparent;
 }
 
 [data-theme-mode="dark"] .verse-row:hover {
-    background: var(--hover-bg);
+    background: transparent;
 }
 
 [data-theme-mode="dark"] .verse-text {
@@ -464,12 +575,37 @@
     border-bottom-color: var(--border-color);
 }
 
+[data-theme-mode="dark"] .verse-row-wrapper {
+    background: transparent;
+}
+
+[data-theme-mode="dark"] .verse-row-wrapper:hover {
+    background-color: var(--hover-bg);
+}
+
+[data-theme-mode="dark"] .verse-sidebar {
+    background: linear-gradient(135deg, rgba(100, 116, 139, 0.15) 0%, rgba(100, 116, 139, 0.1) 100%);
+    border-left-color: rgba(203, 213, 225, 0.3);
+}
+
+[data-theme-mode="dark"] .verse-sidebar:hover {
+    background: linear-gradient(135deg, rgba(100, 116, 139, 0.2) 0%, rgba(100, 116, 139, 0.15) 100%);
+}
+
+[data-theme-mode="dark"] .versions-info i {
+    color: #cbd5e1;
+}
+
+[data-theme-mode="dark"] .versions-text {
+    color: #cbd5e1;
+}
+
 [data-theme-mode="dark"] .verse-row {
     background: transparent;
 }
 
 [data-theme-mode="dark"] .verse-row:hover {
-    background: var(--hover-bg);
+    background: transparent;
 }
 
 [data-theme-mode="dark"] .verse-text {
@@ -600,25 +736,39 @@
                 </div>
             </div>
             
-            <!-- Verses -->
+            <!-- Verses with Sidebar -->
             <div class="verses-container" id="poemContent">
                 {% for verse in verses %}
-                <div class="verse-row">
-                    <div class="row">
-                        {% if verse.verse_2 %}
-                        <div class="col-md-6">
-                            <div class="verse-text verse-1">{{ verse.verse_1 }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="verse-text verse-2">{{ verse.verse_2 }}</div>
+                <div class="verse-row-wrapper">
+                    <div class="verse-sidebar">
+                        {% if verse.present_in_versions %}
+                        <div class="versions-info">
+                            <i class="fas fa-scroll"></i>
+                            <div class="versions-text">{{ verse.present_in_versions }}</div>
                         </div>
                         {% else %}
-                        <div class="col-12">
-                            <div class="verse-text">{{ verse.verse_1 }}</div>
+                        <div class="versions-info empty">
+                            <i class="fas fa-minus"></i>
                         </div>
                         {% endif %}
                     </div>
-                    <div class="verse-number">بیت {{ loop.index|persian_number }}</div>
+                    <div class="verse-row">
+                        <div class="row">
+                            {% if verse.verse_2 %}
+                            <div class="col-md-6">
+                                <div class="verse-text verse-1">{{ verse.verse_1 }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="verse-text verse-2">{{ verse.verse_2 }}</div>
+                            </div>
+                            {% else %}
+                            <div class="col-12">
+                                <div class="verse-text">{{ verse.verse_1 }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="verse-number">بیت {{ loop.index|persian_number }}</div>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
