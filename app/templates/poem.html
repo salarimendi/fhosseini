@@ -46,15 +46,46 @@
     
     .verse-sidebar {
         background: linear-gradient(135deg, #f0f4f8 0%, #e8eef5 100%);
-        padding: 12px 15px;
+        padding: 0;
         width: 160px;
         flex-shrink: 0;
         flex-grow: 0;
         border-left: 2px solid #cbd5e1;
         display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-top {
+        flex: 0 0 auto;
+        height: 8px;
+    }
+    
+    .sidebar-middle {
+        flex: 1;
+        display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.3s ease;
+        padding: 12px 15px;
+        min-height: 0;
+    }
+    
+    .sidebar-bottom {
+        flex: 0 0 auto;
+        padding: 8px 15px;
+        border-top: 1px solid rgba(203, 213, 225, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .verse-number {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 600;
+        letter-spacing: 0.5px;
     }
     
     .versions-info {
@@ -87,6 +118,13 @@
         letter-spacing: 0.3px;
     }
     
+    .verse-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border-radius: 0;
+    }
+    
     .verse-row {
         flex: 1;
         padding: 12px 16px;
@@ -94,6 +132,34 @@
         transition: all 0.2s ease;
         border-right: 3px solid transparent;
         background: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .verse-variant {
+        background: linear-gradient(135deg, #f9fafb 0%, #f5f6f8 100%);
+        border-top: 1px solid #e5e7eb;
+        padding: 10px 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #6b7280;
+        line-height: 1.5;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .verse-variant i {
+        color: #9ca3af;
+        font-size: 0.9rem;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+    
+    .variant-text {
+        flex: 1;
     }
     
     .verse-row-wrapper:hover {
@@ -112,6 +178,10 @@
     .verse-row-wrapper:hover .versions-info i {
         opacity: 1;
         transform: scale(1.1);
+    }
+    
+    .verse-row-wrapper:hover .verse-variant {
+        background: linear-gradient(135deg, #f5f6f8 0%, #f0f1f3 100%);
     }
     
     .verse-text {
@@ -288,11 +358,25 @@
             border-left: none;
             border-bottom: 2px solid #cbd5e1;
             padding: 10px 12px;
-            min-height: 40px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+        }
+        
+        .versions-info {
+            flex-direction: row;
+            gap: 4px;
         }
         
         .versions-text {
             font-size: 0.75rem;
+        }
+        
+        .verse-variant {
+            padding: 8px 12px;
+            font-size: 0.8rem;
         }
         
         .verse-text {
@@ -656,6 +740,28 @@
     background: var(--hover-bg);
     border-color: var(--border-color);
 }
+
+[data-theme-mode="dark"] .verse-variant {
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.4) 0%, rgba(17, 24, 39, 0.3) 100%);
+    border-top-color: rgba(107, 114, 128, 0.3);
+}
+
+[data-theme-mode="dark"] .verse-variant i {
+    color: #9ca3af;
+}
+
+[data-theme-mode="dark"] .variant-text {
+    color: #d1d5db;
+}
+
+[data-theme-mode="dark"] .sidebar-bottom {
+    background: rgba(0, 0, 0, 0.2);
+    border-top-color: rgba(107, 114, 128, 0.3);
+}
+
+[data-theme-mode="dark"] .verse-number {
+    color: #cbd5e1;
+}
 	
 	
 </style>
@@ -738,36 +844,55 @@
             
             <!-- Verses with Sidebar -->
             <div class="verses-container" id="poemContent">
+                {% set ns = namespace(verse_count=0) %}
                 {% for verse in verses %}
+                {% if verse.is_subtitle == 0 %}
+                    {% set ns.verse_count = ns.verse_count + 1 %}
+                {% endif %}
                 <div class="verse-row-wrapper">
                     <div class="verse-sidebar">
-                        {% if verse.present_in_versions %}
-                        <div class="versions-info">
-                            <i class="fas fa-scroll"></i>
-                            <div class="versions-text">{{ verse.present_in_versions }}</div>
-                        </div>
-                        {% else %}
-                        <div class="versions-info empty">
-                            <i class="fas fa-minus"></i>
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="verse-row">
-                        <div class="row">
-                            {% if verse.verse_2 %}
-                            <div class="col-md-6">
-                                <div class="verse-text verse-1">{{ verse.verse_1 }}</div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="verse-text verse-2">{{ verse.verse_2 }}</div>
+                        <div class="sidebar-top"></div>
+                        <div class="sidebar-middle">
+                            {% if verse.present_in_versions %}
+                            <div class="versions-info">
+                                <i class="fas fa-scroll"></i>
+                                <div class="versions-text">{{ verse.present_in_versions }}</div>
                             </div>
                             {% else %}
-                            <div class="col-12">
-                                <div class="verse-text">{{ verse.verse_1 }}</div>
+                            <div class="versions-info empty">
+                                <i class="fas fa-minus"></i>
                             </div>
                             {% endif %}
                         </div>
-                        <div class="verse-number">بیت {{ loop.index|persian_number }}</div>
+                        <div class="sidebar-bottom">
+                            {% if verse.is_subtitle == 0 %}
+                            <span class="verse-number">بیت {{ ns.verse_count|persian_number }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="verse-content">
+                        <div class="verse-row">
+                            <div class="row">
+                                {% if verse.verse_2 %}
+                                <div class="col-md-6">
+                                    <div class="verse-text verse-1">{{ verse.verse_1 }}</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="verse-text verse-2">{{ verse.verse_2 }}</div>
+                                </div>
+                                {% else %}
+                                <div class="col-12">
+                                    <div class="verse-text">{{ verse.verse_1 }}</div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if verse.variant_diff %}
+                        <div class="verse-variant">
+                            <i class="fas fa-code-branch"></i>
+                            <div class="variant-text">{{ verse.variant_diff }}</div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
