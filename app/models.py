@@ -122,6 +122,9 @@ class Verse(db.Model):
     order_in_title = db.Column(db.Integer, nullable=False)
     verse_1 = db.Column(db.Text, nullable=False)  # مصراع اول
     verse_2 = db.Column(db.Text)  # مصراع دوم (اختیاری)
+    variant_diff = db.Column(db.Text)  # اختلاف در نسخه‌ها
+    present_in_versions = db.Column(db.Text)  # موجود در کدام نسخ‌ها
+    is_subtitle = db.Column(db.Integer, nullable=False, default=0)  # آیا تیتر فرعی است (۱) یا بیت (۰)
     
     @property
     def full_verse(self):
