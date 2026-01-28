@@ -4,9 +4,9 @@ import pandas as pd
 # =========================
 # تنظیمات
 # =========================
-EXCEL_FILE = 'poems.xlsx'
-SQLITE_DB = 'ferdosi.db'
-SHEET_NAME = 0  # یا نام شیت
+EXCEL_FILE = 'temp/poems.xlsx'
+SQLITE_DB = 'temp/ferdosi.db'
+SHEET_NAME = 'all'
 
 # =========================
 # اتصال دیتابیس
@@ -14,11 +14,21 @@ SHEET_NAME = 0  # یا نام شیت
 conn = sqlite3.connect(SQLITE_DB)
 cur = conn.cursor()
 
+
+# =========================
+# حذف جداول اصلی
+# =========================
+
+cur.execute("DROP TABLE IF EXISTS verses;")
+cur.execute("DROP TABLE IF EXISTS titles;")
+
+conn.commit()
+
 # =========================
 # ساخت جداول temp
 # =========================
 cur.execute("""
-CREATE TABLE IF NOT EXISTS titles_temp (
+CREATE TABLE IF NOT EXISTS titles (
     id INTEGER PRIMARY KEY,
     title TEXT NOT NULL,
     garden INTEGER NOT NULL,
@@ -27,14 +37,14 @@ CREATE TABLE IF NOT EXISTS titles_temp (
 """)
 
 cur.execute("""
-CREATE TABLE IF NOT EXISTS verses_temp (
+CREATE TABLE IF NOT EXISTS verses (
     id INTEGER PRIMARY KEY,
     title_id INTEGER NOT NULL,
     order_in_title INTEGER NOT NULL,
     verse_1 TEXT NOT NULL,
     verse_2 TEXT,
-    variant_diff TEXT,
-    present_in_versions TEXT,
+    variant_diff TEXT NOT NULL,
+    present_in_versions TEXT NOT NULL,
     is_subtitle INTEGER NOT NULL
 )
 """)
@@ -52,8 +62,9 @@ df = pd.read_excel(EXCEL_FILE, sheet_name=SHEET_NAME)
 current_title_id = None
 current_order_in_title = 0
 
-current_garden = 0
+current_garden = 1
 order_in_garden = 0
+
 
 next_title_id = 1
 next_verse_id = 1
@@ -62,11 +73,17 @@ next_verse_id = 1
 # پردازش سطر به سطر
 # =========================
 for idx, row in df.iterrows():
-    control = row[0]
-    col_b = str(row[1]).strip() if not pd.isna(row[1]) else None
-    col_c = str(row[2]).strip() if not pd.isna(row[2]) else None
-    diff = str(row[3]).strip() if not pd.isna(row[3]) else None
-    present = str(row[4]).strip() if not pd.isna(row[4]) else None
+    control = row.iloc[0]
+
+    col_b = str(row.iloc[1]).strip() if not pd.isna(row.iloc[1]) else ''
+    col_c = str(row.iloc[2]).strip() if not pd.isna(row.iloc[2]) else ''
+    col_d = str(row.iloc[3]).strip() if not pd.isna(row.iloc[3]) else ''
+    col_e = str(row.iloc[4]).strip() if not pd.isna(row.iloc[4]) else ''
+
+    # --- پایان فایل ---
+    if control == 4:
+        print(f"⛔ پایان پردازش در سطر {idx + 1}")
+        break
 
     # --- شروع باغ جدید ---
     if control == 3:
@@ -80,7 +97,7 @@ for idx, row in df.iterrows():
         current_order_in_title = 0
 
         cur.execute("""
-        INSERT INTO titles_temp (id, title, garden, order_in_garden)
+        INSERT INTO titles (id, title, garden, order_in_garden)
         VALUES (?, ?, ?, ?)
         """, (
             next_title_id,
@@ -93,11 +110,11 @@ for idx, row in df.iterrows():
         next_title_id += 1
         continue
 
-    # --- بیت یا تیتر فرعی ---
+    # اگر هنوز تیتر نداریم
     if current_title_id is None:
-        continue  # هنوز تیتر نداریم
+        continue
 
-    # بیت
+    # --- بیت ---
     if pd.isna(control):
         if not col_b:
             continue
@@ -105,7 +122,7 @@ for idx, row in df.iterrows():
         current_order_in_title += 1
 
         cur.execute("""
-        INSERT INTO verses_temp
+        INSERT INTO verses
         (id, title_id, order_in_title, verse_1, verse_2,
          variant_diff, present_in_versions, is_subtitle)
         VALUES (?, ?, ?, ?, ?, ?, ?, 0)
@@ -115,35 +132,34 @@ for idx, row in df.iterrows():
             current_order_in_title,
             col_b,
             col_c,
-            diff,
-            present
+            col_d,
+            col_e
         ))
 
         next_verse_id += 1
         continue
 
-    # تیتر فرعی
-    if control == 2 and col_b:
+    # --- تیتر فرعی ---
+    if control == 2 and col_d:
         current_order_in_title += 1
 
         cur.execute("""
-        INSERT INTO verses_temp
+        INSERT INTO verses
         (id, title_id, order_in_title, verse_1, verse_2,
          variant_diff, present_in_versions, is_subtitle)
-        VALUES (?, ?, ?, ?, NULL, ?, ?, 1)
+        VALUES (?, ?, ?, ?, '', '', ?, 1)
         """, (
             next_verse_id,
             current_title_id,
             current_order_in_title,
-            col_b,
-            diff,
-            present
+            col_d,
+            col_e
         ))
 
         next_verse_id += 1
         continue
 
-    # سایر موارد → نادیده گرفته می‌شود
+    # سایر مقادیر control → نادیده گرفته می‌شود
 
 # =========================
 # پایان
@@ -151,4 +167,4 @@ for idx, row in df.iterrows():
 conn.commit()
 conn.close()
 
-print("✅ انتقال داده‌ها به جداول temp با موفقیت انجام شد.")
+print("✅ انتقال داده‌ها با نسخه نهایی یکپارچه با موفقیت انجام شد.")
