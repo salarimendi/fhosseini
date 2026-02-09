@@ -1418,4 +1418,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+<script src="{{ url_for('static', filename='js/harakat.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    // initialize harakat coloring only for the poem display area
+    if (document.querySelector('.verses-container') || document.querySelector('.verse-text')) {
+        window.HarakatColorize && window.HarakatColorize.init('.verses-container');
+    }
+});
+</script>
 {% endblock %}

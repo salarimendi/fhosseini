@@ -238,3 +238,14 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 {% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/harakat.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    if (document.querySelector('.comparison-container') || document.querySelector('.verse-text')) {
+        window.HarakatColorize && window.HarakatColorize.init('.card-body');
+    }
+});
+</script>
+{% endblock %}

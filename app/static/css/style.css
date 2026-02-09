@@ -19,6 +19,24 @@
     --hover-bg: #f8f9ff;
 }
 
+/* Harakat (diacritics) color variable */
+:root {
+    --haraka-color: #e74c3c; /* default red-accent for diacritics */
+}
+
+[data-theme-mode="dark"] {
+    --haraka-color: #ff7b7b;
+}
+
+/* styling for wrapped diacritics */
+.haraka {
+    color: var(--haraka-color);
+    font-weight: 600;
+    /* keep diacritic spacing natural */
+    display: inline;
+    line-height: 1;
+}
+
 /* پالت فیروزه‌ای */
 [data-theme="turquoise"] {
     --primary-color: #1abc9c;
