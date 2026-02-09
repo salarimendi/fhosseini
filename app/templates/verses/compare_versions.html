@@ -80,11 +80,11 @@
                         <div class="verse-item mb-3 p-3 border rounded">
                             <div class="row">
                                 <div class="col-md-6 text-right">
-                                    <p class="verse-text">{{ verse.verse_1 }}</p>
+                                    <p class="verse-text">{{ verse.verse_1_tag|safe }}</p>
                                 </div>
                                 {% if verse.verse_2 %}
                                 <div class="col-md-6 text-left">
-                                    <p class="verse-text">{{ verse.verse_2 }}</p>
+                                    <p class="verse-text">{{ verse.verse_2_tag|safe }}</p>
                                 </div>
                                 {% endif %}
                             </div>

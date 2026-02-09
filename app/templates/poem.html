@@ -1069,14 +1069,14 @@
                             <div class="row">
                                 {% if verse.verse_2 %}
                                 <div class="col-md-6">
-                                    <div class="verse-text verse-1">{{ verse.verse_1 }}</div>
+                                    <div class="verse-text verse-1">{{ verse.verse_1_tag|safe }}</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="verse-text verse-2">{{ verse.verse_2 }}</div>
+                                    <div class="verse-text verse-2">{{ verse.verse_2_tag|safe }}</div>
                                 </div>
                                 {% else %}
                                 <div class="col-12">
-                                    <div class="verse-text">{{ verse.verse_1 }}</div>
+                                    <div class="verse-text">{{ verse.verse_1_tag|safe }}</div>
                                 </div>
                                 {% endif %}
                             </div>

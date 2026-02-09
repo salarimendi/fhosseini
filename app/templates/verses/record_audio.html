@@ -20,9 +20,9 @@
                         <div class="verses-container">
                             {% for verse in verses %}
                             <div class="verse-row d-flex justify-content-between mb-2">
-                                <div class="verse-right text-end col-6">{{ verse.verse_1 }}</div>
+                                <div class="verse-right text-end col-6">{{ verse.verse_1_tag|safe }}</div>
                                 {% if verse.verse_2 %}
-                                <div class="verse-left text-start col-6">{{ verse.verse_2 }}</div>
+                                <div class="verse-left text-start col-6">{{ verse.verse_2_tag|safe }}</div>
                                 {% endif %}
                             </div>
                             {% endfor %}

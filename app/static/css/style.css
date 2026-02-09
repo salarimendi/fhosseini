@@ -399,6 +399,60 @@ button,
                 background-color 0.3s ease;
 }
 
+/* ---------- Custom inline tags for verse underlines ---------- */
+/* Only introducing two custom tags: <mysl> (single underline) and <mydl> (double underline) */
+mysl, mydl {
+    display: inline-block;
+    position: relative;
+    /* preserve spaces/newlines inside the tag content while allowing wrapping */
+    white-space: pre-wrap;
+}
+
+:root {
+    --ul-thickness: 3px;
+    --ul-offset: 10px;
+    --ul-gap: 15px;
+    /* top color must match single-line color */
+    --ul-color-top: var(--primary-color);
+    --ul-color-bottom: var(--secondary-color);
+}
+
+/* single underline */
+mysl::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(-1 * var(--ul-offset));
+    border-bottom: var(--ul-thickness) solid var(--ul-color-top);
+}
+
+/* double underline */
+mydl::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(-1 * var(--ul-offset));
+    border-bottom: var(--ul-thickness) solid var(--ul-color-top);
+}
+
+mydl::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(-1 * (var(--ul-offset) + var(--ul-gap)));
+    border-bottom: var(--ul-thickness) solid var(--ul-color-bottom);
+}
+
+/* Dark theme adjustments (optional) */
+[data-theme-mode="dark"] {
+    --ul-color-top: var(--primary-color);
+    --ul-color-bottom: var(--accent-color);
+}
+
+
 .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 35px rgba(0,0,0,0.15);
