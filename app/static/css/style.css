@@ -19,7 +19,13 @@
     --hover-bg: #f8f9ff;
 }
 
-/* Harakat (diacritics) color and positioning - simple approach */
+
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* Harakat (diacritics) color and positioning */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* متغیر رنگ حرکات - سازگار با تم روز و شب */
 :root {
     --haraka-color: #e74c3c;
 }
@@ -28,59 +34,67 @@
     --haraka-color: #ff7b7b;
 }
 
-/* رنگ حرکات */
-.fatha, .damma, .tashdid {
-    color: var(--haraka-color);
-    font-weight: 600;
-}
+/* ─────────────────────────────────────────────────────────────── */
+/* رنگ‌بندی و موقعیت‌یابی حرکات */
+/* ─────────────────────────────────────────────────────────────── */
 
-.kasra {
-    color: var(--haraka-color);
-    font-weight: 600;
-}
-
-.sukun {
-    color: var(--haraka-color);
-    font-weight: 600;
-}
-
-.fathatan, .dammatan, .kasratan {
-    color: var(--haraka-color);
-    font-weight: 600;
-}
-
-/* جابجایی - فتحة و ضمة و تشديد للأعلى */
-.fatha, .damma {
+/* رنگ‌بندی حرکات */
+.fatha {
+    color: red;
     position: relative;
     top: -6px;
 }
 
-.tashdid {
+.damma {
+    color: red;
     position: relative;
-    top: -10px;
+    top: -6px;
 }
 
-/* كسرة للأسفل */
 .kasra {
+    color: blue;
     position: relative;
     top: 6px;
 }
 
-/* سكون للأعلى */
+.tashdid {
+    color: red;
+    position: relative;
+    top: -10px;
+}
+
 .sukun {
+    color: green;
     position: relative;
     top: -5px;
 }
 
-.fathatan, .dammatan {
+.fathatan {
+    color: red;
+    position: relative;
+    top: -6px;
+}
+
+.dammatan {
+    color: red;
     position: relative;
     top: -6px;
 }
 
 .kasratan {
+    color: blue;
     position: relative;
     top: 6px;
 }
+
+/* استایل عمومی برای حرکات */
+.haraka {
+    position: relative;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════ */
+
 
 /* پالت فیروزه‌ای */
 [data-theme="turquoise"] {
