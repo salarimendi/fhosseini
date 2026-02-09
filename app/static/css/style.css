@@ -19,22 +19,67 @@
     --hover-bg: #f8f9ff;
 }
 
-/* Harakat (diacritics) color variable */
+/* Harakat (diacritics) color and positioning - simple approach */
 :root {
-    --haraka-color: #e74c3c; /* default red-accent for diacritics */
+    --haraka-color: #e74c3c;
 }
 
 [data-theme-mode="dark"] {
     --haraka-color: #ff7b7b;
 }
 
-/* styling for wrapped diacritics */
-.haraka {
+/* رنگ حرکات */
+.fatha, .damma, .tashdid {
     color: var(--haraka-color);
     font-weight: 600;
-    /* keep diacritic spacing natural */
-    display: inline;
-    line-height: 1;
+}
+
+.kasra {
+    color: var(--haraka-color);
+    font-weight: 600;
+}
+
+.sukun {
+    color: var(--haraka-color);
+    font-weight: 600;
+}
+
+.fathatan, .dammatan, .kasratan {
+    color: var(--haraka-color);
+    font-weight: 600;
+}
+
+/* جابجایی - فتحة و ضمة و تشديد للأعلى */
+.fatha, .damma {
+    position: relative;
+    top: -6px;
+}
+
+.tashdid {
+    position: relative;
+    top: -10px;
+}
+
+/* كسرة للأسفل */
+.kasra {
+    position: relative;
+    top: 6px;
+}
+
+/* سكون للأعلى */
+.sukun {
+    position: relative;
+    top: -5px;
+}
+
+.fathatan, .dammatan {
+    position: relative;
+    top: -6px;
+}
+
+.kasratan {
+    position: relative;
+    top: 6px;
 }
 
 /* پالت فیروزه‌ای */
