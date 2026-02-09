@@ -14,18 +14,15 @@ SHEET_NAME = 'all'
 conn = sqlite3.connect(SQLITE_DB)
 cur = conn.cursor()
 
-
 # =========================
-# حذف جداول اصلی
+# حذف جداول قبلی
 # =========================
-
 cur.execute("DROP TABLE IF EXISTS verses;")
 cur.execute("DROP TABLE IF EXISTS titles;")
-
 conn.commit()
 
 # =========================
-# ساخت جداول temp
+# ساخت جداول جدید (با فیلد tag)
 # =========================
 cur.execute("""
 CREATE TABLE IF NOT EXISTS titles (
@@ -43,6 +40,8 @@ CREATE TABLE IF NOT EXISTS verses (
     order_in_title INTEGER NOT NULL,
     verse_1 TEXT NOT NULL,
     verse_2 TEXT,
+    verse_1_tag TEXT NOT NULL,
+    verse_2_tag TEXT,
     variant_diff TEXT NOT NULL,
     present_in_versions TEXT NOT NULL,
     is_subtitle INTEGER NOT NULL
@@ -65,7 +64,6 @@ current_order_in_title = 0
 current_garden = 1
 order_in_garden = 0
 
-
 next_title_id = 1
 next_verse_id = 1
 
@@ -73,6 +71,7 @@ next_verse_id = 1
 # پردازش سطر به سطر
 # =========================
 for idx, row in df.iterrows():
+
     control = row.iloc[0]
 
     col_b = str(row.iloc[1]).strip() if not pd.isna(row.iloc[1]) else ''
@@ -80,9 +79,13 @@ for idx, row in df.iterrows():
     col_d = str(row.iloc[3]).strip() if not pd.isna(row.iloc[3]) else ''
     col_e = str(row.iloc[4]).strip() if not pd.isna(row.iloc[4]) else ''
 
+    # ستون‌های تگ‌دار جدید
+    col_f = str(row.iloc[5]).strip() if len(row) > 5 and not pd.isna(row.iloc[5]) else ''
+    col_g = str(row.iloc[6]).strip() if len(row) > 6 and not pd.isna(row.iloc[6]) else ''
+
     # --- پایان فایل ---
     if control == 4:
-        print(f"⛔ پایان پردازش در سطر {idx + 1}")
+        print(f"STOP at excel row {idx + 1}")
         break
 
     # --- شروع باغ جدید ---
@@ -123,15 +126,20 @@ for idx, row in df.iterrows():
 
         cur.execute("""
         INSERT INTO verses
-        (id, title_id, order_in_title, verse_1, verse_2,
-         variant_diff, present_in_versions, is_subtitle)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+        (id, title_id, order_in_title,
+         verse_1, verse_2,
+         verse_1_tag, verse_2_tag,
+         variant_diff, present_in_versions,
+         is_subtitle)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
         """, (
             next_verse_id,
             current_title_id,
             current_order_in_title,
             col_b,
-            col_c,
+            col_c if col_c else None,
+            col_f if col_f else None,
+            col_g if col_g else None,
             col_d,
             col_e
         ))
@@ -141,25 +149,28 @@ for idx, row in df.iterrows():
 
     # --- تیتر فرعی ---
     if control == 2 and col_d:
+
         current_order_in_title += 1
 
         cur.execute("""
         INSERT INTO verses
-        (id, title_id, order_in_title, verse_1, verse_2,
-         variant_diff, present_in_versions, is_subtitle)
-        VALUES (?, ?, ?, ?, '', '', ?, 1)
+        (id, title_id, order_in_title,
+         verse_1, verse_2,
+         verse_1_tag, verse_2_tag,
+         variant_diff, present_in_versions,
+         is_subtitle)
+        VALUES (?, ?, ?, ?, NULL, ?, NULL, '', ?, 1)
         """, (
             next_verse_id,
             current_title_id,
             current_order_in_title,
-            col_d,
+            col_d,          # متن تیتر فرعی
+            col_d,          # tag همان متن
             col_e
         ))
 
         next_verse_id += 1
         continue
-
-    # سایر مقادیر control → نادیده گرفته می‌شود
 
 # =========================
 # پایان
@@ -167,4 +178,4 @@ for idx, row in df.iterrows():
 conn.commit()
 conn.close()
 
-print("✅ انتقال داده‌ها با نسخه نهایی یکپارچه با موفقیت انجام شد.")
+print("SUCCESS: Excel → SQLite منتقل شد (with tag fields)")
