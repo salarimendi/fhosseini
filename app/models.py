@@ -113,6 +113,17 @@ class Title(db.Model):
     def __repr__(self):
         return f'<Title {self.title}>'
 
+    def preceding_verses_count(self):
+        """تعداد ابیات (غیر زیرعنوان) که قبل از این تیتر در کتاب قرار دارند"""
+        # محاسبه با استفاده از مقایسه garden و order_in_garden
+        return db.session.query(Verse).join(Title, Verse.title_id == Title.id).filter(
+            Verse.is_subtitle == 0,
+            (
+                (Title.garden < self.garden) |
+                ((Title.garden == self.garden) & (Title.order_in_garden < self.order_in_garden))
+            )
+        ).count()
+
 class Verse(db.Model):
     """مدل ابیات"""
     __tablename__ = 'verses'

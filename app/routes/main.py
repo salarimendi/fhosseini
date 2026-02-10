@@ -181,7 +181,11 @@ def title(title_id):
         'comment_count': len(comments),
         'recording_count': len(recordings)
     }
-    
+    # تعداد ابیات قبلی در کل کتاب (برای شماره سراسری)
+    prev_verses_count = title_obj.preceding_verses_count()
+    # تعداد کل ابیات (غیر زیرعنوان) در کل کتاب
+    total_verses_all = Verse.query.filter_by(is_subtitle=0).count()
+
     return render_template('poem.html',
         title=title_obj,
         verses=verses,
@@ -193,7 +197,9 @@ def title(title_id):
         user_has_comment=user_has_comment,
         comment_form=comment_form,
         user_has_recording=user_has_recording,
-        user_recording_approved=user_recording_approved
+        user_recording_approved=user_recording_approved,
+        prev_verses_count=prev_verses_count,
+        total_verses_all=total_verses_all
     )
 
 @main_bp.route('/search')

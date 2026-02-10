@@ -1,3 +1,51 @@
+
+/*
+
+(function(window, document){
+'use strict';
+
+const map = {
+ '\u064E': 'fatha',
+ '\u064F': 'damma',
+ '\u0650': 'kasra',
+ '\u0651': 'tashdid',
+ '\u0652': 'sukun',
+ '\u064B': 'fathatan',
+ '\u064C': 'dammatan',
+ '\u064D': 'kasratan'
+};
+
+const HARAKAT = '\u064B-\u0652';
+
+function colorizeElement(el){
+
+ if (el.dataset.harakatProcessed === '1') return;
+
+ el.innerHTML = el.innerHTML.replace(
+   new RegExp(`([\\u0621-\\u064A])([${HARAKAT}]+)`, 'g'),
+   (m, letter, marks) => {
+       const cls = map[marks[0]] || 'haraka';
+       return `<span class="${cls}">${letter}${marks}</span>`;
+   }
+ );
+
+ el.dataset.harakatProcessed = '1';
+}
+
+function init(selector){
+ const sel = selector || '.verses-container, .verse, .verse-text';
+ document.querySelectorAll(sel).forEach(colorizeElement);
+}
+
+window.HarakatColorize = { init };
+
+})(window, document);
+
+document.addEventListener("DOMContentLoaded", () => {
+ if (window.HarakatColorize) HarakatColorize.init();
+});
+*/
+
 // harakat.js
 // Simple diacritic coloring and positioning - exactly as shown in reference.
 // Wraps each diacritic in a span with appropriate class name.

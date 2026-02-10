@@ -173,6 +173,36 @@
         font-weight: 600;
         letter-spacing: 0.5px;
     }
+
+    /* Stacked two-level number (local / global) shown in verse sidebar */
+    .stacked-number {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        text-align: center;
+    }
+
+    .stacked-top {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #2c3e50;
+        line-height: 1;
+    }
+
+    .stacked-sep {
+        width: 34px;
+        height: 3px;
+        background: #cbd5e1;
+        border-radius: 2px;
+        opacity: 0.9;
+    }
+
+    .stacked-bottom {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+    }
     
     .versions-info {
         text-align: center;
@@ -1060,7 +1090,11 @@
                         </div>
                         <div class="sidebar-bottom">
                             {% if verse.is_subtitle == 0 %}
-                            <span class="verse-number">بیت {{ ns.verse_count|persian_number }}</span>
+                            <div class="stacked-number" role="note" aria-label="شماره بیت">
+                                <div class="stacked-top">{{ ns.verse_count|persian_number }}</div>
+                                <div class="stacked-sep" aria-hidden="true"></div>
+                                <div class="stacked-bottom">{{ (prev_verses_count + ns.verse_count)|persian_number }}</div>
+                            </div>
                             {% endif %}
                         </div>
                     </div>
