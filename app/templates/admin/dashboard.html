@@ -32,6 +32,14 @@
                             مدیریت ضبط‌ها
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.admin_corrections') }}">
+                            مدیریت نظرات اصلاحی
+                            {% if pending_corrections_count > 0 %}
+                            <span class="badge bg-warning rounded-pill">{{ pending_corrections_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -105,6 +113,45 @@
                 </div>
             </div>
 
+            <!-- ردیف دوم آمار - نظرات اصلاحی -->
+            <div class="row mb-4">
+                <div class="col-xl-6 col-md-6">
+                    <div class="card border-left-danger shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                        نظرات اصلاحی در انتظار تایید
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.pending_corrections }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6 col-md-6">
+                    <div class="card border-left-secondary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                        کل نظرات اصلاحی تایید شده
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.approved_corrections }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- آخرین فعالیت‌ها -->
             <div class="row">
                 <div class="col-lg-6">
@@ -146,7 +193,7 @@
                                     {% for comment in recent_comments %}
                                     <div class="list-group-item">
                                         <div class="d-flex justify-content-between">
-                                            <strong>{{ comment.user.username }}</strong>
+                                            <strong>{{ comment.author.username }}</strong>
                                             <small class="text-muted">{{ comment.created_at.strftime('%Y/%m/%d') }}</small>
                                         </div>
                                         <p class="mb-1">{{ comment.comment[:100] }}{% if comment.comment|length > 100 %}...{% endif %}</p>

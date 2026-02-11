@@ -440,7 +440,7 @@
 
     <!-- Filters -->
     <div class="filters-section">
-        <form method="get" action="{{ url_for('admin_corrections') }}">
+        <form method="get" action="{{ url_for('admin.admin_corrections') }}">
             <div class="filters-row">
                 <div class="filter-group">
                     <label for="status">وضعیت</label>
@@ -589,7 +589,7 @@
                                 <i class="fas fa-trash"></i> حذف
                             </button>
                             {% endif %}
-                            <a href="{{ url_for('poem', title_id=correction.verse.title_id) }}#verse-{{ correction.verse_id }}" class="btn-action btn-view" target="_blank">
+                            <a href="{{ url_for('main.title', title_id=correction.verse.title_id) }}#verse-{{ correction.verse_id }}" class="btn-action btn-view" target="_blank">
                                 <i class="fas fa-eye"></i> مشاهده
                             </a>
                         </div>
@@ -611,7 +611,7 @@
     {% if corrections.pages > 1 %}
     <div class="pagination">
         {% if corrections.has_prev %}
-        <a href="{{ url_for('admin_corrections', page=corrections.prev_num, status=status, search=search) }}">
+        <a href="{{ url_for('admin.admin_corrections', page=corrections.prev_num, status=status, search=search) }}">
             <i class="fas fa-chevron-right"></i> قبلی
         </a>
         {% else %}
@@ -623,7 +623,7 @@
                 {% if page_num == corrections.page %}
                 <span class="current">{{ page_num }}</span>
                 {% else %}
-                <a href="{{ url_for('admin_corrections', page=page_num, status=status, search=search) }}">{{ page_num }}</a>
+                <a href="{{ url_for('admin.admin_corrections', page=page_num, status=status, search=search) }}">{{ page_num }}</a>
                 {% endif %}
             {% else %}
                 <span>...</span>
@@ -631,7 +631,7 @@
         {% endfor %}
         
         {% if corrections.has_next %}
-        <a href="{{ url_for('admin_corrections', page=corrections.next_num, status=status, search=search) }}">
+        <a href="{{ url_for('admin.admin_corrections', page=corrections.next_num, status=status, search=search) }}">
             بعدی <i class="fas fa-chevron-left"></i>
         </a>
         {% else %}

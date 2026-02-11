@@ -36,19 +36,34 @@ def admin_required(f):
 @admin_required
 def dashboard():
     """داشبورد مدیریت"""
+    from app.models import VerseCorrection
+    
     users_count = User.query.count()
     comments_count = Comment.query.count()
     recordings_count = Recording.query.count()
     poems_count = Title.query.count()
+    pending_corrections_count = VerseCorrection.query.filter_by(is_approved=False).count()
+    approved_corrections_count = VerseCorrection.query.filter_by(is_approved=True).count()
+    
+    # آخرین کاربران
+    recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
+    
+    # آخرین نظرات
+    recent_comments = Comment.query.order_by(Comment.created_at.desc()).limit(5).all()
     
     stats = {
         'users': users_count,
         'comments': comments_count,
         'recordings': recordings_count,
-        'poems': poems_count
+        'poems': poems_count,
+        'pending_corrections': pending_corrections_count,
+        'approved_corrections': approved_corrections_count
     }
     
-    return render_template('admin/dashboard.html', stats=stats)
+    return render_template('admin/dashboard.html', 
+                         stats=stats,
+                         recent_users=recent_users,
+                         recent_comments=recent_comments)
 
 @admin_bp.route('/users')
 @login_required

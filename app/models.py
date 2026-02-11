@@ -194,6 +194,10 @@ class VerseCorrection(db.Model):
     approved_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     approved_at = db.Column(db.DateTime)
 
+    # روابط به کاربر ایجادکننده و تاییدکننده
+    author = db.relationship('User', foreign_keys=[created_by], backref=db.backref('verse_corrections', lazy='dynamic'))
+    approver = db.relationship('User', foreign_keys=[approved_by])
+
     def __repr__(self):
         return f'<VerseCorrection v={self.verse_id} field={self.field_name}>'
 
