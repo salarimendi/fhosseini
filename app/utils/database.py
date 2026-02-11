@@ -311,3 +311,323 @@ def get_available_gardens():
         Title.garden,
         func.count(db.distinct(Title.id)).label('poems_count')
     ).group_by(Title.garden).order_by(Title.garden).all()
+
+
+# =============================================================================
+# توابع جدید برای سیستم نظرات تصحیحی ابیات
+# این کد باید به انتهای فایل database.py اضافه شود
+# =============================================================================
+
+def get_verse_corrections(verse_id, include_pending=False, user_id=None):
+    """
+    دریافت نظرات تصحیحی یک بیت
+    
+    Args:
+        verse_id: شناسه بیت
+        include_pending: نمایش نظرات در انتظار (برای ادمین)
+        user_id: شناسه کاربر (برای نمایش نظرات خود کاربر)
+    
+    Returns:
+        لیست نظرات تصحیحی با اطلاعات کامل
+    """
+    from app.models import VerseCorrection, User
+    
+    query = VerseCorrection.query.filter_by(verse_id=verse_id)
+    
+    if include_pending:
+        # برای ادمین: همه نظرات
+        corrections = query.order_by(VerseCorrection.created_at.desc()).all()
+    elif user_id:
+        # برای کاربر: نظرات تایید شده + نظرات خودش
+        corrections = query.filter(
+            or_(
+                VerseCorrection.is_approved == True,
+                VerseCorrection.created_by == user_id
+            )
+        ).order_by(VerseCorrection.created_at.desc()).all()
+    else:
+        # برای مهمان: فقط نظرات تایید شده
+        corrections = query.filter_by(is_approved=True)\
+            .order_by(VerseCorrection.created_at.desc()).all()
+    
+    # اضافه کردن اطلاعات کاربر
+    result = []
+    for correction in corrections:
+        user = User.query.get(correction.created_by)
+        approver = User.query.get(correction.approved_by) if correction.approved_by else None
+        
+        result.append({
+            'id': correction.id,
+            'verse_id': correction.verse_id,
+            'field_name': correction.field_name,
+            'old_text': correction.old_text,
+            'new_text': correction.new_text,
+            'correction_type': correction.correction_type,
+            'note': correction.note,
+            'created_by': correction.created_by,
+            'created_by_name': user.username if user else 'ناشناس',
+            'created_by_fullname': user.fullname if user else 'ناشناس',
+            'created_at': correction.created_at,
+            'is_approved': correction.is_approved,
+            'approved_by_name': approver.username if approver else None,
+            'approved_at': correction.approved_at
+        })
+    
+    return result
+
+
+def save_verse_correction(data, user_id):
+    """
+    ذخیره یا ویرایش نظر تصحیحی
+    
+    Args:
+        data: دیکشنری حاوی اطلاعات نظر تصحیحی
+        user_id: شناسه کاربر
+    
+    Returns:
+        tuple: (correction_object, message)
+    
+    Raises:
+        ValueError: در صورت اعتبارسنجی ناموفق
+    """
+    from app.models import VerseCorrection, Verse
+    from datetime import datetime
+    
+    # اعتبارسنجی
+    verse_id = data.get('verse_id')
+    if not verse_id:
+        raise ValueError('شناسه بیت الزامی است')
+    
+    verse = Verse.query.get(verse_id)
+    if not verse:
+        raise ValueError('بیت مورد نظر یافت نشد')
+    
+    field_name = data.get('field_name')
+    valid_fields = ['verse_1', 'verse_2', 'verse_1_tag', 'verse_2_tag', 'variant_diff', 'present_in_versions']
+    if field_name not in valid_fields:
+        raise ValueError('فیلد انتخاب شده نامعتبر است')
+    
+    new_text = data.get('new_text', '').strip()
+    if not new_text:
+        raise ValueError('متن پیشنهادی نمی‌تواند خالی باشد')
+    
+    correction_type = data.get('correction_type', 'text')
+    note = data.get('note', '').strip()
+    
+    # دریافت متن فعلی
+    old_text = getattr(verse, field_name) or ''
+    
+    # بررسی تکراری نبودن
+    correction_id = data.get('correction_id')
+    if not correction_id:
+        existing = VerseCorrection.query.filter_by(
+            verse_id=verse_id,
+            field_name=field_name,
+            created_by=user_id,
+            is_approved=False
+        ).first()
+        
+        if existing:
+            raise ValueError('شما قبلاً برای این قسمت نظر ثبت کرده‌اید. لطفاً نظر قبلی را ویرایش کنید.')
+    
+    if correction_id:
+        # ویرایش
+        correction = VerseCorrection.query.get(correction_id)
+        if not correction:
+            raise ValueError('نظر مورد نظر یافت نشد')
+        
+        if correction.created_by != user_id:
+            raise ValueError('شما مجوز ویرایش این نظر را ندارید')
+        
+        if correction.is_approved:
+            raise ValueError('نظرات تایید شده قابل ویرایش نیستند')
+        
+        correction.old_text = old_text
+        correction.new_text = new_text
+        correction.correction_type = correction_type
+        correction.note = note
+        message = 'نظر تصحیحی با موفقیت ویرایش شد'
+    else:
+        # ایجاد جدید
+        correction = VerseCorrection(
+            verse_id=verse_id,
+            field_name=field_name,
+            old_text=old_text,
+            new_text=new_text,
+            correction_type=correction_type,
+            note=note,
+            created_by=user_id,
+            is_approved=False
+        )
+        db.session.add(correction)
+        message = 'نظر تصحیحی با موفقیت ثبت شد و پس از تایید مدیر نمایش داده خواهد شد'
+    
+    db.session.commit()
+    return correction, message
+
+
+def delete_verse_correction(correction_id, user_id, is_admin=False):
+    """
+    حذف نظر تصحیحی
+    
+    Args:
+        correction_id: شناسه نظر
+        user_id: شناسه کاربر
+        is_admin: آیا کاربر ادمین است
+    
+    Returns:
+        str: پیام موفقیت
+    
+    Raises:
+        ValueError: در صورت عدم دسترسی یا یافت نشدن نظر
+    """
+    from app.models import VerseCorrection
+    
+    correction = VerseCorrection.query.get(correction_id)
+    if not correction:
+        raise ValueError('نظر مورد نظر یافت نشد')
+    
+    # بررسی مجوز
+    if not is_admin and correction.created_by != user_id:
+        raise ValueError('شما مجوز حذف این نظر را ندارید')
+    
+    db.session.delete(correction)
+    db.session.commit()
+    return 'نظر تصحیحی با موفقیت حذف شد'
+
+
+def user_can_add_correction(user_id, verse_id, field_name):
+    """
+    بررسی اینکه آیا کاربر می‌تواند نظر جدید اضافه کند
+    (یک کاربر نمی‌تواند برای یک فیلد چند نظر pending داشته باشد)
+    
+    Args:
+        user_id: شناسه کاربر
+        verse_id: شناسه بیت
+        field_name: نام فیلد
+    
+    Returns:
+        bool: امکان افزودن نظر جدید
+    """
+    from app.models import VerseCorrection
+    
+    # بررسی نظر pending قبلی
+    existing = VerseCorrection.query.filter_by(
+        verse_id=verse_id,
+        field_name=field_name,
+        created_by=user_id,
+        is_approved=False
+    ).first()
+    
+    return existing is None
+
+
+def get_pending_corrections_count():
+    """
+    تعداد نظرات تصحیحی در انتظار تایید
+    
+    Returns:
+        int: تعداد نظرات pending
+    """
+    from app.models import VerseCorrection
+    return VerseCorrection.query.filter_by(is_approved=False).count()
+
+
+def get_corrections_filtered(page=1, per_page=20, status='', search=''):
+    """
+    دریافت نظرات تصحیحی با فیلتر برای پنل مدیریت
+    
+    Args:
+        page: شماره صفحه
+        per_page: تعداد در هر صفحه
+        status: فیلتر وضعیت ('approved', 'pending', یا '')
+        search: متن جستجو
+    
+    Returns:
+        Pagination object
+    """
+    from app.models import VerseCorrection, Verse, Title, User
+    
+    query = VerseCorrection.query.join(Verse).join(Title)
+    
+    # فیلتر وضعیت
+    if status == 'approved':
+        query = query.filter(VerseCorrection.is_approved == True)
+    elif status == 'pending':
+        query = query.filter(VerseCorrection.is_approved == False)
+    
+    # فیلتر جستجو
+    if search:
+        query = query.join(User, VerseCorrection.created_by == User.id).filter(
+            or_(
+                User.username.ilike(f'%{search}%'),
+                VerseCorrection.new_text.ilike(f'%{search}%'),
+                VerseCorrection.note.ilike(f'%{search}%'),
+                Title.title.ilike(f'%{search}%')
+            )
+        )
+    
+    return query.order_by(VerseCorrection.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+
+def approve_verse_correction(correction_id, admin_id):
+    """
+    تایید نظر تصحیحی توسط ادمین
+    
+    Args:
+        correction_id: شناسه نظر
+        admin_id: شناسه ادمین
+    
+    Returns:
+        str: پیام موفقیت
+    
+    Raises:
+        ValueError: در صورت یافت نشدن یا تایید قبلی
+    """
+    from app.models import VerseCorrection
+    from datetime import datetime, UTC
+    
+    correction = VerseCorrection.query.get(correction_id)
+    if not correction:
+        raise ValueError('نظر مورد نظر یافت نشد')
+    
+    if correction.is_approved:
+        raise ValueError('این نظر قبلاً تایید شده است')
+    
+    correction.is_approved = True
+    correction.approved_by = admin_id
+    correction.approved_at = datetime.now(UTC)
+    
+    db.session.commit()
+    return 'نظر تصحیحی با موفقیت تایید شد'
+
+
+def reject_verse_correction(correction_id):
+    """
+    رد نظر تصحیحی (حذف)
+    
+    Args:
+        correction_id: شناسه نظر
+    
+    Returns:
+        str: پیام موفقیت
+    
+    Raises:
+        ValueError: در صورت یافت نشدن نظر
+    """
+    from app.models import VerseCorrection
+    
+    correction = VerseCorrection.query.get(correction_id)
+    if not correction:
+        raise ValueError('نظر مورد نظر یافت نشد')
+    
+    db.session.delete(correction)
+    db.session.commit()
+    return 'نظر تصحیحی رد و حذف شد'
+
+
+# =============================================================================
+# پایان توابع نظرات تصحیحی
+# =============================================================================

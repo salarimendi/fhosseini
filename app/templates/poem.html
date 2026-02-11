@@ -1,8 +1,12 @@
+
 {% extends "base.html" %}
 
 {% block title %}{{ title.title }} - سایت فردوسی حسینی{% endblock %}
 
 {% block head %}
+<!-- لینک CSS نظرات تصحیحی -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/verse-corrections.css') }}">
+
 <style>
     .poem-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1073,7 +1077,7 @@
                 {% if verse.is_subtitle == 0 %}
                     {% set ns.verse_count = ns.verse_count + 1 %}
                 {% endif %}
-                <div class="verse-row-wrapper">
+                <div class="verse-row-wrapper" id="verse-{{ verse.id }}" data-verse-id="{{ verse.id }}">
                     <div class="verse-sidebar">
                         <div class="sidebar-top"></div>
                         <div class="sidebar-middle">
@@ -1121,6 +1125,48 @@
                             <div class="variant-text">{{ verse.variant_diff }}</div>
                         </div>
                         {% endif %}
+                        
+                        <!-- ==========================================
+                             بخش نظرات تصحیحی (کد جدید)
+                             ========================================== -->
+                        {% if verse.is_subtitle == 0 %}
+                        <div class="verse-corrections-section" id="verse-section-{{ verse.id }}">
+                            
+                            <!-- دکمه‌های اکشن بر اساس سطح دسترسی کاربر -->
+                            <div class="corrections-actions">
+                                {% if current_user.is_authenticated and current_user.can_comment() %}
+                                    <!-- کاربر محقق: می‌تواند نظر اضافه کند -->
+                                    <button class="btn-add-correction" onclick="showCorrectionForm({{ verse.id }})">
+                                        <i class="fas fa-plus-circle"></i>
+                                        ثبت نظر تصحیحی
+                                    </button>
+                                    
+                                    <button class="btn-toggle-corrections" 
+                                            data-verse-id="{{ verse.id }}" 
+                                            onclick="toggleCorrections({{ verse.id }})">
+                                        <i class="fas fa-chevron-down"></i>
+                                        نمایش نظرات تصحیحی
+                                    </button>
+                                {% else %}
+                                    <!-- کاربر عادی یا مهمان: فقط مشاهده نظرات تایید شده -->
+                                    <button class="btn-toggle-corrections" 
+                                            onclick="toggleCorrections({{ verse.id }})">
+                                        <i class="fas fa-chevron-down"></i>
+                                        نمایش نظرات تصحیحی
+                                    </button>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- محل نمایش فرم افزودن/ویرایش (به صورت داینامیک) -->
+                            <div id="correction-form-{{ verse.id }}" style="display: none;"></div>
+                            
+                            <!-- محل نمایش لیست نظرات (به صورت داینامیک) -->
+                            <div id="corrections-{{ verse.id }}" style="display: none;"></div>
+                            
+                        </div>
+                        {% endif %}
+                        <!-- پایان بخش نظرات تصحیحی -->
+                        
                     </div>
                 </div>
                 {% endfor %}
@@ -1271,6 +1317,23 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- ==========================================
+     اسکریپت‌های نظرات تصحیحی
+     ========================================== -->
+<script>
+// تنظیم اطلاعات کاربر برای استفاده در verse-corrections.js
+window.isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+window.canComment = {{ 'true' if current_user.is_authenticated and current_user.can_comment() else 'false' }};
+{% if current_user.is_authenticated %}
+window.currentUserId = {{ current_user.id }};
+window.currentUserFullname = "{{ current_user.fullname }}";
+{% endif %}
+</script>
+
+<!-- لینک به فایل JavaScript نظرات تصحیحی -->
+<script src="{{ url_for('static', filename='js/verse-corrections.js') }}"></script>
+
+<!-- اسکریپت‌های موجود قبلی -->
 <script>
 let commentsVisible = true;
 

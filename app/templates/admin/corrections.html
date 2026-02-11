@@ -1,0 +1,718 @@
+{% extends "base.html" %}
+
+{% block title %} مدیریت نظرات تصحیحی - سایت فردوسی حسینی{% endblock %}
+
+{% block extra_css %}
+<style>
+.corrections-admin-container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.corrections-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.corrections-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.corrections-stats {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.stat-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-badge i {
+    font-size: 1.2rem;
+}
+
+.filters-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.filters-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.filter-group select,
+.filter-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-filter {
+    padding: 0.75rem 1.5rem;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-filter:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.corrections-table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.corrections-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.corrections-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.corrections-table th {
+    padding: 1rem;
+    text-align: right;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.corrections-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: top;
+}
+
+.corrections-table tbody tr:hover {
+    background: #f8f9ff;
+}
+
+.correction-card {
+    background: #f8f9ff;
+    padding: 1rem;
+    border-radius: 8px;
+    border-right: 4px solid #667eea;
+}
+
+.correction-field {
+    display: inline-block;
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.correction-type {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.type-text { background: #e8f5e9; color: #2e7d32; }
+.type-variant { background: #fff3e0; color: #e65100; }
+.type-vocalization { background: #f3e5f5; color: #6a1b9a; }
+.type-punctuation { background: #e0f2f1; color: #00695c; }
+.type-other { background: #fce4ec; color: #c2185b; }
+
+.text-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 0.75rem 0;
+}
+
+.text-box {
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    line-height: 1.8;
+}
+
+.old-text {
+    background: #ffebee;
+    border-right: 3px solid #e53935;
+}
+
+.new-text {
+    background: #e8f5e9;
+    border-right: 3px solid #43a047;
+}
+
+.text-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #666;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.correction-note {
+    background: #fff9c4;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-top: 0.5rem;
+    border-right: 3px solid #fbc02d;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.correction-meta {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #ddd;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.meta-item i {
+    color: #667eea;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-approved {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-pending {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-approve {
+    background: #4caf50;
+    color: white;
+}
+
+.btn-approve:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.btn-reject {
+    background: #f44336;
+    color: white;
+}
+
+.btn-reject:hover {
+    background: #e53935;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.btn-view {
+    background: #2196f3;
+    color: white;
+}
+
+.btn-view:hover {
+    background: #1976d2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #999;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #666;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.pagination a,
+.pagination span {
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.pagination a:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.pagination .current {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.pagination .disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .text-comparison {
+        grid-template-columns: 1fr;
+    }
+    
+    .filters-row {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .corrections-table-container {
+        overflow-x: auto;
+    }
+    
+    .corrections-table {
+        min-width: 800px;
+    }
+}
+
+/* Loading State */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    display: none;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="corrections-admin-container">
+    <!-- Header -->
+    <div class="corrections-header">
+        <h1><i class="fas fa-edit"></i> مدیریت نظرات تصحیحی</h1>
+        <div class="corrections-stats">
+            <div class="stat-badge">
+                <i class="fas fa-clock"></i>
+                <span>در انتظار تایید: {{ pending_count }}</span>
+            </div>
+            <div class="stat-badge">
+                <i class="fas fa-list"></i>
+                <span>مجموع: {{ corrections.total }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+        <form method="get" action="{{ url_for('admin_corrections') }}">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="status">وضعیت</label>
+                    <select name="status" id="status">
+                        <option value="">همه</option>
+                        <option value="pending" {% if status == 'pending' %}selected{% endif %}>در انتظار تایید</option>
+                        <option value="approved" {% if status == 'approved' %}selected{% endif %}>تایید شده</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="search">جستجو</label>
+                    <input type="text" name="search" id="search" placeholder="نام کاربر، متن، یا عنوان شعر..." value="{{ search }}">
+                </div>
+                
+                <div class="filter-group">
+                    <button type="submit" class="btn-filter">
+                        <i class="fas fa-filter"></i> اعمال فیلتر
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Corrections Table -->
+    <div class="corrections-table-container">
+        {% if corrections.items %}
+        <table class="corrections-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%">#</th>
+                    <th style="width: 30%">شعر و بیت</th>
+                    <th style="width: 35%">نظر تصحیحی</th>
+                    <th style="width: 15%">اطلاعات</th>
+                    <th style="width: 15%">عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for correction in corrections.items %}
+                <tr data-correction-id="{{ correction.id }}">
+                    <td>{{ loop.index + (corrections.page - 1) * corrections.per_page }}</td>
+                    
+                    <!-- Poem & Verse Info -->
+                    <td>
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>{{ correction.verse.title.title }}</strong>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #666;">
+                            باغ {{ correction.verse.title.garden }} - ترتیب {{ correction.verse.title.order_in_garden }}
+                        </div>
+                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: #f5f5f5; border-radius: 6px; font-size: 0.9rem;">
+                            {{ correction.verse.verse_1 }}
+                            {% if correction.verse.verse_2 %}
+                            <br>{{ correction.verse.verse_2 }}
+                            {% endif %}
+                        </div>
+                    </td>
+                    
+                    <!-- Correction Details -->
+                    <td>
+                        <div class="correction-card">
+                            <div>
+                                <span class="correction-field">
+                                    {{ {
+                                        'verse_1': 'مصراع اول',
+                                        'verse_2': 'مصراع دوم',
+                                        'verse_1_tag': 'اعراب مصراع اول',
+                                        'verse_2_tag': 'اعراب مصراع دوم',
+                                        'variant_diff': 'اختلاف نسخ',
+                                        'present_in_versions': 'موجود در نسخه‌ها'
+                                    }[correction.field_name] }}
+                                </span>
+                                <span class="correction-type type-{{ correction.correction_type }}">
+                                    {{ {
+                                        'text': 'متن',
+                                        'variant': 'نسخه',
+                                        'vocalization': 'اعراب',
+                                        'punctuation': 'نقطه‌گذاری',
+                                        'other': 'سایر'
+                                    }[correction.correction_type] }}
+                                </span>
+                            </div>
+                            
+                            <div class="text-comparison">
+                                <div class="text-box old-text">
+                                    <div class="text-label">متن فعلی</div>
+                                    {{ correction.old_text or '(خالی)' }}
+                                </div>
+                                <div class="text-box new-text">
+                                    <div class="text-label">متن پیشنهادی</div>
+                                    {{ correction.new_text }}
+                                </div>
+                            </div>
+                            
+                            {% if correction.note %}
+                            <div class="correction-note">
+                                <strong>توضیحات:</strong> {{ correction.note }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    
+                    <!-- Meta Info -->
+                    <td>
+                        <div class="correction-meta" style="flex-direction: column; gap: 0.5rem; border: none; padding: 0; margin: 0;">
+                            <div class="meta-item">
+                                <i class="fas fa-user"></i>
+                                <span>{{ correction.author.fullname }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>{{ correction.created_at.strftime('%Y/%m/%d') }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>{{ correction.created_at.strftime('%H:%M') }}</span>
+                            </div>
+                            {% if correction.is_approved %}
+                            <div class="meta-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>تایید شده</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div style="margin-top: 0.75rem;">
+                            {% if correction.is_approved %}
+                            <span class="status-badge status-approved">تایید شده</span>
+                            {% else %}
+                            <span class="status-badge status-pending">در انتظار تایید</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    
+                    <!-- Actions -->
+                    <td>
+                        <div class="action-buttons">
+                            {% if not correction.is_approved %}
+                            <button class="btn-action btn-approve" onclick="approveCorrection({{ correction.id }})">
+                                <i class="fas fa-check"></i> تایید
+                            </button>
+                            <button class="btn-action btn-reject" onclick="rejectCorrection({{ correction.id }})">
+                                <i class="fas fa-times"></i> رد
+                            </button>
+                            {% else %}
+                            <button class="btn-action btn-reject" onclick="rejectCorrection({{ correction.id }})">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                            {% endif %}
+                            <a href="{{ url_for('poem', title_id=correction.verse.title_id) }}#verse-{{ correction.verse_id }}" class="btn-action btn-view" target="_blank">
+                                <i class="fas fa-eye"></i> مشاهده
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h3>نظر تصحیحی یافت نشد</h3>
+            <p>هیچ نظر تصحیحی با فیلترهای انتخابی وجود ندارد</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if corrections.pages > 1 %}
+    <div class="pagination">
+        {% if corrections.has_prev %}
+        <a href="{{ url_for('admin_corrections', page=corrections.prev_num, status=status, search=search) }}">
+            <i class="fas fa-chevron-right"></i> قبلی
+        </a>
+        {% else %}
+        <span class="disabled"><i class="fas fa-chevron-right"></i> قبلی</span>
+        {% endif %}
+        
+        {% for page_num in corrections.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == corrections.page %}
+                <span class="current">{{ page_num }}</span>
+                {% else %}
+                <a href="{{ url_for('admin_corrections', page=page_num, status=status, search=search) }}">{{ page_num }}</a>
+                {% endif %}
+            {% else %}
+                <span>...</span>
+            {% endif %}
+        {% endfor %}
+        
+        {% if corrections.has_next %}
+        <a href="{{ url_for('admin_corrections', page=corrections.next_num, status=status, search=search) }}">
+            بعدی <i class="fas fa-chevron-left"></i>
+        </a>
+        {% else %}
+        <span class="disabled">بعدی <i class="fas fa-chevron-left"></i></span>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+</div>
+
+<script>
+function showLoading() {
+    document.getElementById('loadingOverlay').classList.add('active');
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+}
+
+function approveCorrection(correctionId) {
+    if (!confirm('آیا از تایید این نظر تصحیحی اطمینان دارید؟')) {
+        return;
+    }
+    
+    showLoading();
+    
+    fetch(`/admin/correction/${correctionId}/approve`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('خطا: ' + data.message);
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        alert('خطا در ارتباط با سرور');
+        console.error('Error:', error);
+    });
+}
+
+function rejectCorrection(correctionId) {
+    if (!confirm('آیا از رد/حذف این نظر تصحیحی اطمینان دارید؟ این عمل قابل بازگشت نیست.')) {
+        return;
+    }
+    
+    showLoading();
+    
+    fetch(`/admin/correction/${correctionId}/reject`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('خطا: ' + data.message);
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        alert('خطا در ارتباط با سرور');
+        console.error('Error:', error);
+    });
+}
+</script>
+{% endblock %}

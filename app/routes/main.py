@@ -14,6 +14,18 @@ from datetime import datetime
 from flask_mail import Message
 from app import mail
 
+
+from flask import jsonify, request
+from flask_login import login_required, current_user
+from app.utils.database import (
+    get_verse_corrections, 
+    save_verse_correction, 
+    delete_verse_correction,
+    user_can_add_correction
+)
+
+
+
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
@@ -540,3 +552,153 @@ def internal_error(error):
     """صفحه خطای ۵۰۰"""
     db.session.rollback()
     return render_template('errors/500.html'), 500
+
+
+
+# =============================================================================
+# API Endpoints
+# =============================================================================
+
+@main_bp.route('/api/verse/<int:verse_id>/corrections', methods=['GET'])
+def api_get_verse_corrections(verse_id):
+    """
+    دریافت نظرات تصحیحی یک بیت
+    
+    Query Parameters:
+        - verse_id: شناسه بیت
+    
+    Response:
+        - success: bool
+        - corrections: list
+    """
+    try:
+        user_id = current_user.id if current_user.is_authenticated else None
+        corrections = get_verse_corrections(verse_id, user_id=user_id)
+        return jsonify({'success': True, 'corrections': corrections})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+
+@main_bp.route('/api/verse/correction/add', methods=['POST'])
+@login_required
+def api_add_verse_correction():
+    """
+    افزودن نظر تصحیحی جدید
+    
+    Request Body (JSON):
+        - verse_id: int
+        - field_name: str
+        - new_text: str
+        - correction_type: str
+        - note: str (optional)
+    
+    Response:
+        - success: bool
+        - message: str
+        - correction_id: int
+    """
+    try:
+        # بررسی نقش کاربر
+        if not current_user.can_comment():
+            return jsonify({
+                'success': False, 
+                'message': 'شما مجوز ثبت نظر تصحیحی را ندارید'
+            }), 403
+        
+        data = request.get_json()
+        correction, message = save_verse_correction(data, current_user.id)
+        
+        return jsonify({
+            'success': True, 
+            'message': message,
+            'correction_id': correction.id
+        })
+    except ValueError as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+    except Exception as e:
+        app.logger.error(f"Error adding verse correction: {str(e)}")
+        return jsonify({'success': False, 'message': 'خطا در ثبت نظر'}), 500
+
+
+@main_bp.route('/api/verse/correction/<int:correction_id>/edit', methods=['PUT'])
+@login_required
+def api_edit_verse_correction(correction_id):
+    """
+    ویرایش نظر تصحیحی
+    
+    Parameters:
+        - correction_id: شناسه نظر
+    
+    Request Body (JSON):
+        - field_name: str
+        - new_text: str
+        - correction_type: str
+        - note: str (optional)
+    
+    Response:
+        - success: bool
+        - message: str
+    """
+    try:
+        data = request.get_json()
+        data['correction_id'] = correction_id
+        
+        correction, message = save_verse_correction(data, current_user.id)
+        
+        return jsonify({
+            'success': True, 
+            'message': message
+        })
+    except ValueError as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+    except Exception as e:
+        app.logger.error(f"Error editing verse correction: {str(e)}")
+        return jsonify({'success': False, 'message': 'خطا در ویرایش نظر'}), 500
+
+
+@main_bp.route('/api/verse/correction/<int:correction_id>/delete', methods=['DELETE'])
+@login_required
+def api_delete_verse_correction(correction_id):
+    """
+    حذف نظر تصحیحی
+    
+    Parameters:
+        - correction_id: شناسه نظر
+    
+    Response:
+        - success: bool
+        - message: str
+    """
+    try:
+        message = delete_verse_correction(correction_id, current_user.id)
+        return jsonify({'success': True, 'message': message})
+    except ValueError as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+    except Exception as e:
+        app.logger.error(f"Error deleting verse correction: {str(e)}")
+        return jsonify({'success': False, 'message': 'خطا در حذف نظر'}), 500
+
+
+@main_bp.route('/api/verse/<int:verse_id>/can-add-correction', methods=['GET'])
+@login_required
+def api_can_add_correction(verse_id):
+    """
+    بررسی امکان افزودن نظر جدید
+    
+    Parameters:
+        - verse_id: شناسه بیت
+    
+    Query Parameters:
+        - field_name: نام فیلد
+    
+    Response:
+        - can_add: bool
+    """
+    field_name = request.args.get('field_name')
+    can_add = user_can_add_correction(current_user.id, verse_id, field_name)
+    return jsonify({'can_add': can_add})
+
+
+# =============================================================================
+# پایان Route های نظرات تصحیحی
+# =============================================================================

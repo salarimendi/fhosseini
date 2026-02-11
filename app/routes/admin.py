@@ -8,6 +8,16 @@ import os
 import secrets
 import json
 from app.utils.database import save_research_form
+from flask import render_template, request, jsonify, flash, redirect, url_for
+from flask_login import login_required, current_user
+from app.utils.database import (
+    get_corrections_filtered,
+    approve_verse_correction,
+    reject_verse_correction,
+    get_pending_corrections_count
+)
+
+
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -531,3 +541,131 @@ def update_comment_research(comment_id):
     except Exception as e:
         current_app.logger.error(f"Error saving research form (admin): {e}")
         return jsonify({'success': False, 'message': 'خطا در ثبت فرم پژوهشی'}), 500
+    
+
+    
+# =============================================================================
+# صفحه مدیریت نظرات
+# =============================================================================
+
+@admin_bp.route('/admin/corrections')
+@login_required
+def admin_corrections():
+    """
+    صفحه مدیریت نظرات تصحیحی
+    
+    Query Parameters:
+        - page: int (default: 1)
+        - status: str ('' | 'approved' | 'pending')
+        - search: str
+    
+    Returns:
+        Template با لیست نظرات
+    """
+    # بررسی دسترسی ادمین
+    if not current_user.is_admin():
+        flash('دسترسی غیرمجاز', 'danger')
+        return redirect(url_for('index'))
+    
+    # دریافت پارامترها
+    page = request.args.get('page', 1, type=int)
+    status = request.args.get('status', '')
+    search = request.args.get('search', '')
+    
+    # دریافت نظرات با فیلتر
+    corrections = get_corrections_filtered(
+        page=page,
+        per_page=20,
+        status=status,
+        search=search
+    )
+    
+    # تعداد نظرات در انتظار
+    pending_count = get_pending_corrections_count()
+    
+    return render_template('admin/corrections.html',
+                         corrections=corrections,
+                         pending_count=pending_count,
+                         status=status,
+                         search=search)
+
+
+# =============================================================================
+# API Endpoints برای تایید/رد نظرات
+# =============================================================================
+
+@admin_bp.route('/admin/correction/<int:correction_id>/approve', methods=['POST'])
+@login_required
+def admin_approve_correction(correction_id):
+    """
+    تایید نظر تصحیحی
+    
+    Parameters:
+        - correction_id: شناسه نظر
+    
+    Response:
+        - success: bool
+        - message: str
+    """
+    # بررسی دسترسی ادمین
+    if not current_user.is_admin():
+        return jsonify({'success': False, 'message': 'دسترسی غیرمجاز'}), 403
+    
+    try:
+        message = approve_verse_correction(correction_id, current_user.id)
+        return jsonify({'success': True, 'message': message})
+    except ValueError as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+    except Exception as e:
+        app.logger.error(f"Error approving correction {correction_id}: {str(e)}")
+        return jsonify({'success': False, 'message': 'خطا در تایید نظر'}), 500
+
+
+@admin_bp.route('/admin/correction/<int:correction_id>/reject', methods=['POST'])
+@login_required
+def admin_reject_correction(correction_id):
+    """
+    رد نظر تصحیحی (حذف)
+    
+    Parameters:
+        - correction_id: شناسه نظر
+    
+    Response:
+        - success: bool
+        - message: str
+    """
+    # بررسی دسترسی ادمین
+    if not current_user.is_admin():
+        return jsonify({'success': False, 'message': 'دسترسی غیرمجاز'}), 403
+    
+    try:
+        message = reject_verse_correction(correction_id)
+        return jsonify({'success': True, 'message': message})
+    except ValueError as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+    except Exception as e:
+        app.logger.error(f"Error rejecting correction {correction_id}: {str(e)}")
+        return jsonify({'success': False, 'message': 'خطا در رد نظر'}), 500
+
+
+# =============================================================================
+# Context Processor برای نمایش تعداد نظرات pending در منو
+# =============================================================================
+
+@admin_bp.context_processor
+def inject_pending_corrections_count():
+    """
+    اضافه کردن تعداد نظرات pending به context برای نمایش در منوی ادمین
+    
+    این تابع به صورت خودکار در تمام template ها اجرا می‌شود
+    """
+    if current_user.is_authenticated and current_user.is_admin():
+        return {
+            'pending_corrections_count': get_pending_corrections_count()
+        }
+    return {}
+
+
+# =============================================================================
+# پایان Route های مدیریت نظرات تصحیحی
+# =============================================================================

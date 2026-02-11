@@ -1,0 +1,549 @@
+/* ====================================
+   نظرات تصحیحی ابیات
+   Verse Corrections Styles
+   ==================================== */
+
+/* کانتینر نظرات برای هر بیت */
+.verse-corrections-section {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+}
+
+/* دکمه‌های اکشن نظرات */
+.corrections-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.btn-add-correction,
+.btn-toggle-corrections {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-add-correction {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-add-correction:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.btn-toggle-corrections {
+    background: #fff;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-toggle-corrections:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* فرم افزودن/ویرایش نظر */
+.correction-form-wrapper {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    border: 2px solid #667eea;
+}
+
+.correction-form-wrapper .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.correction-form-wrapper .form-header h4 {
+    margin: 0;
+    color: #667eea;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.btn-close-form {
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-close-form:hover {
+    background: #d32f2f;
+    transform: rotate(90deg);
+}
+
+.correction-form-wrapper .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.correction-form-wrapper .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.correction-form-wrapper .form-group label i {
+    color: #667eea;
+    margin-left: 0.5rem;
+}
+
+.correction-form-wrapper select,
+.correction-form-wrapper textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.correction-form-wrapper select:focus,
+.correction-form-wrapper textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.correction-form-wrapper textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.6;
+}
+
+.preview-box {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    border-right: 4px solid #667eea;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: #555;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #f0f0f0;
+}
+
+.btn-submit-correction,
+.btn-cancel {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-submit-correction {
+    background: #4caf50;
+    color: white;
+}
+
+.btn-submit-correction:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.btn-submit-correction:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-cancel {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+/* لیست نظرات */
+.corrections-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.correction-item {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border-right: 4px solid transparent;
+}
+
+.correction-item.approved {
+    border-right-color: #4caf50;
+}
+
+.correction-item.pending {
+    border-right-color: #ff9800;
+    background: #fffbf0;
+}
+
+.correction-item:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.correction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.correction-user {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.correction-user i {
+    color: #667eea;
+    font-size: 1.2rem;
+}
+
+.correction-user strong {
+    color: #333;
+}
+
+.pending-badge {
+    background: #ff9800;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.correction-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #999;
+}
+
+.correction-date i {
+    color: #ccc;
+}
+
+.correction-body {
+    margin-bottom: 1rem;
+}
+
+.correction-field-info {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.field-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.4rem 0.9rem;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.type-badge {
+    padding: 0.4rem 0.9rem;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.type-badge.type-text { background: #e8f5e9; color: #2e7d32; }
+.type-badge.type-variant { background: #fff3e0; color: #e65100; }
+.type-badge.type-vocalization { background: #f3e5f5; color: #6a1b9a; }
+.type-badge.type-punctuation { background: #e0f2f1; color: #00695c; }
+.type-badge.type-other { background: #fce4ec; color: #c2185b; }
+
+.correction-texts {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+.text-item {
+    padding: 1rem;
+    border-radius: 8px;
+    min-height: 80px;
+}
+
+.text-item.old-text {
+    background: #ffebee;
+    border-right: 3px solid #e53935;
+}
+
+.text-item.new-text {
+    background: #e8f5e9;
+    border-right: 3px solid #43a047;
+}
+
+.text-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #666;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+.text-content {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #333;
+}
+
+.text-arrow {
+    color: #667eea;
+    font-size: 1.5rem;
+}
+
+.correction-note {
+    background: #fff9c4;
+    padding: 1rem;
+    border-radius: 8px;
+    border-right: 3px solid #fbc02d;
+    margin-top: 1rem;
+}
+
+.correction-note i {
+    color: #f57c00;
+    margin-left: 0.5rem;
+}
+
+.correction-note strong {
+    color: #f57c00;
+}
+
+.correction-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #ddd;
+}
+
+.btn-edit-correction,
+.btn-delete-correction {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-edit-correction {
+    background: #2196f3;
+    color: white;
+}
+
+.btn-edit-correction:hover {
+    background: #1976d2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.btn-delete-correction {
+    background: #f44336;
+    color: white;
+}
+
+.btn-delete-correction:hover {
+    background: #d32f2f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.correction-approval {
+    background: #e8f5e9;
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-top: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #2e7d32;
+}
+
+.correction-approval i {
+    color: #4caf50;
+    font-size: 1.1rem;
+}
+
+/* حالت‌های خالی و لودینگ */
+.corrections-loading,
+.corrections-error,
+.no-corrections {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+    font-size: 0.95rem;
+}
+
+.corrections-loading i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: #667eea;
+}
+
+.corrections-error {
+    color: #f44336;
+}
+
+.no-corrections {
+    background: white;
+    border-radius: 8px;
+    border: 2px dashed #ddd;
+}
+
+/* هایلایت بیت هنگام اسکرول */
+.highlight-verse {
+    animation: highlightPulse 2s ease-in-out;
+}
+
+@keyframes highlightPulse {
+    0%, 100% {
+        background: transparent;
+    }
+    50% {
+        background: #fff9c4;
+        box-shadow: 0 0 20px rgba(251, 192, 45, 0.3);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .corrections-actions {
+        flex-direction: column;
+    }
+    
+    .btn-add-correction,
+    .btn-toggle-corrections {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .correction-texts {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .text-arrow {
+        transform: rotate(90deg);
+        text-align: center;
+    }
+    
+    .correction-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn-submit-correction,
+    .btn-cancel {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .correction-actions {
+        flex-direction: column;
+    }
+    
+    .btn-edit-correction,
+    .btn-delete-correction {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* استایل‌های اضافی برای ادغام با طراحی موجود */
+.verse-item {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.verse-item:hover {
+    background: #f8f9ff;
+}
+
+/* Scroll to verse animation */
+@keyframes scrollToVerse {
+    0% {
+        background: transparent;
+    }
+    50% {
+        background: #fff9c4;
+    }
+    100% {
+        background: transparent;
+    }
+}
