@@ -563,7 +563,7 @@ def update_comment_research(comment_id):
 # صفحه مدیریت نظرات
 # =============================================================================
 
-@admin_bp.route('/admin/corrections')
+@admin_bp.route('/corrections')
 @login_required
 def admin_corrections():
     """
@@ -609,7 +609,7 @@ def admin_corrections():
 # API Endpoints برای تایید/رد نظرات
 # =============================================================================
 
-@admin_bp.route('/admin/correction/<int:correction_id>/approve', methods=['POST'])
+@admin_bp.route('/correction/<int:correction_id>/approve', methods=['POST'])
 @login_required
 def admin_approve_correction(correction_id):
     """
@@ -636,7 +636,7 @@ def admin_approve_correction(correction_id):
         return jsonify({'success': False, 'message': 'خطا در تایید نظر'}), 500
 
 
-@admin_bp.route('/admin/correction/<int:correction_id>/reject', methods=['POST'])
+@admin_bp.route('/correction/<int:correction_id>/reject', methods=['POST'])
 @login_required
 def admin_reject_correction(correction_id):
     """
