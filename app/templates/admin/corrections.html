@@ -422,7 +422,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="corrections-admin-container">
+<div class="admin-container">
+    <div class="row">
+        {% include 'admin/_sidebar.html' %}
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+            <div class="corrections-admin-container">
     <!-- Header -->
     <div class="corrections-header">
         <h1><i class="fas fa-edit"></i> مدیریت نظرات تصحیحی</h1>
@@ -639,6 +643,9 @@
         {% endif %}
     </div>
     {% endif %}
+            </div>
+        </main>
+    </div>
 </div>
 
 <!-- Loading Overlay -->

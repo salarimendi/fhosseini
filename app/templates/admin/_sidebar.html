@@ -1,0 +1,37 @@
+<div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+    <div class="sidebar-content">
+        <h5 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            پنل مدیریت
+        </h5>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">
+                    داشبورد
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.users' %}active{% endif %}" href="{{ url_for('admin.users') }}">
+                    مدیریت کاربران
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.comments' %}active{% endif %}" href="{{ url_for('admin.comments') }}">
+                    مدیریت نظرات
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.recordings' %}active{% endif %}" href="{{ url_for('admin.recordings') }}">
+                    مدیریت ضبط‌ها
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.admin_corrections' %}active{% endif %}" href="{{ url_for('admin.admin_corrections') }}">
+                    مدیریت نظرات اصلاحی
+                    {% if pending_corrections_count > 0 %}
+                    <span class="badge bg-warning rounded-pill">{{ pending_corrections_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
