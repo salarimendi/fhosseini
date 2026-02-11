@@ -598,6 +598,21 @@ def api_add_verse_correction():
         - correction_id: int
     """
     try:
+        # بررسی Content-Type
+        if not request.is_json:
+            return jsonify({
+                'success': False, 
+                'message': 'درخواست باید JSON باشد'
+            }), 400
+        
+        # دریافت داده‌ها
+        data = request.get_json(force=True, silent=True)
+        if data is None:
+            return jsonify({
+                'success': False, 
+                'message': 'خطا در تجزیه JSON'
+            }), 400
+        
         # بررسی نقش کاربر
         if not current_user.can_comment():
             return jsonify({
@@ -605,7 +620,6 @@ def api_add_verse_correction():
                 'message': 'شما مجوز ثبت نظر تصحیحی را ندارید'
             }), 403
         
-        data = request.get_json()
         correction, message = save_verse_correction(data, current_user.id)
         
         return jsonify({
@@ -616,7 +630,7 @@ def api_add_verse_correction():
     except ValueError as e:
         return jsonify({'success': False, 'message': str(e)}), 400
     except Exception as e:
-        app.logger.error(f"Error adding verse correction: {str(e)}")
+        current_app.logger.error(f"Error adding verse correction: {str(e)}")
         return jsonify({'success': False, 'message': 'خطا در ثبت نظر'}), 500
 
 
@@ -640,7 +654,21 @@ def api_edit_verse_correction(correction_id):
         - message: str
     """
     try:
-        data = request.get_json()
+        # بررسی Content-Type
+        if not request.is_json:
+            return jsonify({
+                'success': False, 
+                'message': 'درخواست باید JSON باشد'
+            }), 400
+        
+        # دریافت داده‌ها
+        data = request.get_json(force=True, silent=True)
+        if data is None:
+            return jsonify({
+                'success': False, 
+                'message': 'خطا در تجزیه JSON'
+            }), 400
+        
         data['correction_id'] = correction_id
         
         correction, message = save_verse_correction(data, current_user.id)
@@ -652,7 +680,7 @@ def api_edit_verse_correction(correction_id):
     except ValueError as e:
         return jsonify({'success': False, 'message': str(e)}), 400
     except Exception as e:
-        app.logger.error(f"Error editing verse correction: {str(e)}")
+        current_app.logger.error(f"Error editing verse correction: {str(e)}")
         return jsonify({'success': False, 'message': 'خطا در ویرایش نظر'}), 500
 
 
@@ -675,7 +703,7 @@ def api_delete_verse_correction(correction_id):
     except ValueError as e:
         return jsonify({'success': False, 'message': str(e)}), 400
     except Exception as e:
-        app.logger.error(f"Error deleting verse correction: {str(e)}")
+        current_app.logger.error(f"Error deleting verse correction: {str(e)}")
         return jsonify({'success': False, 'message': 'خطا در حذف نظر'}), 500
 
 

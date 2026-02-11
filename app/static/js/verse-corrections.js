@@ -313,10 +313,14 @@ function submitCorrectionForm(event, verseId, correctionId = null) {
     
     const method = correctionId ? 'PUT' : 'POST';
     
+    // دریافت CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    
     fetch(url, {
         method: method,
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify(data)
     })
@@ -374,10 +378,14 @@ function deleteVerseCorrection(correctionId, verseId) {
         return;
     }
     
+    // دریافت CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    
     fetch(`/api/verse/correction/${correctionId}/delete`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
         }
     })
     .then(response => response.json())
