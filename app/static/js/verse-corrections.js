@@ -144,17 +144,15 @@ function showCorrectionForm(verseId) {
     formContainer.innerHTML = createCorrectionForm(verseId);
     formContainer.style.display = 'block';
     
-    // اضافه کردن event listener برای انتخاب فیلد
-    const fieldSelect = document.getElementById(`field-select-${verseId}`);
-    if (fieldSelect) {
-        fieldSelect.addEventListener('change', function() {
-            updateOldTextPreview(verseId, this.value);
-        });
-    }
+    // فوکوس روی textarea
+    setTimeout(() => {
+        const textarea = document.getElementById(`new-text-${verseId}`);
+        if (textarea) textarea.focus();
+    }, 100);
 }
 
 /**
- * ایجاد HTML فرم نظر تصحیحی
+ * ایجاد HTML فرم نظر تصحیحی - ساده‌شده
  */
 function createCorrectionForm(verseId, correctionData = null) {
     const isEdit = correctionData !== null;
@@ -170,61 +168,16 @@ function createCorrectionForm(verseId, correctionData = null) {
         
         <form id="correction-form-${verseId}" onsubmit="submitCorrectionForm(event, ${verseId}, ${isEdit ? correctionData.id : 'null'})">
             <div class="form-group">
-                <label for="field-select-${verseId}">
-                    <i class="fas fa-list"></i> قسمت مورد نظر:
-                </label>
-                <select id="field-select-${verseId}" name="field_name" required ${isEdit ? 'disabled' : ''}>
-                    <option value="">انتخاب کنید...</option>
-                    <option value="verse_1" ${isEdit && correctionData.field_name === 'verse_1' ? 'selected' : ''}>مصراع اول</option>
-                    <option value="verse_2" ${isEdit && correctionData.field_name === 'verse_2' ? 'selected' : ''}>مصراع دوم</option>
-                    <option value="verse_1_tag" ${isEdit && correctionData.field_name === 'verse_1_tag' ? 'selected' : ''}>اعراب مصراع اول</option>
-                    <option value="verse_2_tag" ${isEdit && correctionData.field_name === 'verse_2_tag' ? 'selected' : ''}>اعراب مصراع دوم</option>
-                    <option value="variant_diff" ${isEdit && correctionData.field_name === 'variant_diff' ? 'selected' : ''}>اختلاف نسخ</option>
-                    <option value="present_in_versions" ${isEdit && correctionData.field_name === 'present_in_versions' ? 'selected' : ''}>موجود در نسخه‌ها</option>
-                </select>
-            </div>
-            
-            <div class="form-group" id="old-text-preview-${verseId}" style="display: none;">
-                <label>متن فعلی:</label>
-                <div class="preview-box"></div>
-            </div>
-            
-            <div class="form-group">
-                <label for="correction-type-${verseId}">
-                    <i class="fas fa-tag"></i> نوع تصحیح:
-                </label>
-                <select id="correction-type-${verseId}" name="correction_type" required>
-                    <option value="text" ${isEdit && correctionData.correction_type === 'text' ? 'selected' : ''}>متن</option>
-                    <option value="variant" ${isEdit && correctionData.correction_type === 'variant' ? 'selected' : ''}>نسخه</option>
-                    <option value="vocalization" ${isEdit && correctionData.correction_type === 'vocalization' ? 'selected' : ''}>اعراب</option>
-                    <option value="punctuation" ${isEdit && correctionData.correction_type === 'punctuation' ? 'selected' : ''}>نقطه‌گذاری</option>
-                    <option value="other" ${isEdit && correctionData.correction_type === 'other' ? 'selected' : ''}>سایر</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
                 <label for="new-text-${verseId}">
-                    <i class="fas fa-edit"></i> متن پیشنهادی: *
+                    <i class="fas fa-comment-dots"></i> نظر تصحیحی شما: *
                 </label>
                 <textarea 
                     id="new-text-${verseId}" 
                     name="new_text" 
-                    rows="3" 
+                    rows="4" 
                     required 
-                    placeholder="متن پیشنهادی خود را وارد کنید..."
+                    placeholder="نظر تصحیحی خود را وارد کنید (شامل توضیح تصحیح، منابع، یا پیشنهادات)"
                 >${isEdit ? correctionData.new_text : ''}</textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="note-${verseId}">
-                    <i class="fas fa-comment"></i> توضیحات (اختیاری):
-                </label>
-                <textarea 
-                    id="note-${verseId}" 
-                    name="note" 
-                    rows="3" 
-                    placeholder="دلیل تصحیح، منابع، یا توضیحات بیشتر..."
-                >${isEdit ? (correctionData.note || '') : ''}</textarea>
             </div>
             
             <div class="form-actions">
@@ -240,46 +193,10 @@ function createCorrectionForm(verseId, correctionData = null) {
     `;
 }
 
-/**
- * به‌روزرسانی پیش‌نمایش متن فعلی
- */
-function updateOldTextPreview(verseId, fieldName) {
-    const previewContainer = document.getElementById(`old-text-preview-${verseId}`);
-    if (!previewContainer) return;
-    
-    if (!fieldName) {
-        previewContainer.style.display = 'none';
-        return;
-    }
-    
-    // دریافت متن فعلی از DOM
-    const verseElement = document.querySelector(`[data-verse-id="${verseId}"]`);
-    if (!verseElement) return;
-    
-    let oldText = '';
-    
-    // بسته به فیلد انتخابی، متن مربوطه را پیدا کن
-    if (fieldName === 'verse_1') {
-        const verse1Element = verseElement.querySelector('.verse-1');
-        oldText = verse1Element ? verse1Element.textContent.trim() : '';
-    } else if (fieldName === 'verse_2') {
-        const verse2Element = verseElement.querySelector('.verse-2');
-        oldText = verse2Element ? verse2Element.textContent.trim() : '';
-    } else if (fieldName.includes('tag')) {
-        oldText = verseElement.dataset[fieldName] || '(خالی)';
-    } else {
-        oldText = verseElement.dataset[fieldName] || '(خالی)';
-    }
-    
-    const previewBox = previewContainer.querySelector('.preview-box');
-    if (previewBox) {
-        previewBox.textContent = oldText || '(خالی)';
-        previewContainer.style.display = 'block';
-    }
-}
+
 
 /**
- * ارسال فرم نظر تصحیحی
+ * ارسال فرم نظر تصحیحی - ساده‌شده
  */
 function submitCorrectionForm(event, verseId, correctionId = null) {
     event.preventDefault();
@@ -289,15 +206,12 @@ function submitCorrectionForm(event, verseId, correctionId = null) {
     
     const data = {
         verse_id: verseId,
-        field_name: formData.get('field_name'),
-        correction_type: formData.get('correction_type'),
-        new_text: formData.get('new_text').trim(),
-        note: formData.get('note').trim()
+        new_text: formData.get('new_text').trim()
     };
     
     // اعتبارسنجی
-    if (!data.field_name || !data.new_text) {
-        alert('لطفاً تمام فیلدهای الزامی را پر کنید');
+    if (!data.new_text) {
+        alert('لطفاً نظر خود را وارد کنید');
         return;
     }
     
@@ -325,13 +239,13 @@ function submitCorrectionForm(event, verseId, correctionId = null) {
         body: JSON.stringify(data)
     })
     .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
+    .then(responseData => {
+        if (responseData.success) {
+            alert(responseData.message);
             closeCorrectionForm(verseId);
             loadVerseCorrections(verseId);
         } else {
-            alert('خطا: ' + data.message);
+            alert('خطا: ' + responseData.message);
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
@@ -462,6 +376,48 @@ function getCorrectionTypePersian(correctionType) {
         'other': 'سایر'
     };
     return types[correctionType] || correctionType;
+}
+
+/**
+ * تبدیل نمایش/مخفی کردن تمام نظرات تصحیحی
+ */
+function toggleAllCorrections() {
+    const allContainers = document.querySelectorAll('[id^="corrections-"]');
+    const button = document.getElementById('toggleAllCorrectionsBtn');
+    
+    if (allContainers.length === 0) return;
+    
+    // اگر بیشتر کنتینرها پنهان باشند، همه را نمایش بده
+    // If most containers are hidden, show all
+    const visibleCount = Array.from(allContainers).filter(el => {
+        const computed = window.getComputedStyle(el);
+        return computed.display !== 'none' && el.offsetHeight > 0;
+    }).length;
+    
+    const shouldShow = visibleCount < allContainers.length / 2;
+    
+    // تغییر وضعیت تمام کنتینرها
+    allContainers.forEach(container => {
+        if (shouldShow) {
+            // نمایش کنتینر
+            container.style.display = 'block';
+            
+            // اگر نظرات هنوز بارگذاری نشده‌اند، آنها را بارگذاری کن
+            if (!container.hasAttribute('data-loaded')) {
+                const verseId = container.id.replace('corrections-', '');
+                loadVerseCorrections(verseId);
+                container.setAttribute('data-loaded', 'true');
+            }
+        } else {
+            // مخفی کردن کنتینر
+            container.style.display = 'none';
+        }
+    });
+    
+    // تغییر وضعیت دکمه اگر وجود داشته باشد
+    if (button) {
+        button.classList.toggle('active', shouldShow);
+    }
 }
 
 // ====================================

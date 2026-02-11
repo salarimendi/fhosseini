@@ -402,9 +402,12 @@ def save_verse_correction(data, user_id):
     if not verse:
         raise ValueError('بیت مورد نظر یافت نشد')
     
+    # field_name - اگر ارسال نشده باشد، مقدار پیش‌فرض استفاده کن
     field_name = data.get('field_name')
     valid_fields = ['verse_1', 'verse_2', 'verse_1_tag', 'verse_2_tag', 'variant_diff', 'present_in_versions']
-    if field_name not in valid_fields:
+    if not field_name:
+        field_name = 'verse_1'  # مقدار پیش‌فرض
+    elif field_name not in valid_fields:
         raise ValueError('فیلد انتخاب شده نامعتبر است')
     
     new_text = data.get('new_text', '').strip()
@@ -415,7 +418,7 @@ def save_verse_correction(data, user_id):
     note = data.get('note', '').strip()
     
     # دریافت متن فعلی
-    old_text = getattr(verse, field_name) or ''
+    old_text = getattr(verse, field_name, None) or ''
     
     # بررسی تکراری نبودن
     correction_id = data.get('correction_id')

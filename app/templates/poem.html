@@ -1070,6 +1070,17 @@
                 </div>
             </div>
             
+            <!-- Global Controls for Corrections -->
+            <div class="global-corrections-controls">
+                <button class="btn-icon-correction" 
+                        id="toggleAllCorrectionsBtn"
+                        title="نمایش/بستن تمام نظرات تصحیحی"
+                        onclick="toggleAllCorrections()">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <span class="corrections-control-label">نمایش/بستن تمام نظرات</span>
+            </div>
+
             <!-- Verses with Sidebar -->
             <div class="verses-container" id="poemContent">
                 {% set ns = namespace(verse_count=0) %}
@@ -1136,25 +1147,20 @@
                             <div class="corrections-actions">
                                 {% if current_user.is_authenticated and current_user.can_comment() %}
                                     <!-- کاربر محقق: می‌تواند نظر اضافه کند -->
-                                    <button class="btn-add-correction" onclick="showCorrectionForm({{ verse.id }})">
+                                    <button class="btn-icon-correction" 
+                                            title="ثبت نظر تصحیحی جدید" 
+                                            onclick="showCorrectionForm({{ verse.id }})">
                                         <i class="fas fa-plus-circle"></i>
-                                        ثبت نظر تصحیحی
-                                    </button>
-                                    
-                                    <button class="btn-toggle-corrections" 
-                                            data-verse-id="{{ verse.id }}" 
-                                            onclick="toggleCorrections({{ verse.id }})">
-                                        <i class="fas fa-chevron-down"></i>
-                                        نمایش نظرات تصحیحی
-                                    </button>
-                                {% else %}
-                                    <!-- کاربر عادی یا مهمان: فقط مشاهده نظرات تایید شده -->
-                                    <button class="btn-toggle-corrections" 
-                                            onclick="toggleCorrections({{ verse.id }})">
-                                        <i class="fas fa-chevron-down"></i>
-                                        نمایش نظرات تصحیحی
                                     </button>
                                 {% endif %}
+                                
+                                <!-- نمایش/بستن نظرات -->
+                                <button class="btn-icon-correction" 
+                                        title="نمایش/بستن نظرات تصحیحی" 
+                                        data-verse-id="{{ verse.id }}" 
+                                        onclick="toggleCorrections({{ verse.id }})">
+                                    <i class="fas fa-comments"></i>
+                                </button>
                             </div>
                             
                             <!-- محل نمایش فرم افزودن/ویرایش (به صورت داینامیک) -->
