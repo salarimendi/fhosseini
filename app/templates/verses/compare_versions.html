@@ -2,30 +2,6 @@
 
 {% block title %}مقایسه نسخه‌ها - {{ title.title }}{% endblock %}
 
-{% block content %}
-<div class="container mt-4" dir="rtl">
-    <div class="row">
-        <div class="col-12">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">خانه</a></li>
-                    <li class="breadcrumb-item"><a href="{{ url_for('main.garden', garden_num=title.garden) }}">باغ {{ title.garden }}</a></li>
-                    <li class="breadcrumb-item"><a href="{{ url_for('main.poem', title_id=title.id) }}">{{ title.title }}</a></li>
-                    <li class="breadcrumb-item active">مقایسه نسخه‌ها</li>
-                </ol>
-            </nav>
-        </div>
-    </div>
-    
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-balance-scale"></i>
-                        مقایسه نسخه‌های « {{ title.title }} »
-                    </h4>
-                </div>
                 <div class="card-body">
                     {% if versions|length > 1 %}
                         <div class="row mb-3">
@@ -53,6 +29,30 @@
                         
                         <div id="comparison-result">
                             <!-- نتیجه مقایسه در اینجا نمایش داده می‌شود -->
+                        </div>
+                    {% else %}
+                            </div>
+                            <form id="correction-form-${vid}" onsubmit="submitCorrectionForm(event, ${vid}, null)">
+                                <div class="mb-2">
+                                    <label for="new-text-${vid}" class="form-label">نظر تصحیحی شما: *</label>
+                                    <textarea id="new-text-${vid}" name="new_text" rows="3" class="form-control" required placeholder="نظر تصحیحی خود را وارد کنید"></textarea>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary btn-sm">ثبت نظر</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeCorrectionForm(${vid})">انصراف</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Corrections list (hidden by default) -->
+                    <div id="corrections-${vid}" class="mt-3" style="display:none;">
+                        <div class="no-corrections">هنوز نظر تصحیحی ثبت نشده است</div>
+                    </div>
+
+                </div>
+            </div>
+        `;
                         </div>
                     {% else %}
                         <div class="alert alert-warning text-center">
@@ -164,10 +164,20 @@ function displayComparison(comparison) {
         const isDifferent = item.different;
         const cardClass = isDifferent ? 'border-warning bg-light' : 'border-secondary';
         
+        // verse id for DOM elements (use index+1 to avoid zero id)
+        const vid = index + 1;
+
         html += `
             <div class="card mb-3 ${cardClass}">
-                <div class="card-body">
+                <div class="card-body position-relative">
                     ${isDifferent ? '<div class="badge bg-warning mb-2">تفاوت</div>' : ''}
+
+                    <!-- Artistic buttons: show form and toggle comments -->
+                    <div class="verse-actions">
+                        <button class="btn btn-sm btn-light btn-vertical" title="نمایش/پنهان نظرات" data-verse-id="${vid}" onclick="toggleCorrections(${vid})">&#x276F;</button>
+                        <button class="btn btn-sm btn-light.btn-vertical" title="ثبت نظر جدید" onclick="showCorrectionForm(${vid})">+</button>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="verse-container p-2 border-end">
@@ -182,6 +192,32 @@ function displayComparison(comparison) {
                             </div>
                         </div>
                     </div>
+
+                    <!-- Corrections form (hidden by default) -->
+                    <div id="correction-form-wrapper-${vid}" class="mt-3" style="display:none;">
+                        <div class="correction-form-wrapper p-3 border rounded">
+                            <div class="form-header d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">ثبت نظر تصحیحی جدید</h6>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="closeCorrectionForm(${vid})">×</button>
+                            </div>
+                            <form id="correction-form-${vid}" onsubmit="submitCorrectionForm(event, ${vid}, null)">
+                                <div class="mb-2">
+                                    <label for="new-text-${vid}" class="form-label">نظر تصحیحی شما: *</label>
+                                    <textarea id="new-text-${vid}" name="new_text" rows="3" class="form-control" required placeholder="نظر تصحیحی خود را وارد کنید"></textarea>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary btn-sm">ثبت نظر</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeCorrectionForm(${vid})">انصراف</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Corrections list (hidden by default) -->
+                    <div id="corrections-${vid}" class="mt-3" style="display:none;">
+                        <div class="no-corrections">هنوز نظر تصحیحی ثبت نشده است</div>
+                    </div>
+
                 </div>
             </div>
         `;
@@ -230,6 +266,25 @@ document.addEventListener('DOMContentLoaded', function() {
     justify-content: center;
 }
 
+/* Action buttons that sit at the top-right of each verse card */
+.verse-actions {
+    position: absolute;
+    top: 8px;
+    left: 8px; /* RTL page: keep buttons on left so they appear visually at start */
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.btn-vertical {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
 @media (max-width: 768px) {
     .border-end {
         border-end: none !important;
@@ -247,5 +302,58 @@ document.addEventListener('DOMContentLoaded', function(){
         window.HarakatColorize && window.HarakatColorize.init('.card-body');
     }
 });
+</script>
+<script>
+// Toggle visibility of corrections list for a verse
+function toggleCorrections(vid) {
+    const el = document.getElementById(`corrections-${vid}`);
+    if (!el) return;
+    if (el.style.display === 'none' || el.style.display === '') {
+        el.style.display = 'block';
+    } else {
+        el.style.display = 'none';
+    }
+}
+
+function showCorrectionForm(vid) {
+    const fw = document.getElementById(`correction-form-wrapper-${vid}`);
+    if (!fw) return;
+    fw.style.display = 'block';
+    // optionally focus textarea
+    const ta = document.getElementById(`new-text-${vid}`);
+    if (ta) ta.focus();
+}
+
+function closeCorrectionForm(vid) {
+    const fw = document.getElementById(`correction-form-wrapper-${vid}`);
+    if (!fw) return;
+    fw.style.display = 'none';
+}
+
+function submitCorrectionForm(e, vid, correctionId=null) {
+    e.preventDefault();
+    const ta = document.getElementById(`new-text-${vid}`);
+    if (!ta) return;
+    const text = ta.value.trim();
+    if (!text) return;
+
+    // For now append to the corrections list locally; replace with real AJAX POST as needed
+    const list = document.getElementById(`corrections-${vid}`);
+    if (list) {
+        // reveal list if hidden
+        list.style.display = 'block';
+        const note = document.createElement('div');
+        note.className = 'correction-item mb-2 p-2 border rounded';
+        note.innerText = text;
+        // remove 'no-corrections' placeholder if present
+        const placeholder = list.querySelector('.no-corrections');
+        if (placeholder) placeholder.remove();
+        list.appendChild(note);
+    }
+
+    // clear and hide form
+    ta.value = '';
+    closeCorrectionForm(vid);
+}
 </script>
 {% endblock %}

@@ -1128,6 +1128,18 @@
                                     <div class="verse-text">{{ verse.verse_1_tag|safe }}</div>
                                 </div>
                                 {% endif %}
+                                <!-- دکمه نمایش/پنهان نظرات تصحیحی -->
+                                {% if verse.is_subtitle == 0 %}
+                                <div class="col-auto d-flex align-items-center justify-content-end">
+                                    <button class="btn-toggle-verse-corrections" 
+                                            data-verse-id="{{ verse.id }}" 
+                                            onclick="toggleCorrections({{ verse.id }})"
+                                            data-expanded="false"
+                                            title="نمایش نظرات تصحیحی">
+                                        <span class="toggle-icon">▾</span>
+                                    </button>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                         {% if verse.variant_diff %}
@@ -1141,26 +1153,18 @@
                              بخش نظرات تصحیحی (کد جدید)
                              ========================================== -->
                         {% if verse.is_subtitle == 0 %}
-                        <div class="verse-corrections-section" id="verse-section-{{ verse.id }}">
+                        <div class="verse-corrections-section" id="verse-section-{{ verse.id }}" style="display: none;">
                             
                             <!-- دکمه‌های اکشن بر اساس سطح دسترسی کاربر -->
                             <div class="corrections-actions">
                                 {% if current_user.is_authenticated and current_user.can_comment() %}
                                     <!-- کاربر محقق: می‌تواند نظر اضافه کند -->
-                                    <button class="btn-icon-correction" 
+                                    <button class="btn-add-correction" 
                                             title="ثبت نظر تصحیحی جدید" 
                                             onclick="showCorrectionForm({{ verse.id }})">
-                                        <i class="fas fa-plus-circle"></i>
+                                        <i class="fas fa-plus-circle"></i> نظر جدید
                                     </button>
                                 {% endif %}
-                                
-                                <!-- نمایش/بستن نظرات -->
-                                <button class="btn-icon-correction" 
-                                        title="نمایش/بستن نظرات تصحیحی" 
-                                        data-verse-id="{{ verse.id }}" 
-                                        onclick="toggleCorrections({{ verse.id }})">
-                                    <i class="fas fa-comments"></i>
-                                </button>
                             </div>
                             
                             <!-- محل نمایش فرم افزودن/ویرایش (به صورت داینامیک) -->

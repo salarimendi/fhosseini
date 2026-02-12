@@ -321,23 +321,30 @@ function deleteVerseCorrection(correctionId, verseId) {
  * Toggle نمایش نظرات تصحیحی
  */
 function toggleCorrections(verseId) {
+    const section = document.getElementById(`verse-section-${verseId}`);
+    const button = document.querySelector(`[data-verse-id="${verseId}"]`);
     const container = document.getElementById(`corrections-${verseId}`);
-    const button = document.querySelector(`[data-verse-id="${verseId}"] .btn-toggle-corrections`);
     
-    if (!container) return;
+    if (!section || !button) return;
     
-    if (container.style.display === 'none' || !container.style.display) {
-        container.style.display = 'block';
-        if (button) button.innerHTML = '<i class="fas fa-chevron-up"></i> بستن نظرات';
+    const isVisible = section.style.display !== 'none';
+    
+    if (isVisible) {
+        // بسته کردن سکشن
+        section.style.display = 'none';
+        button.setAttribute('data-expanded', 'false');
+        button.title = 'نمایش نظرات تصحیحی';
+    } else {
+        // باز کردن سکشن
+        section.style.display = 'block';
+        button.setAttribute('data-expanded', 'true');
+        button.title = 'پنهان کردن نظرات تصحیحی';
         
         // بارگذاری نظرات در صورت خالی بودن
-        if (!container.hasAttribute('data-loaded')) {
+        if (container && !container.hasAttribute('data-loaded')) {
             loadVerseCorrections(verseId);
             container.setAttribute('data-loaded', 'true');
         }
-    } else {
-        container.style.display = 'none';
-        if (button) button.innerHTML = '<i class="fas fa-chevron-down"></i> نمایش نظرات تصحیحی';
     }
 }
 
