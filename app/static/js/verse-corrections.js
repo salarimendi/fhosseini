@@ -64,23 +64,9 @@ function displayVerseCorrections(verseId, corrections) {
             </div>
             
             <div class="correction-body">
-                <div class="correction-field-info">
-                    <span class="field-badge">${getFieldNamePersian(correction.field_name)}</span>
-                    <span class="type-badge type-${correction.correction_type}">${getCorrectionTypePersian(correction.correction_type)}</span>
-                </div>
-                
-                <div class="correction-texts">
-                    <div class="text-item old-text">
-                        <div class="text-label">متن فعلی:</div>
-                        <div class="text-content">${correction.old_text || '(خالی)'}</div>
-                    </div>
-                    <div class="text-arrow">
-                        <i class="fas fa-arrow-left"></i>
-                    </div>
-                    <div class="text-item new-text">
-                        <div class="text-label">متن پیشنهادی:</div>
-                        <div class="text-content">${correction.new_text}</div>
-                    </div>
+                <div class="correction-main-text">
+                    <div class="text-label">نظر تصحیحی:</div>
+                    <div class="text-content">${correction.new_text}</div>
                 </div>
                 
                 ${correction.note ? `
@@ -155,23 +141,17 @@ function showCorrectionForm(verseId) {
                 );
                 
                 if (userPendingCorrection) {
-                    // اگر نظر قبلی دارد، از او بپرس که می‌خواهد ویرایش کند یا نظر جدید ثبت کند
-                    if (confirm('شما قبلاً برای این بیت نظر ثبت کرده‌اید که هنوز تایید نشده است.\n\nآیا می‌خواهید نظر قبلی را ویرایش کنید؟\n\n(اگر "لغو" را بزنید، نظر جدیدی ثبت خواهد شد)')) {
-                        // ویرایش نظر قبلی
-                        editVerseCorrection(userPendingCorrection.id, verseId);
-                    } else {
-                        // ثبت نظر جدید - ایجاد فرم
-                        formContainer.innerHTML = createCorrectionForm(verseId);
-                        formContainer.style.display = 'block';
-                        
-                        // فوکوس روی textarea
-                        setTimeout(() => {
-                            const textarea = document.getElementById(`new-text-${verseId}`);
-                            if (textarea) textarea.focus();
-                        }, 100);
-                    }
+                    // اگر نظر قبلی دارد، مستقیماً فرم ویرایش نمایش داده شود
+                    formContainer.innerHTML = createCorrectionForm(verseId, userPendingCorrection);
+                    formContainer.style.display = 'block';
+                    
+                    // فوکوس روی textarea
+                    setTimeout(() => {
+                        const textarea = document.getElementById(`new-text-${verseId}`);
+                        if (textarea) textarea.focus();
+                    }, 100);
                 } else {
-                    // نظر قبلی ندارد - ایجاد فرم
+                    // نظر قبلی ندارد - ایجاد فرم جدید
                     formContainer.innerHTML = createCorrectionForm(verseId);
                     formContainer.style.display = 'block';
                     

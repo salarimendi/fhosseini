@@ -382,6 +382,30 @@
     margin-bottom: 1rem;
 }
 
+.correction-main-text {
+    background: #f8f9fa;
+    padding: 1.25rem;
+    border-radius: 8px;
+    border-right: 4px solid #667eea;
+    margin-bottom: 1rem;
+}
+
+.correction-main-text .text-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #667eea;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.correction-main-text .text-content {
+    font-size: 1.05rem;
+    line-height: 2;
+    color: #333;
+    white-space: pre-wrap;
+}
+
 .correction-field-info {
     display: flex;
     gap: 0.5rem;

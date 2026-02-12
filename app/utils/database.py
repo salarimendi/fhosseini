@@ -420,18 +420,17 @@ def save_verse_correction(data, user_id):
     # دریافت متن فعلی
     old_text = getattr(verse, field_name, None) or ''
     
-    # بررسی تکراری نبودن
+    # بررسی تکراری نبودن - هر کاربر فقط یک نظر برای هر بیت
     correction_id = data.get('correction_id')
     if not correction_id:
         existing = VerseCorrection.query.filter_by(
             verse_id=verse_id,
-            field_name=field_name,
             created_by=user_id,
             is_approved=False
         ).first()
         
         if existing:
-            raise ValueError('شما قبلاً برای این قسمت نظر ثبت کرده‌اید. لطفاً نظر قبلی را ویرایش کنید.')
+            raise ValueError('شما قبلاً برای این بیت نظر ثبت کرده‌اید که هنوز تایید نشده است. لطفاً نظر قبلی را ویرایش کنید یا منتظر تایید آن بمانید.')
     
     if correction_id:
         # ویرایش
