@@ -1052,6 +1052,13 @@
                     <i class="fas fa-copy ms-1"></i>
                     کپی شعر
                 </button>
+                <button class="btn btn-outline-info ms-2" 
+                        id="toggleAllCorrectionsBtn"
+                        title="نمایش/بستن تمام نظرات تصحیحی"
+                        onclick="toggleAllCorrections()">
+                    <i class="fas fa-eye ms-1"></i>
+                    <span class="d-none d-sm-inline">همه نظرات</span>
+                </button>
                 {% if current_user.is_authenticated and current_user.role == 'researcher' %}
                 <button type="button" class="btn btn-outline-info ms-2" onclick="window.location.href='{{ url_for('verses.get_research_form', title_id=title.id) }}'">
                     <i class="fas fa-search-plus ms-1"></i>
@@ -1068,17 +1075,6 @@
                         <button class="btn btn-outline-secondary" disabled>شعر بعدی <i class="fas fa-arrow-left me-1"></i></button>
                     {% endif %}
                 </div>
-            </div>
-            
-            <!-- Global Controls for Corrections -->
-            <div class="global-corrections-controls">
-                <button class="btn-icon-correction" 
-                        id="toggleAllCorrectionsBtn"
-                        title="نمایش/بستن تمام نظرات تصحیحی"
-                        onclick="toggleAllCorrections()">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <span class="corrections-control-label">نمایش/بستن تمام نظرات</span>
             </div>
 
             <!-- Verses with Sidebar -->
@@ -1115,29 +1111,39 @@
                     </div>
                     <div class="verse-content">
                         <div class="verse-row">
-                            <div class="row">
+                            <div class="row align-items-center">
                                 {% if verse.verse_2 %}
                                 <div class="col-md-6">
                                     <div class="verse-text verse-1">{{ verse.verse_1_tag|safe }}</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="verse-text verse-2">{{ verse.verse_2_tag|safe }}</div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="verse-text verse-2 flex-grow-1">{{ verse.verse_2_tag|safe }}</div>
+                                        {% if verse.is_subtitle == 0 %}
+                                        <button class="btn-toggle-verse-corrections" 
+                                                data-verse-id="{{ verse.id }}" 
+                                                onclick="toggleCorrections({{ verse.id }})"
+                                                data-expanded="false"
+                                                title="نمایش نظرات تصحیحی">
+                                            <span class="toggle-icon">▾</span>
+                                        </button>
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 {% else %}
                                 <div class="col-12">
-                                    <div class="verse-text">{{ verse.verse_1_tag|safe }}</div>
-                                </div>
-                                {% endif %}
-                                <!-- دکمه نمایش/پنهان نظرات تصحیحی -->
-                                {% if verse.is_subtitle == 0 %}
-                                <div class="col-auto d-flex align-items-center justify-content-end">
-                                    <button class="btn-toggle-verse-corrections" 
-                                            data-verse-id="{{ verse.id }}" 
-                                            onclick="toggleCorrections({{ verse.id }})"
-                                            data-expanded="false"
-                                            title="نمایش نظرات تصحیحی">
-                                        <span class="toggle-icon">▾</span>
-                                    </button>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="verse-text flex-grow-1">{{ verse.verse_1_tag|safe }}</div>
+                                        {% if verse.is_subtitle == 0 %}
+                                        <button class="btn-toggle-verse-corrections" 
+                                                data-verse-id="{{ verse.id }}" 
+                                                onclick="toggleCorrections({{ verse.id }})"
+                                                data-expanded="false"
+                                                title="نمایش نظرات تصحیحی">
+                                            <span class="toggle-icon">▾</span>
+                                        </button>
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 {% endif %}
                             </div>
@@ -1337,6 +1343,9 @@ window.canComment = {{ 'true' if current_user.is_authenticated and current_user.
 {% if current_user.is_authenticated %}
 window.currentUserId = {{ current_user.id }};
 window.currentUserFullname = "{{ current_user.fullname }}";
+{% else %}
+window.currentUserId = null;
+window.currentUserFullname = null;
 {% endif %}
 </script>
 

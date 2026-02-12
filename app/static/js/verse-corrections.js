@@ -273,15 +273,40 @@ function closeCorrectionForm(verseId) {
  * ویرایش نظر تصحیحی
  */
 function editVerseCorrection(correctionId, verseId) {
-    // دریافت اطلاعات نظر فعلی
-    const correctionElement = document.querySelector(`[data-correction-id="${correctionId}"]`);
-    if (!correctionElement) return;
-    
-    // استخراج داده‌ها از DOM (در حالت واقعی باید از API دریافت شود)
-    // برای سادگی، فرض می‌کنیم داده‌ها در data attributes ذخیره شده‌اند
-    
-    alert('قابلیت ویرایش به زودی اضافه خواهد شد');
-    // TODO: پیاده‌سازی کامل ویرایش
+    // دریافت اطلاعات نظر از سرور
+    fetch(`/api/verse/${verseId}/corrections`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const correction = data.corrections.find(c => c.id === correctionId);
+                if (!correction) {
+                    alert('نظر مورد نظر یافت نشد');
+                    return;
+                }
+                
+                // بستن فرم افزودن اگر باز است
+                closeCorrectionForm(verseId);
+                
+                // نمایش فرم ویرایش
+                const formContainer = document.getElementById(`correction-form-${verseId}`);
+                if (!formContainer) return;
+                
+                formContainer.innerHTML = createCorrectionForm(verseId, correction);
+                formContainer.style.display = 'block';
+                
+                // فوکوس روی textarea
+                setTimeout(() => {
+                    const textarea = document.getElementById(`new-text-${verseId}`);
+                    if (textarea) textarea.focus();
+                }, 100);
+            } else {
+                alert('خطا در دریافت اطلاعات نظر');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading correction:', error);
+            alert('خطا در ارتباط با سرور');
+        });
 }
 
 /**
@@ -389,41 +414,54 @@ function getCorrectionTypePersian(correctionType) {
  * تبدیل نمایش/مخفی کردن تمام نظرات تصحیحی
  */
 function toggleAllCorrections() {
-    const allContainers = document.querySelectorAll('[id^="corrections-"]');
-    const button = document.getElementById('toggleAllCorrectionsBtn');
+    const allSections = document.querySelectorAll('[id^="verse-section-"]');
+    const allButtons = document.querySelectorAll('.btn-toggle-verse-corrections');
+    const toggleBtn = document.getElementById('toggleAllCorrectionsBtn');
     
-    if (allContainers.length === 0) return;
+    if (allSections.length === 0) return;
     
-    // اگر بیشتر کنتینرها پنهان باشند، همه را نمایش بده
-    // If most containers are hidden, show all
-    const visibleCount = Array.from(allContainers).filter(el => {
-        const computed = window.getComputedStyle(el);
-        return computed.display !== 'none' && el.offsetHeight > 0;
+    // بررسی وضعیت فعلی: اگر بیشتر سکشن‌ها پنهان باشند، همه را نمایش بده
+    const visibleCount = Array.from(allSections).filter(section => {
+        return section.style.display !== 'none';
     }).length;
     
-    const shouldShow = visibleCount < allContainers.length / 2;
+    const shouldShow = visibleCount < allSections.length / 2;
     
-    // تغییر وضعیت تمام کنتینرها
-    allContainers.forEach(container => {
+    // تغییر وضعیت تمام سکشن‌ها
+    allSections.forEach((section, index) => {
+        const verseId = section.id.replace('verse-section-', '');
+        const button = document.querySelector(`[data-verse-id="${verseId}"]`);
+        const container = document.getElementById(`corrections-${verseId}`);
+        
         if (shouldShow) {
-            // نمایش کنتینر
-            container.style.display = 'block';
+            // نمایش سکشن
+            section.style.display = 'block';
+            if (button) {
+                button.setAttribute('data-expanded', 'true');
+                button.title = 'پنهان کردن نظرات تصحیحی';
+            }
             
-            // اگر نظرات هنوز بارگذاری نشده‌اند، آنها را بارگذاری کن
-            if (!container.hasAttribute('data-loaded')) {
-                const verseId = container.id.replace('corrections-', '');
+            // بارگذاری نظرات اگر هنوز بارگذاری نشده‌اند
+            if (container && !container.hasAttribute('data-loaded')) {
                 loadVerseCorrections(verseId);
                 container.setAttribute('data-loaded', 'true');
             }
         } else {
-            // مخفی کردن کنتینر
-            container.style.display = 'none';
+            // مخفی کردن سکشن
+            section.style.display = 'none';
+            if (button) {
+                button.setAttribute('data-expanded', 'false');
+                button.title = 'نمایش نظرات تصحیحی';
+            }
         }
     });
     
-    // تغییر وضعیت دکمه اگر وجود داشته باشد
-    if (button) {
-        button.classList.toggle('active', shouldShow);
+    // تغییر آیکون دکمه toggle همه
+    if (toggleBtn) {
+        const icon = toggleBtn.querySelector('i');
+        if (icon) {
+            icon.className = shouldShow ? 'fas fa-eye-slash ms-1' : 'fas fa-eye ms-1';
+        }
     }
 }
 
