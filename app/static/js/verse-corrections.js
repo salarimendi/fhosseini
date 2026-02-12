@@ -37,6 +37,8 @@ function displayVerseCorrections(verseId, corrections) {
     
     if (corrections.length === 0) {
         container.innerHTML = '<div class="no-corrections">هنوز نظر تصحیحی ثبت نشده است</div>';
+        // نمایش container حتی اگر خالی باشد
+        container.style.display = 'block';
         return;
     }
     
@@ -112,6 +114,8 @@ function displayVerseCorrections(verseId, corrections) {
     
     html += '</div>';
     container.innerHTML = html;
+    // نمایش container بعد از پر کردن
+    container.style.display = 'block';
 }
 
 /**
@@ -140,15 +144,65 @@ function showCorrectionForm(verseId) {
         return;
     }
     
-    // ایجاد فرم
-    formContainer.innerHTML = createCorrectionForm(verseId);
-    formContainer.style.display = 'block';
-    
-    // فوکوس روی textarea
-    setTimeout(() => {
-        const textarea = document.getElementById(`new-text-${verseId}`);
-        if (textarea) textarea.focus();
-    }, 100);
+    // چک کردن اینکه آیا کاربر نظر قبلی دارد یا نه
+    fetch(`/api/verse/${verseId}/corrections`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // پیدا کردن نظر pending خود کاربر
+                const userPendingCorrection = data.corrections.find(
+                    c => c.created_by === window.currentUserId && !c.is_approved
+                );
+                
+                if (userPendingCorrection) {
+                    // اگر نظر قبلی دارد، از او بپرس که می‌خواهد ویرایش کند یا نظر جدید ثبت کند
+                    if (confirm('شما قبلاً برای این بیت نظر ثبت کرده‌اید که هنوز تایید نشده است.\n\nآیا می‌خواهید نظر قبلی را ویرایش کنید؟\n\n(اگر "لغو" را بزنید، نظر جدیدی ثبت خواهد شد)')) {
+                        // ویرایش نظر قبلی
+                        editVerseCorrection(userPendingCorrection.id, verseId);
+                    } else {
+                        // ثبت نظر جدید - ایجاد فرم
+                        formContainer.innerHTML = createCorrectionForm(verseId);
+                        formContainer.style.display = 'block';
+                        
+                        // فوکوس روی textarea
+                        setTimeout(() => {
+                            const textarea = document.getElementById(`new-text-${verseId}`);
+                            if (textarea) textarea.focus();
+                        }, 100);
+                    }
+                } else {
+                    // نظر قبلی ندارد - ایجاد فرم
+                    formContainer.innerHTML = createCorrectionForm(verseId);
+                    formContainer.style.display = 'block';
+                    
+                    // فوکوس روی textarea
+                    setTimeout(() => {
+                        const textarea = document.getElementById(`new-text-${verseId}`);
+                        if (textarea) textarea.focus();
+                    }, 100);
+                }
+            } else {
+                // در صورت خطا، فقط فرم را نمایش بده
+                formContainer.innerHTML = createCorrectionForm(verseId);
+                formContainer.style.display = 'block';
+                
+                setTimeout(() => {
+                    const textarea = document.getElementById(`new-text-${verseId}`);
+                    if (textarea) textarea.focus();
+                }, 100);
+            }
+        })
+        .catch(error => {
+            console.error('Error checking existing corrections:', error);
+            // در صورت خطا، فقط فرم را نمایش بده
+            formContainer.innerHTML = createCorrectionForm(verseId);
+            formContainer.style.display = 'block';
+            
+            setTimeout(() => {
+                const textarea = document.getElementById(`new-text-${verseId}`);
+                if (textarea) textarea.focus();
+            }, 100);
+        });
 }
 
 /**
