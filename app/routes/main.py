@@ -21,7 +21,8 @@ from app.utils.database import (
     get_verse_corrections, 
     save_verse_correction, 
     delete_verse_correction,
-    user_can_add_correction
+    user_can_add_correction,
+    get_daily_verse
 )
 
 
@@ -73,10 +74,14 @@ def home():
                                       .order_by(Recording.created_at.desc())\
                                       .limit(5).all()
     
+    # دریافت بیت روزانه
+    daily_verse = get_daily_verse()
+    
     return render_template('home.html', 
                          stats=stats,
                          recent_comments=recent_comments,
-                         recent_recordings=recent_recordings)
+                         recent_recordings=recent_recordings,
+                         daily_verse=daily_verse)
 
 @main_bp.route('/garden/<int:garden_num>')
 def garden(garden_num):

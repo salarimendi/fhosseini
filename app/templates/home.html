@@ -531,6 +531,17 @@
     opacity: 0;
 }
 
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(2rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 /* رسپانسیو */
 @media (max-width: 991px) {
     .hero-banner-improved {
@@ -715,18 +726,32 @@
                         <i class="fas fa-star me-2"></i>
                         شعر روزانه
                     </div>
+                    {% if daily_verse %}
                     <div class="poem-content-improved" style="padding: 0.5rem 0;">
-                        <div class="verse-line-improved" style="font-size: 1.2rem;">بدو گفت صبح امیدم دمید</div>
-                        <div class="verse-line-improved" style="font-size: 1.2rem;">که خورشیدم اندر سرای آرمید</div>
+                        <div class="verse-line-improved" style="font-size: 1.2rem;">{{ daily_verse.verse_1|safe }}</div>
+                        {% if daily_verse.verse_2 %}
+                        <div class="verse-line-improved" style="font-size: 1.2rem;">{{ daily_verse.verse_2|safe }}</div>
+                        {% endif %}
                     </div>
                     <div class="poem-meta-improved" style="margin-top: 1rem; padding-top: 1rem;">
                         <i class="fas fa-book me-2"></i>
-                        از باغ اول - عنوان ۵۰
+                        <span id="dailyVerseInfo">{{ daily_verse.garden_name }} - سروده {{ daily_verse.title_order_in_garden|persian_number }} - بیت {{ daily_verse.verse_order_in_title|persian_number }}</span>
                     </div>
-                    <a href="#" class="btn btn-poem-link" style="margin-top: 0.75rem; padding: 0.6rem 1.2rem; font-size: 0.95rem;">
-                        مشاهده شعر کامل
-                        <i class="fas fa-chevron-left ms-2"></i>
-                    </a>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+                        <a href="{{ url_for('main.title', title_id=daily_verse.title_id) }}" class="btn btn-poem-link" style="padding: 0.6rem 1.2rem; font-size: 0.95rem; flex: 1;">
+                            مشاهده شعر کامل
+                            <i class="fas fa-chevron-left ms-2"></i>
+                        </a>
+                        <button onclick="shareDailyVerse('{{ daily_verse.verse_1|replace("'", "\\'") }}', '{% if daily_verse.verse_2 %}{{ daily_verse.verse_2|replace("'", "\\'") }}{% endif %}', '{{ daily_verse.garden_name }}', '{{ daily_verse.title_order_in_garden|persian_number }}', '{{ daily_verse.verse_order_in_title|persian_number }}')" class="btn btn-poem-link" style="padding: 0.6rem 1.2rem; font-size: 0.95rem; flex: 0.5;">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        هنوز شعری ثبت نشده است
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -971,6 +996,82 @@
 
 {% block scripts %}
 <script>
+/**
+ * اشتراک گذاری بیت روزانه
+ */
+function shareDailyVerse(verse1, verse2, gardenName, titleOrder, verseOrder) {
+    // ساخت متن اشتراک
+    let shareText = verse1;
+    if (verse2) {
+        shareText += '\n' + verse2;
+    }
+    shareText += '\n\n';
+    shareText += `— ${gardenName}\n`;
+    shareText += `سروده ${titleOrder} | بیت ${verseOrder}\n`;
+    shareText += `از سایت فردوسی حسینی`;
+    
+    // اگر Web Share API موجود باشد
+    if (navigator.share) {
+        navigator.share({
+            title: 'شعر روزانه',
+            text: shareText
+        }).catch(error => {
+            if (error.name !== 'AbortError') {
+                copyToClipboard(shareText);
+            }
+        });
+    } else {
+        // Fallback: کپی کردن به Clipboard
+        copyToClipboard(shareText);
+    }
+}
+
+/**
+ * کپی کردن متن به Clipboard
+ */
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        // نمایش پیام تأیید
+        showNotification('شعر با موفقیت کپی شد! ✓', 'success');
+    }).catch(err => {
+        // Fallback برای مرورگرهای قدیمی‌تر
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showNotification('شعر با موفقیت کپی شد! ✓', 'success');
+    });
+}
+
+/**
+ * نمایش پیام اطلاع‌رسانی
+ */
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideInRight 0.3s ease-out;
+    `;
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.body.appendChild(notification);
+    
+    // حذف خودکار بعد از 3 ثانیه
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const searchButton = document.getElementById('searchButton');

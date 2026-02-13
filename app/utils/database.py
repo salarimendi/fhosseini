@@ -633,3 +633,52 @@ def reject_verse_correction(correction_id):
 # =============================================================================
 # پایان توابع نظرات تصحیحی
 # =============================================================================
+
+# =============================================================================
+# تابع انتخاب بیت روزانه
+# =============================================================================
+
+def get_daily_verse():
+    """
+    انتخاب یک بیت تصادفی از تمام ابیات
+    
+    Returns:
+        dict: حاوی اطلاعات بیت تصادفی
+            {
+                'verse': Verse object,
+                'title': Title object,
+                'verse_1': str,
+                'verse_2': str,
+                'garden': int,
+                'title_name': str,
+                'title_id': int,
+                'verse_id': int,
+                'title_order_in_garden': int,
+                'verse_order_in_title': int
+            }
+    """
+    from app.models import Verse, Title
+    from sqlalchemy import func
+    
+    # دریافت بیت تصادفی
+    verse = Verse.query.order_by(func.random()).limit(1).first()
+    
+    if not verse:
+        return None
+    
+    # دریافت عنوان شعر
+    title = Title.query.get(verse.title_id)
+    
+    return {
+        'verse': verse,
+        'title': title,
+        'verse_1': verse.verse_1,
+        'verse_2': verse.verse_2,
+        'garden': title.garden if title else None,
+        'title_name': title.title if title else 'نامعلوم',
+        'title_id': title.id if title else None,
+        'verse_id': verse.id,
+        'garden_name': title.garden_name if title else 'نامعلوم',
+        'title_order_in_garden': title.order_in_garden if title else None,
+        'verse_order_in_title': verse.order_in_title if verse else None
+    }
