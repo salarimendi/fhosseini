@@ -90,20 +90,9 @@ def create_app(config_name=None):
         return User.query.get(int(user_id))
     
     # ثبت Blueprintها
-    from app.routes.main import main_bp as main_blueprint
-    app.register_blueprint(main_blueprint)
-    
-    from app.routes.auth import auth_bp as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
-    
-    from app.routes.verses import verses_bp as verses_blueprint
-    app.register_blueprint(verses_blueprint, url_prefix='/verses')
-    
-    from app.routes.admin import admin_bp as admin_blueprint
-    app.register_blueprint(admin_blueprint, url_prefix='/admin')
-    
-    from app.routes.comments import comments_bp as comments_blueprint
-    app.register_blueprint(comments_blueprint, url_prefix='/comments')
+    from app.routes import register_blueprints
+    register_blueprints(app)
+
     
     # ایجاد جداول پایگاه داده
     with app.app_context():
