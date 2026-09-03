@@ -26,14 +26,16 @@ def login():
     
     form = LoginForm()
     if form.validate_on_submit():
-        username = form.username.data.strip()
+        username = form.username.data.strip().lower()
         password = form.password.data
         remember = form.remember_me.data
         
         # جستجوی کاربر بر اساس نام کاربری یا ایمیل
         user = User.query.filter(
-            (User.username == username) | (User.email == username)
+            (db.func.lower(User.username) == username) |
+            (db.func.lower(User.email) == username)
         ).first()
+
         
         if user and user.check_password(password) and user.is_active:
             login_user(user, remember=remember)
@@ -60,17 +62,21 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         # بررسی تکراری نبودن نام کاربری و ایمیل
-        if User.query.filter_by(username=form.username.data).first():
+        username = form.username.data.strip().lower()
+        if User.query.filter(
+            db.func.lower(User.username) == username
+        ).first():
             flash('نام کاربری قبلاً استفاده شده است. ❌', 'error')
             return render_template('auth/register.html', form=form)
         
-        if User.query.filter_by(email=form.email.data).first():
+        email = form.email.data.strip().lower()
+        if User.query.filter_by(email=email).first():
             flash('ایمیل قبلاً ثبت شده است. ❌', 'error')
             return render_template('auth/register.html', form=form)
         
         # ایجاد کاربر جدید
         user = User(
-            username=form.username.data,
+            username=username,
             email=form.email.data.lower(),
             fullname=form.fullname.data,  # این خط را اضافه کنید
             role=form.role.data,

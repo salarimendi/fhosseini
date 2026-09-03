@@ -63,7 +63,7 @@ class ChangePasswordForm(FlaskForm):
     ])
     new_password = PasswordField('رمز عبور جدید', validators=[
         DataRequired(message='رمز عبور جدید الزامی است'),
-        Length(min=8, message='رمز عبور جدید باید حداقل ۸ کاراکتر باشد')
+        Length(min=6, message='رمز عبور جدید باید حداقل ۶ کاراکتر باشد')
     ])
     confirm_password = PasswordField('تکرار رمز عبور جدید', validators=[
         DataRequired(message='تکرار رمز عبور الزامی است'),
