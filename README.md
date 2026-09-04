@@ -58,33 +58,36 @@ pip install -r requirements.txt
 
 5. تنظیمات محیطی:
 
-**برای محیط توسعه (Development):**
-- نیازی به تنظیم متغیرهای محیطی نیست
-- همه تنظیمات با مقادیر پیش‌فرض در `config.py` تعریف شده‌اند
-- برنامه به صورت خودکار در حالت development اجرا می‌شود
+تنظیمات پروژه از فایل `.env` با استفاده از `python-decouple` خوانده می‌شوند.
+برای ساخت فایل تنظیمات محلی از نمونه‌ی موجود استفاده کنید.
 
-**برای محیط تولید (Production):**
-متغیرهای محیطی زیر باید در سرور تنظیم شوند:
+**در لینوکس/macOS:**
 ```bash
-# تنظیمات امنیتی
-SECRET_KEY=your_secret_key_here
-WTF_CSRF_SECRET_KEY=your_csrf_secret_key
-
-# تنظیمات پایگاه داده
-DATABASE_URL=your_database_url
-
-# تنظیمات ایمیل
-MAIL_SERVER=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USE_TLS=True
-MAIL_USERNAME=your_email@gmail.com
-MAIL_PASSWORD=your_app_password
-MAIL_DEFAULT_SENDER=your_email@gmail.com
-
-# تنظیمات سایت
-SITE_URL=https://ferdowsihosseini.ir
-UPLOAD_FOLDER=/path/to/upload/folder
+cp .env.example .env
 ```
+
+**در Windows PowerShell:**
+```powershell
+Copy-Item .env.example .env
+```
+
+سپس مقدارهای واقعی را در `.env` وارد کنید. حداقل تنظیمات لازم:
+```env
+FLASK_CONFIG=development
+SECRET_KEY=your-secret-key
+WTF_CSRF_SECRET_KEY=your-csrf-secret-key
+DATABASE_URL=sqlite:///ferdosi.db
+```
+
+برای محیط تولید مقدار محیط را تغییر دهید:
+```env
+FLASK_CONFIG=production
+ENABLE_SSL=true
+```
+
+در محیط Production حتماً برای `SECRET_KEY` و `WTF_CSRF_SECRET_KEY` مقدارهای تصادفی و امن قرار دهید و اطلاعات ایمیل را نیز تنظیم کنید.
+
+فایل `.env.example` شامل مقدارهای نمونه است و باید در Git قرار بگیرد. فایل `.env` شامل اطلاعات محرمانه است، در `.gitignore` قرار دارد و نباید commit یا push شود.
 
 6. راه‌اندازی پایگاه داده:
 ```bash

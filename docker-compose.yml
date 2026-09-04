@@ -5,14 +5,10 @@ services:
     build: .
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     environment:
-      - FLASK_ENV=production
-      - SECRET_KEY=${SECRET_KEY:-change-this-secret-key-in-production}
-      - MAIL_SERVER=${MAIL_SERVER:-smtp.gmail.com}
-      - MAIL_PORT=${MAIL_PORT:-587}
-      - MAIL_USE_TLS=${MAIL_USE_TLS:-True}
-      - MAIL_USERNAME=${MAIL_USERNAME}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - FLASK_CONFIG=production
     volumes:
       - ./instance:/app/instance
       - ./uploads:/app/uploads

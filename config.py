@@ -5,6 +5,8 @@
 """
 
 import os
+from decouple import config as env_config
+
 from pathlib import Path
 from datetime import timedelta, UTC
 
@@ -15,15 +17,15 @@ class Config:
     """تنظیمات پایه"""
     
     # تنظیمات امنیتی
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-key-123'
-    WTF_CSRF_SECRET_KEY = os.environ.get('WTF_CSRF_SECRET_KEY') or 'your-csrf-secret-key'
+    SECRET_KEY = env_config('SECRET_KEY', default='dev-key-123')
+    WTF_CSRF_SECRET_KEY = env_config('WTF_CSRF_SECRET_KEY', default='your-csrf-secret-key')
     
     # تنظیمات Rate Limiting
-    RATELIMIT_ENABLED = True
-    RATELIMIT_STORAGE_URL = "redis://localhost:6379/0"  # استفاده از Redis برای ذخیره‌سازی
-    RATELIMIT_DEFAULT = "200 per day;50 per hour;10 per minute"  # محدودیت پیش‌فرض
-    RATELIMIT_LOGIN = "5 per minute"  # محدودیت برای لاگین
-    RATELIMIT_HEADERS_ENABLED = True
+    RATELIMIT_ENABLED = env_config('RATELIMIT_ENABLED', cast=bool, default=True)
+    RATELIMIT_STORAGE_URL = env_config('RATELIMIT_STORAGE_URL', default='redis://localhost:6379/0')
+    RATELIMIT_DEFAULT = env_config('RATELIMIT_DEFAULT', default='200 per day;50 per hour;10 per minute')
+    RATELIMIT_LOGIN = env_config('RATELIMIT_LOGIN', default='5 per minute')
+    RATELIMIT_HEADERS_ENABLED = env_config('RATELIMIT_HEADERS_ENABLED', cast=bool, default=True)
     
     # تنظیمات هدرهای امنیتی
     SECURE_HEADERS = {
@@ -34,42 +36,51 @@ class Config:
     }
     
     # تنظیمات پایگاه داده
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        f'sqlite:///{os.path.join(basedir, "instance", "ferdosi.db")}'
+    SQLALCHEMY_DATABASE_URI = env_config(
+        'DATABASE_URL',
+        default=f'sqlite:///{os.path.join(basedir, "instance", "ferdosi.db")}')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # تنظیمات فایل آپلود
-    UPLOAD_MAX_SIZE_MB = 11  # تنظیم حجم مجاز فایل به مگابایت
-    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or \
-        os.path.join(basedir, 'uploads')  # مسیر نسبی ./uploads/
+    UPLOAD_MAX_SIZE_MB = env_config('UPLOAD_MAX_SIZE_MB', cast=int, default=11)  # تنظیم حجم مجاز فایل به مگابایت  
+    UPLOAD_FOLDER = env_config('UPLOAD_FOLDER', default=os.path.join(basedir, 'uploads'))  # مسیر نسبی ./uploads/
     MAX_CONTENT_LENGTH = UPLOAD_MAX_SIZE_MB * 1024 * 1024  # تبدیل به بایت
     ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a'}
     
     # تنظیمات تصاویر پژوهشی
-    RESEARCH_IMAGE_UPLOAD_FOLDER = os.path.join(basedir, 'uploads', 'research_images')
-    RESEARCH_IMAGE_MAX_SIZE_MB = 5  # حجم به مگابایت
+    RESEARCH_IMAGE_UPLOAD_FOLDER = env_config('RESEARCH_IMAGE_UPLOAD_FOLDER', default=os.path.join(basedir, 'uploads', 'research_images'))
+    RESEARCH_IMAGE_MAX_SIZE_MB = env_config('RESEARCH_IMAGE_MAX_SIZE_MB', cast=int, default=5)  # حجم به مگابایت
     RESEARCH_IMAGE_ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
     
-
+ 
     # تنظیمات Session
     PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
     
     # تنظیمات ایمیل
-    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
-    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
+    MAIL_SERVER = env_config('MAIL_SERVER', default='smtp.gmail.com')
+    MAIL_PORT = env_config('MAIL_PORT', cast=int, default=587)
+    MAIL_USE_TLS = env_config('MAIL_USE_TLS', cast=bool, default=True)
+    MAIL_USERNAME = env_config('MAIL_USERNAME', default='')
+    MAIL_PASSWORD = env_config('MAIL_PASSWORD', default='')
+    MAIL_DEFAULT_SENDER = env_config('MAIL_DEFAULT_SENDER', default='')
     
     # تنظیمات سایت
-    SITE_NAME = 'فردوسی حسینی'
-    SITE_URL = os.environ.get('SITE_URL', 'https://ferdowsihosseini.ir')
-    INSTAGRAM_URL = 'https://instagram.com/ferdowsihosseini'
-    TELEGRAM_URL = 'https://t.me/ferdowsihosseini'
+    SITE_NAME = env_config('SITE_NAME', default='فردوسی حسینی')
+    SITE_URL = env_config(
+        'SITE_URL',
+        default='https://ferdowsihosseini.ir'
+    )
+    INSTAGRAM_URL = env_config(
+        'INSTAGRAM_URL',
+        default='https://instagram.com/ferdowsihosseini'
+    )
+    TELEGRAM_URL = env_config(
+        'TELEGRAM_URL',
+        default='https://t.me/ferdowsihosseini'
+    )
     
     # تنظیمات جستجو
-    SEARCH_RESULTS_PER_PAGE = 10
+    SEARCH_RESULTS_PER_PAGE = env_config('SEARCH_RESULTS_PER_PAGE', cast=int, default=10)
     
     # تنظیمات سایت
     PREFERRED_URL_SCHEME = 'https'
@@ -86,23 +97,24 @@ class Config:
         # ایجاد پوشه instance در صورت عدم وجود
         os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
 
-    @staticmethod
-    def get_upload_max_size_formatted():
+    @classmethod
+    def get_upload_max_size_formatted(cls):
         """دریافت حجم مجاز فایل به صورت فرمت شده"""
-        return f"{Config.UPLOAD_MAX_SIZE_MB}M"
+        return f"{cls.UPLOAD_MAX_SIZE_MB}M"
 
 class DevelopmentConfig(Config):
     """تنظیمات محیط توسعه"""
     DEBUG = True
     TEMPLATES_AUTO_RELOAD = True
     # در محیط توسعه از مسیر نسبی استفاده می‌کنیم
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        f'sqlite:///{os.path.join(basedir, "instance", "ferdosi.db")}'
+    SQLALCHEMY_DATABASE_URI = env_config(
+        'DATABASE_URL',
+        default=f'sqlite:///{os.path.join(basedir, "instance", "ferdosi.db")}')
     PREFERRED_URL_SCHEME = 'http'
     SESSION_COOKIE_SECURE = False
     REMEMBER_COOKIE_SECURE = False
     # استفاده صریح از حافظه برای rate-limit تا هشدار Redis نمایش داده نشود
-    RATELIMIT_STORAGE_URL = "memory://"
+    RATELIMIT_STORAGE_URL = 'memory://'
     
     # تنظیمات Rate Limiting برای محیط توسعه - محدودیت بسیار کم برای تست راحت‌تر
     RATELIMIT_DEFAULT = "5000 per day;1000 per hour;200 per minute"  # محدودیت بسیار کم برای توسعه
@@ -113,12 +125,17 @@ class ProductionConfig(Config):
     DEBUG = False
     
     # در محیط تولید از مسیر مطلق استفاده می‌کنیم
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:////home/qouyvwti/myflaskapp/instance/ferdosi.db'
+    SQLALCHEMY_DATABASE_URI = env_config(
+        'DATABASE_URL',
+        default=f'sqlite:///{os.path.join(basedir, "instance", "ferdosi.db")}')
     
     # تنظیمات مسیرها در محیط تولید - استفاده از مسیر نسبی برای آپلود
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads')
-    LOG_FOLDER = '/home/qouyvwti/myflaskapp/logs'
+    UPLOAD_FOLDER = env_config(
+        'UPLOAD_FOLDER',
+        default=os.path.join(basedir, 'uploads'))
+    LOG_FOLDER = env_config(
+        'LOG_FOLDER',
+        default=os.path.join(basedir, 'logs'))
     
     # تنظیمات SSL برای محیط تولید
     PREFERRED_URL_SCHEME = 'https'
@@ -164,7 +181,7 @@ class TestingConfig(Config):
     
     # تنظیمات Rate Limiting برای محیط تست - محدودیت بسیار کم برای تست‌ها
     RATELIMIT_DEFAULT = "10000 per day;1000 per hour;100 per minute"  # محدودیت بسیار کم برای تست
-    RATELIMIT_LOGIN = "100 per minute"  # محدودیت بسیار کم برای لاگین در تست
+    RATELIMIT_LOGIN = "5 per minute"  # محدودیت بسیار کم برای لاگین در تست
 
 config = {
     'development': DevelopmentConfig,

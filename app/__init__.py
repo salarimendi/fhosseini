@@ -14,7 +14,7 @@ from flask_migrate import Migrate
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
-from config import config
+from config import config, env_config
 from datetime import datetime
 
 from app.utils.visits import increment_visit, get_visit_stats
@@ -33,7 +33,7 @@ def create_app(config_name=None):
     """ایجاد و تنظیم اپلیکیشن Flask"""
     
     if config_name is None:
-        config_name = os.environ.get('FLASK_CONFIG') or 'default'
+        config_name = env_config('FLASK_CONFIG', default='default')
     
     app = Flask(__name__)
     app.config.from_object(config[config_name])

@@ -109,6 +109,7 @@ class ModelTestCase(unittest.TestCase):
         user = User(
             username='testuser',
             email='test@example.com',
+            fullname='Test User',
             role='researcher'
         )
         user.set_password('testpassword')
@@ -157,7 +158,9 @@ class ModelTestCase(unittest.TestCase):
             title_id=title.id,
             order_in_title=1,
             verse_1='بیت اول',
-            verse_2='بیت دوم'
+            verse_2='بیت دوم',
+            verse_1_tag='بیت اول',
+            verse_2_tag='بیت دوم'
         )
         
         db.session.add(verse)
@@ -171,7 +174,7 @@ class ModelTestCase(unittest.TestCase):
     def test_comment_creation(self):
         """Test comment creation."""
         # Create user and title first
-        user = User(username='researcher', email='res@test.com', role='researcher')
+        user = User(username='researcher', email='res@test.com', fullname='Researcher User', role='researcher')
         user.set_password('password')
         db.session.add(user)
         
@@ -196,7 +199,7 @@ class ModelTestCase(unittest.TestCase):
     def test_recording_creation(self):
         """Test recording creation."""
         # Create user and title first
-        user = User(username='reader', email='reader@test.com', role='reader')
+        user = User(username='reader', email='reader@test.com', fullname='Reader User', role='reader')
         user.set_password('password')
         db.session.add(user)
         
@@ -221,25 +224,32 @@ class ModelTestCase(unittest.TestCase):
         self.assertEqual(recording.file_size, 1024000)
         self.assertEqual(recording.duration, 60.5)
         self.assertEqual(recording.file_size_mb, 0.98)  # rounded
-        self.assertEqual(recording.file_path, 'static/uploads/test_recording.mp3')
+        expected_path = os.path.join(
+            self.app.config['UPLOAD_FOLDER'],
+            'test_recording.mp3'
+        )
+        self.assertEqual(
+            os.path.normpath(recording.file_path),
+            os.path.normpath(expected_path)
+        )
         self.assertFalse(recording.is_approved)
     
     def test_user_roles_and_permissions(self):
         """Test user roles and permissions."""
         # Test admin user
-        admin = User(username='admin2', email='admin2@test.com', role='admin')
+        admin = User(username='admin2', email='admin2@test.com', fullname='Admin User', role='admin')
         admin.set_password('password')
         
         # Test researcher user
-        researcher = User(username='researcher', email='researcher@test.com', role='researcher')
+        researcher = User(username='researcher', email='researcher@test.com', fullname='Researcher User', role='researcher')
         researcher.set_password('password')
         
         # Test reader user
-        reader = User(username='reader', email='reader@test.com', role='reader')
+        reader = User(username='reader', email='reader@test.com', fullname='Reader User', role='reader')
         reader.set_password('password')
         
         # Test regular user
-        user = User(username='user', email='user@test.com', role='user')
+        user = User(username='user', email='user@test.com', fullname='Regular User', role='user')
         user.set_password('password')
         
         db.session.add_all([admin, researcher, reader, user])

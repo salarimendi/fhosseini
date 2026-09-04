@@ -7,11 +7,7 @@
 from app import create_app
 
 # استفاده از محیط development برای اجرای لوکال
-#app = create_app('development')
-app = create_app('development')
-
-# برای اجرا در سرور
-# app = create_app('production')
+app = create_app()
 
 if __name__ == '__main__':
     app.run()
