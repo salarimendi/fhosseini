@@ -19,12 +19,20 @@
     
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-    
+
+    {# فاصله‌ی بالای محتوا با ارتفاع واقعی هدر تنظیم می‌شود، حتی وقتی هدر به دو خط بشکند (مثل صفحه‌ی دسته‌بندی مقالات) #}
+    <style>
+        :root { --site-navbar-height: 76px; }
+        .main-content {
+            padding-top: var(--site-navbar-height) !important;
+        }
+    </style>
+
     {% block head %}{% endblock %}
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);">
+    <nav id="mainNavbar" class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url_for('main.home') }}">
                 سایت فردوسی حسینی
@@ -314,7 +322,22 @@
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>    
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    
+
+    {# اندازه‌گیری ارتفاع واقعی هدر (چون هدر fixed-top است و در برخی صفحات مثل دسته‌بندی مقالات ممکن است دو خط شود) و به‌روزرسانی فاصله‌ی بالای محتوا #}
+    <script>
+        (function () {
+            function updateNavbarHeightVar() {
+                var nav = document.getElementById('mainNavbar');
+                if (nav) {
+                    document.documentElement.style.setProperty('--site-navbar-height', nav.offsetHeight + 'px');
+                }
+            }
+            window.addEventListener('DOMContentLoaded', updateNavbarHeightVar);
+            window.addEventListener('load', updateNavbarHeightVar);
+            window.addEventListener('resize', updateNavbarHeightVar);
+        })();
+    </script>
+
     {% block scripts %}{% endblock %}
 </body>
 </html>

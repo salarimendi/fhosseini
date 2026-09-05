@@ -2,48 +2,99 @@
 {% extends "base.html" %}
 {% block title %}{{ 'دسته‌بندی: ' + active_category.name if active_category else 'مقالات' }}{% endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-9">
-        <h1>{{ 'دسته‌بندی: ' + active_category.name if active_category else 'مقالات' }}</h1>
+{% block head %}
+    {{ super() if super }}
+    {# استایل اختصاصی همین صفحه - چیزی در style.css اصلی سایت تغییر نمی‌کند #}
+    <style>
+        .articles-list-page .article-card {
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+        .articles-list-page .article-card:hover {
+            box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.09);
+            transform: translateY(-2px);
+        }
+        .articles-list-page .article-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .articles-list-page .article-card h2 a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .articles-list-page .article-card h2 a:hover {
+            text-decoration: underline;
+        }
+        .articles-list-page .sidebar-card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+        }
+        .articles-list-page .sidebar-card ul li {
+            padding: 0.35rem 0;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+        }
+        .articles-list-page .sidebar-card ul li:last-child {
+            border-bottom: none;
+        }
+        @media (max-width: 576px) {
+            .articles-list-page .article-card .card-img-top {
+                height: 160px;
+            }
+        }
+    </style>
+{% endblock %}
 
-        {% for article in articles %}
-        <div class="card mb-3">
-            {% if article.featured_image_filename %}
-            <img src="{{ url_for('articles_public.media', filename=article.featured_image_filename) }}"
-                 class="card-img-top" alt="{{ article.title }}">
+{% block content %}
+<div class="container my-4 articles-list-page">
+    <div class="row justify-content-center g-4">
+        <div class="col-lg-8">
+            <h1 class="h3 mb-4">{{ 'دسته‌بندی: ' + active_category.name if active_category else 'مقالات' }}</h1>
+
+            {% for article in articles %}
+            <div class="card mb-4 article-card">
+                {% if article.featured_image_filename %}
+                <img src="{{ url_for('articles_public.media', filename=article.featured_image_filename) }}"
+                     class="card-img-top" alt="{{ article.title }}">
+                {% endif %}
+                <div class="card-body">
+                    <h2 class="h5"><a href="{{ url_for('articles_public.detail', slug=article.slug) }}">{{ article.title }}</a></h2>
+                    <p class="mb-2">{{ article.excerpt }}</p>
+                    <small class="text-muted">{{ article.published_at.strftime('%Y-%m-%d') if article.published_at else '' }}</small>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-muted">مقاله‌ای یافت نشد.</p>
+            {% endfor %}
+
+            {% if pagination.pages > 1 %}
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% for p in range(1, pagination.pages + 1) %}
+                    <li class="page-item {{ 'active' if p == pagination.page else '' }}">
+                        <a class="page-link"
+                           href="{{ url_for(request.endpoint, page=p, **request.view_args) }}">{{ p }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </nav>
             {% endif %}
-            <div class="card-body">
-                <h2 class="h5"><a href="{{ url_for('articles_public.detail', slug=article.slug) }}">{{ article.title }}</a></h2>
-                <p>{{ article.excerpt }}</p>
-                <small class="text-muted">{{ article.published_at.strftime('%Y-%m-%d') if article.published_at else '' }}</small>
+        </div>
+
+        <div class="col-lg-3">
+            <div class="sidebar-card">
+                <h4 class="h6 mb-3">دسته‌بندی‌ها</h4>
+                <ul class="list-unstyled mb-0">
+                    {% for category in categories %}
+                    <li><a href="{{ url_for('articles_public.by_category', slug=category.slug) }}" class="text-decoration-none">{{ category.name }}</a></li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
-        {% else %}
-        <p>مقاله‌ای یافت نشد.</p>
-        {% endfor %}
-
-        {% if pagination.pages > 1 %}
-        <nav>
-            <ul class="pagination">
-                {% for p in range(1, pagination.pages + 1) %}
-                <li class="page-item {{ 'active' if p == pagination.page else '' }}">
-                    <a class="page-link"
-                       href="{{ url_for(request.endpoint, page=p, **request.view_args) }}">{{ p }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-        </nav>
-        {% endif %}
-    </div>
-
-    <div class="col-md-3">
-        <h4>دسته‌بندی‌ها</h4>
-        <ul class="list-unstyled">
-            {% for category in categories %}
-            <li><a href="{{ url_for('articles_public.by_category', slug=category.slug) }}">{{ category.name }}</a></li>
-            {% endfor %}
-        </ul>
     </div>
 </div>
 {% endblock %}

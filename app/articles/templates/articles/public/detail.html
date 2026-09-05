@@ -15,58 +15,101 @@
     <meta property="og:image" content="{{ url_for('articles_public.media', filename=article.featured_image_filename, _external=True) }}">
     {% endif %}
     <link rel="canonical" href="{{ url_for('articles_public.detail', slug=article.slug, _external=True) }}">
+
+    {# استایل اختصاصی همین صفحه - چیزی در style.css اصلی سایت تغییر نمی‌کند #}
+    <style>
+        .article-detail-wrap {
+            max-width: 860px;
+        }
+        .article-detail-card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 0.75rem;
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.06);
+            padding: 1.75rem;
+        }
+        .article-detail-card .featured-image {
+            width: 100%;
+            max-height: 420px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+        }
+        .article-detail-card .article-content {
+            font-size: 1.05rem;
+            line-height: 2;
+        }
+        .article-detail-card .article-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.4rem;
+        }
+        @media (max-width: 576px) {
+            .article-detail-card {
+                padding: 1.1rem;
+            }
+            .article-detail-card .featured-image {
+                max-height: 240px;
+            }
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-<article>
-    <h1>{{ article.title }}</h1>
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 article-detail-wrap">
+            <article class="article-detail-card">
+                <h1 class="h3 mb-3">{{ article.title }}</h1>
 
-    {% if current_user.is_authenticated
-        and (current_user.role == 'admin'
-        or article.author_id == current_user.id) %}
-        <a href="{{ url_for('articles_admin.edit_article', article_id=article.id) }}"
-        class="btn btn-outline-primary btn-sm mb-3">
-            <i class="fas fa-edit me-1"></i>
-            ویرایش مقاله
-        </a>
-    {% endif %}   
-     
-    <p class="text-muted">
-        {{ article.author.fullname if article.author else '' }}
-        ·
-        {{ article.published_at.strftime('%Y-%m-%d') if article.published_at else '' }}
-        ·
-        {% if article.category %}
-            <a href="{{ url_for('articles_public.by_category', slug=article.category.slug) }}">{{ article.category.name }}</a>
-        {% endif %}
-    </p>
-
-    {% if article.featured_image_filename %}
-        <img src="{{ url_for('articles_public.media', filename=article.featured_image_filename) }}"
-             alt="{{ article.title }}" class="img-fluid mb-3">
-    {% endif %}
-
-    {# محتوا موقع ذخیره با bleach پاکسازی شده - رندر مستقیم امن است #}
-    <div class="article-content">
-        {{ article.content_html | safe }}
-    </div>
-</article>
-
-{% if related %}
-<section class="mt-5">
-    <h3>مقالات مرتبط</h3>
-    <div class="row">
-        {% for r in related %}
-        <div class="col-md-3">
-            <a href="{{ url_for('articles_public.detail', slug=r.slug) }}">
-                {% if r.featured_image_filename %}
-                <img src="{{ url_for('articles_public.media', filename=r.featured_image_filename) }}" class="img-fluid mb-2" alt="">
+                {% if current_user.is_authenticated
+                    and (current_user.role == 'admin'
+                    or article.author_id == current_user.id) %}
+                    <a href="{{ url_for('articles_admin.edit_article', article_id=article.id) }}"
+                    class="btn btn-outline-primary btn-sm mb-3">
+                        <i class="fas fa-edit me-1"></i>
+                        ویرایش مقاله
+                    </a>
                 {% endif %}
-                <div>{{ r.title }}</div>
-            </a>
+
+                <p class="text-muted small mb-3">
+                    {{ article.author.fullname if article.author else '' }}
+                    ·
+                    {{ article.published_at.strftime('%Y-%m-%d') if article.published_at else '' }}
+                    ·
+                    {% if article.category %}
+                        <a href="{{ url_for('articles_public.by_category', slug=article.category.slug) }}">{{ article.category.name }}</a>
+                    {% endif %}
+                </p>
+
+                {% if article.featured_image_filename %}
+                    <img src="{{ url_for('articles_public.media', filename=article.featured_image_filename) }}"
+                         alt="{{ article.title }}" class="featured-image mb-3">
+                {% endif %}
+
+                {# محتوا موقع ذخیره با bleach پاکسازی شده - رندر مستقیم امن است #}
+                <div class="article-content">
+                    {{ article.content_html | safe }}
+                </div>
+            </article>
+
+            {% if related %}
+            <section class="mt-5">
+                <h3 class="h5 mb-3">مقالات مرتبط</h3>
+                <div class="row">
+                    {% for r in related %}
+                    <div class="col-6 col-md-3 mb-3">
+                        <a href="{{ url_for('articles_public.detail', slug=r.slug) }}" class="text-decoration-none">
+                            {% if r.featured_image_filename %}
+                            <img src="{{ url_for('articles_public.media', filename=r.featured_image_filename) }}" class="img-fluid rounded mb-2" alt="">
+                            {% endif %}
+                            <div class="small">{{ r.title }}</div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
         </div>
-        {% endfor %}
     </div>
-</section>
-{% endif %}
+</div>
 {% endblock %}
