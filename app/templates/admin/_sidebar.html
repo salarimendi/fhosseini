@@ -32,6 +32,18 @@
                     {% endif %}
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'articles_admin.list_articles' %}active{% endif %}" href="{{ url_for('articles_admin.list_articles') }}">
+                    مدیریت مقالات 
+                    {% if pending_corrections_count > 0 %}
+                    <span class="badge bg-warning rounded-pill">{{ pending_corrections_count }}</span>
+                    {% endif %}
+                </a>
+            </li>            
+
+
+
         </ul>
     </div>
 </div>

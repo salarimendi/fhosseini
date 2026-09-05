@@ -1,0 +1,61 @@
+{# app/articles/templates/articles/public/detail.html #}
+{% extends "base.html" %}
+
+{% block title %}{{ article.get_meta_title() }}{% endblock %}
+
+{% block head %}
+    {{ super() if super }}
+    <meta name="description" content="{{ article.get_meta_description() }}">
+    {% if article.meta_keywords %}<meta name="keywords" content="{{ article.meta_keywords }}">{% endif %}
+
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ article.get_meta_title() }}">
+    <meta property="og:description" content="{{ article.get_meta_description() }}">
+    {% if article.featured_image_filename %}
+    <meta property="og:image" content="{{ url_for('articles_public.media', filename=article.featured_image_filename, _external=True) }}">
+    {% endif %}
+    <link rel="canonical" href="{{ url_for('articles_public.detail', slug=article.slug, _external=True) }}">
+{% endblock %}
+
+{% block content %}
+<article>
+    <h1>{{ article.title }}</h1>
+    <p class="text-muted">
+        {{ article.author.fullname if article.author else '' }}
+        ·
+        {{ article.published_at.strftime('%Y-%m-%d') if article.published_at else '' }}
+        ·
+        {% if article.category %}
+            <a href="{{ url_for('articles_public.by_category', slug=article.category.slug) }}">{{ article.category.name }}</a>
+        {% endif %}
+    </p>
+
+    {% if article.featured_image_filename %}
+        <img src="{{ url_for('articles_public.media', filename=article.featured_image_filename) }}"
+             alt="{{ article.title }}" class="img-fluid mb-3">
+    {% endif %}
+
+    {# محتوا موقع ذخیره با bleach پاکسازی شده - رندر مستقیم امن است #}
+    <div class="article-content">
+        {{ article.content_html | safe }}
+    </div>
+</article>
+
+{% if related %}
+<section class="mt-5">
+    <h3>مقالات مرتبط</h3>
+    <div class="row">
+        {% for r in related %}
+        <div class="col-md-3">
+            <a href="{{ url_for('articles_public.detail', slug=r.slug) }}">
+                {% if r.featured_image_filename %}
+                <img src="{{ url_for('articles_public.media', filename=r.featured_image_filename) }}" class="img-fluid mb-2" alt="">
+                {% endif %}
+                <div>{{ r.title }}</div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

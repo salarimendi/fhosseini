@@ -1,0 +1,76 @@
+{# app/articles/templates/articles/admin/list.html #}
+{% extends "base.html" %}
+{% block title %}مقالات{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        {% include "admin/_sidebar.html" %}
+    </div>
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>مقالات</h1>
+            <a href="{{ url_for('articles_admin.new_article') }}" class="btn btn-primary">+ مقاله‌ی جدید</a>
+        </div>
+
+        <div class="mb-3">
+            <a href="{{ url_for('articles_admin.list_articles') }}" class="btn btn-sm {{ 'btn-secondary' if not status_filter else 'btn-outline-secondary' }}">همه</a>
+            <a href="{{ url_for('articles_admin.list_articles', status='published') }}" class="btn btn-sm {{ 'btn-secondary' if status_filter=='published' else 'btn-outline-secondary' }}">منتشرشده</a>
+            <a href="{{ url_for('articles_admin.list_articles', status='draft') }}" class="btn btn-sm {{ 'btn-secondary' if status_filter=='draft' else 'btn-outline-secondary' }}">پیش‌نویس</a>
+            <a href="{{ url_for('articles_admin.categories') }}" class="btn btn-sm btn-outline-dark">مدیریت دسته‌بندی‌ها</a>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>عنوان</th>
+                    <th>دسته‌بندی</th>
+                    <th>وضعیت</th>
+                    <th>بازدید</th>
+                    <th>تاریخ</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articles %}
+                <tr>
+                    <td>{{ article.title }}</td>
+                    <td>{{ article.category.name if article.category else '—' }}</td>
+                    <td>
+                        {% if article.is_published %}
+                            <span class="badge bg-success">منتشرشده</span>
+                        {% else %}
+                            <span class="badge bg-secondary">پیش‌نویس</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ article.views }}</td>
+                    <td>{{ article.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <a href="{{ url_for('articles_admin.edit_article', article_id=article.id) }}" class="btn btn-sm btn-outline-primary">ویرایش</a>
+                        <form method="POST" action="{{ url_for('articles_admin.delete_article', article_id=article.id) }}" style="display:inline"
+                              onsubmit="return confirm('حذف این مقاله مطمئن هستید؟');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6">هنوز مقاله‌ای ثبت نشده است.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if pagination.pages > 1 %}
+        <nav>
+            <ul class="pagination">
+                {% for p in range(1, pagination.pages + 1) %}
+                <li class="page-item {{ 'active' if p == pagination.page else '' }}">
+                    <a class="page-link" href="{{ url_for('articles_admin.list_articles', page=p, status=status_filter) }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

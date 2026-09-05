@@ -1,0 +1,49 @@
+{# app/articles/templates/articles/public/list.html #}
+{% extends "base.html" %}
+{% block title %}{{ 'دسته‌بندی: ' + active_category.name if active_category else 'مقالات' }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-9">
+        <h1>{{ 'دسته‌بندی: ' + active_category.name if active_category else 'مقالات' }}</h1>
+
+        {% for article in articles %}
+        <div class="card mb-3">
+            {% if article.featured_image_filename %}
+            <img src="{{ url_for('articles_public.media', filename=article.featured_image_filename) }}"
+                 class="card-img-top" alt="{{ article.title }}">
+            {% endif %}
+            <div class="card-body">
+                <h2 class="h5"><a href="{{ url_for('articles_public.detail', slug=article.slug) }}">{{ article.title }}</a></h2>
+                <p>{{ article.excerpt }}</p>
+                <small class="text-muted">{{ article.published_at.strftime('%Y-%m-%d') if article.published_at else '' }}</small>
+            </div>
+        </div>
+        {% else %}
+        <p>مقاله‌ای یافت نشد.</p>
+        {% endfor %}
+
+        {% if pagination.pages > 1 %}
+        <nav>
+            <ul class="pagination">
+                {% for p in range(1, pagination.pages + 1) %}
+                <li class="page-item {{ 'active' if p == pagination.page else '' }}">
+                    <a class="page-link"
+                       href="{{ url_for(request.endpoint, page=p, **request.view_args) }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+
+    <div class="col-md-3">
+        <h4>دسته‌بندی‌ها</h4>
+        <ul class="list-unstyled">
+            {% for category in categories %}
+            <li><a href="{{ url_for('articles_public.by_category', slug=category.slug) }}">{{ category.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

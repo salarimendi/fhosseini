@@ -1,0 +1,40 @@
+{# app/articles/templates/articles/admin/categories.html #}
+{% extends "base.html" %}
+{% block title %}دسته‌بندی‌های مقاله{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        {% include "admin/_sidebar.html" %}
+    </div>
+    <div class="col-md-9">
+        <h1>دسته‌بندی‌های مقالات</h1>
+
+        <form method="POST" class="mb-4">
+            {{ form.hidden_tag() }}
+            <div class="mb-2">
+                {{ form.name.label }} {{ form.name(class_="form-control") }}
+            </div>
+            <div class="mb-2">
+                {{ form.description.label }} {{ form.description(class_="form-control", rows=2) }}
+            </div>
+            <button type="submit" class="btn btn-primary">افزودن دسته‌بندی</button>
+        </form>
+
+        <table class="table">
+            <thead><tr><th>نام</th><th>Slug</th><th>تعداد مقالات</th></tr></thead>
+            <tbody>
+                {% for category in categories %}
+                <tr>
+                    <td>{{ category.name }}</td>
+                    <td>{{ category.slug }}</td>
+                    <td>{{ category.articles.count() }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="3">هنوز دسته‌بندی‌ای ثبت نشده است.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

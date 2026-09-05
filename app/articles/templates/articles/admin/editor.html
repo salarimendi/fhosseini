@@ -1,0 +1,76 @@
+{# app/articles/templates/articles/admin/editor.html #}
+{# این قالب از base.html اصلی پروژه ارث می‌برد و نوار کناری ادمین را include می‌کند - #}
+{# دقیقاً مثل بقیه‌ی صفحات پنل مدیریت (dashboard.html و ...). اگر الگوی #}
+{# layout ادمین شما (مثلاً یک بلاک {% block admin_content %}) طور دیگری #}
+{# است، همین یک قالب را با آن هماهنگ کنید - بقیه‌ی فایل‌های پروژه لمس نشده‌اند. #}
+{% extends "base.html" %}
+
+{% block title %}{{ 'ویرایش مقاله' if article else 'مقاله‌ی جدید' }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        {% include "admin/_sidebar.html" %}
+    </div>
+    <div class="col-md-9">
+        <h1>{{ 'ویرایش مقاله' if article else 'مقاله‌ی جدید' }}</h1>
+
+        <form method="POST" enctype="multipart/form-data" id="article-form">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                {{ form.title.label }}
+                {{ form.title(class_="form-control", size=60) }}
+                {% for error in form.title.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.category_id.label }}
+                {{ form.category_id(class_="form-select") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.featured_image.label }}
+                {{ form.featured_image(class_="form-control") }}
+                {% if article and article.featured_image_filename %}
+                    <img src="{{ image_url(article.featured_image_filename) }}" alt="" style="max-width:200px;margin-top:8px;">
+                {% endif %}
+                {% for error in form.featured_image.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.content_html.label }}
+                {{ form.content_html(id="content_html") }}
+                {% for error in form.content_html.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.excerpt.label }}
+                {{ form.excerpt(class_="form-control", rows=3) }}
+            </div>
+
+            <fieldset class="mb-3">
+                <legend>تنظیمات سئو (اختیاری - در صورت خالی بودن خودکار پر می‌شود)</legend>
+                {{ form.meta_title.label }} {{ form.meta_title(class_="form-control") }}
+                {{ form.meta_description.label }} {{ form.meta_description(class_="form-control", rows=2) }}
+                {{ form.meta_keywords.label }} {{ form.meta_keywords(class_="form-control") }}
+            </fieldset>
+
+            <div class="mb-3">
+                {{ form.status.label }}
+                {{ form.status(class_="form-select") }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">ذخیره</button>
+        </form>
+    </div>
+</div>
+
+{# آدرس آپلود تصویر TinyMCE از طریق data attribute به JS پاس داده می‌شود #}
+<script
+    src="{{ url_for('articles_public.static', filename='vendor/tinymce/tinymce.min.js') }}"
+    data-upload-url="{{ url_for('articles_admin.upload_image') }}"
+    id="tinymce-loader"
+></script>
+<script src="{{ url_for('articles_public.static', filename='js/article-editor.js') }}"></script>
+{% endblock %}
