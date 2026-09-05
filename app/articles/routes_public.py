@@ -15,6 +15,9 @@ from flask import (
 
 from app import db, limiter
 from app.articles.models import Article, ArticleCategory
+from urllib.parse import unquote
+from unicodedata import normalize
+
 
 public_bp = Blueprint(
     'articles_public',
@@ -80,6 +83,7 @@ def by_category(slug):
 
 @public_bp.route('/<slug>')
 def detail(slug):
+    slug = normalize('NFC', unquote(slug))  # برای اطمینان از تطابق با slugهای یونیکد    
     article = Article.query.filter_by(slug=slug).first_or_404()
 
     if not article.is_published:
