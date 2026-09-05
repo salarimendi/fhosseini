@@ -99,25 +99,146 @@ python run.py
 ## ساختار پروژه
 
 ```
-fardosi_hosseini/
-├── app/
-│   ├── __init__.py                 # اعداد اولیه اپلیکیشن
-│   ├── models.py                   # مدل‌های پایگاه داده
-│   ├── routes/                     # مسیرهای مختلف
-│   │   ├── __init__.py
-│   │   ├── auth.py                 # احراز هویت
-│   │   ├── main.py                 # صفحه اصلی
-│   │   ├── verses.py               # اشعار
-│   │   ├── admin.py                # پنل مدیریت
-│   │   └── comments.py             # نظرات
-│   ├── templates/                  # قالب‌های HTML
-│   ├── static/                     # فایل‌های استاتیک
-│   └── utils/                      # ابزارهای کمکی
-├── instance/
-│   └── ferdosi.db                  # پایگاه داده SQLite
-├── config.py                       # تنظیمات
-├── run.py                          # فایل اجرا
-└── requirements.txt                # وابستگی‌ها
+fhosseini/
+├── app/                                      # هسته برنامه Flask
+│   ├── __init__.py                            # ایجاد و پیکربندی برنامه Flask
+│   ├── forms.py                               # فرم‌ها و اعتبارسنجی ورودی‌ها
+│   ├── models.py                              # مدل‌های پایگاه داده و روابط آن‌ها
+│   ├── routes/                                # مسیرها و نماهای برنامه
+│   │   ├── __init__.py                        # مقداردهی اولیه بسته مسیرها
+│   │   ├── admin.py                           # مسیرهای پنل مدیریت
+│   │   ├── auth.py                            # ثبت‌نام، ورود و حساب کاربری
+│   │   ├── comments.py                        # ثبت و مدیریت نظرات
+│   │   ├── main.py                            # صفحات اصلی و عمومی سایت
+│   │   ├── verses.py                          # نمایش اشعار و نسخه‌ها
+│   │   └── word_398.py                        # قابلیت‌های واژه ۳۹۸
+│   ├── utils/                                 # توابع و سرویس‌های کمکی
+│   │   ├── audio.py                            # مدیریت فایل‌های صوتی
+│   │   ├── database.py                         # عملیات کمکی پایگاه داده
+│   │   ├── versioning.py                       # مدیریت نسخه‌های متون
+│   │   └── visits.py                            # ثبت و پردازش بازدیدها
+│   ├── templates/                              # قالب‌های HTML رابط کاربری
+│   │   ├── base.html                            # قالب پایه مشترک صفحات
+│   │   ├── home.html                            # صفحه اصلی
+│   │   ├── articles.html                        # فهرست مقالات
+│   │   ├── biography.html                       # زندگی‌نامه
+│   │   ├── contact.html                         # تماس با ما
+│   │   ├── documentation.html                   # مستندات سایت
+│   │   ├── garden.html                          # نمایش باغ‌ها و فصل‌های شعر
+│   │   ├── ilhami_manuscript_studies.html       # مطالعات نسخه‌شناسی الهامی
+│   │   ├── poem.html                             # نمایش یک شعر
+│   │   ├── research_collaboration.html           # همکاری پژوهشی
+│   │   ├── textual_criticism.html               # نقد و تصحیح متون
+│   │   ├── word_398.html                         # قالب صفحه واژه ۳۹۸
+│   │   ├── admin/                                # قالب‌های پنل مدیریت
+│   │   │   ├── _sidebar.html                     # نوار کناری پنل
+│   │   │   ├── change_role.html                  # تغییر نقش کاربران
+│   │   │   ├── comments.html                     # مدیریت نظرات
+│   │   │   ├── corrections.html                  # بررسی اصلاحات ابیات
+│   │   │   ├── dashboard.html                    # داشبورد مدیریت
+│   │   │   ├── recordings.html                   # مدیریت فایل‌های صوتی
+│   │   │   └── users.html                        # مدیریت کاربران
+│   │   ├── auth/                                 # قالب‌های احراز هویت
+│   │   │   ├── change_password.html              # تغییر رمز عبور
+│   │   │   ├── forgot_password.html              # درخواست بازیابی رمز
+│   │   │   ├── login.html                        # صفحه ورود
+│   │   │   ├── profile.html                      # پروفایل کاربر
+│   │   │   ├── register.html                     # صفحه ثبت‌نام
+│   │   │   └── reset_password.html               # تعیین رمز جدید
+│   │   ├── emails/reset_password.html             # قالب ایمیل بازیابی رمز
+│   │   ├── errors/500.html                        # صفحه خطای داخلی سرور
+│   │   ├── research/                             # قالب‌های بخش پژوهش
+│   │   │   ├── README.md                         # توضیحات قالب‌های پژوهش
+│   │   │   ├── admin_form.html                   # فرم مدیریت پژوهش
+│   │   │   ├── base_form.html                    # قالب پایه فرم‌های پژوهش
+│   │   │   ├── manage_images.html                # مدیریت تصاویر پژوهشی
+│   │   │   ├── researcher_form.html              # فرم ویژه محقق
+│   │   │   ├── test_forms.html                   # قالب‌های آزمایشی فرم‌ها
+│   │   │   └── view_only_form.html               # فرم فقط برای مشاهده
+│   │   └── verses/                               # قالب‌های مربوط به اشعار
+│   │       ├── compare_versions.html             # مقایسه نسخه‌های شعر
+│   │       ├── my_recordings.html                # فایل‌های صوتی کاربر
+│   │       └── record_audio.html                 # ضبط فایل صوتی شعر
+│   └── static/                                  # فایل‌های ثابت سمت کاربر
+│       ├── css/                                 # شیوه‌نامه‌های صفحات
+│       │   ├── bootstrap.rtl.min.css            # Bootstrap راست‌چین فشرده
+│       │   ├── style.css                        # شیوه‌نامه اصلی سایت
+│       │   └── verse-corrections.css            # شیوه‌نامه اصلاحات ابیات
+│       ├── js/                                  # اسکریپت‌های سمت کاربر
+│       │   ├── bootstrap.bundle.min.js          # کتابخانه Bootstrap
+│       │   ├── harakat.js                       # مدیریت و نمایش اعراب
+│       │   ├── main.js                          # رفتارهای عمومی رابط کاربری
+│       │   └── verse-corrections.js             # تعاملات اصلاحات ابیات
+│       ├── images/                              # تصاویر و الگوهای سایت
+│       │   ├── besm.png                         # تصویر بسم‌الله
+│       │   ├── favicon.ico                      # نماد سایت در مرورگر
+│       │   ├── form.png                         # تصویر فرم
+│       │   ├── hand-write-1.jpg                 # تصویر دست‌نوشته شماره ۱
+│       │   ├── hand-write-2.jpg                 # تصویر دست‌نوشته شماره ۲
+│       │   ├── hand-write-3.jpg                 # تصویر دست‌نوشته شماره ۳
+│       │   ├── hand-write-4.jpg                 # تصویر دست‌نوشته شماره ۴
+│       │   ├── hoo.jpg                          # تصویر محتوایی سایت
+│       │   ├── pattern.png                      # الگوی پس‌زمینه
+│       │   ├── pattern1.png                     # الگوی تصویری شماره ۱
+│       │   ├── pattern2.png                     # الگوی تصویری شماره ۲
+│       │   ├── pattern4.png                     # الگوی تصویری شماره ۴
+│       │   ├── poet.png                         # تصویر شاعر
+│       │   └── poet - Copy.png                  # نسخه کپی تصویر شاعر
+│       ├── fonts/                               # فونت‌های فارسی و آیکون‌ها
+│       │   ├── Vazir.woff                       # فونت وزیر معمولی
+│       │   ├── Vazir.woff2                      # نسخه فشرده فونت وزیر
+│       │   ├── Vazir-Bold.woff                  # فونت وزیر ضخیم
+│       │   ├── Vazir-Bold.woff2                 # نسخه فشرده فونت وزیر ضخیم
+│       │   ├── Sahel.woff                       # فونت ساحل معمولی
+│       │   ├── Sahel-Bold.woff                  # فونت ساحل ضخیم
+│       │   └── fontawesome/                     # فونت آیکون Font Awesome
+│       │       ├── css/all.min.css              # شیوه‌نامه آیکون‌ها
+│       │       └── webfonts/                    # فایل‌های فونت آیکون
+│       │           ├── fa-brands-400.ttf        # آیکون برندها در قالب TTF
+│       │           ├── fa-brands-400.woff2      # آیکون برندها در قالب WOFF2
+│       │           ├── fa-regular-400.ttf       # آیکون‌های معمولی در قالب TTF
+│       │           ├── fa-regular-400.woff2     # آیکون‌های معمولی در قالب WOFF2
+│       │           ├── fa-solid-900.ttf         # آیکون‌های ضخیم در قالب TTF
+│       │           ├── fa-solid-900.woff2       # آیکون‌های ضخیم در قالب WOFF2
+│       │           ├── fa-v4compatibility.ttf   # سازگاری Font Awesome نسخه ۴
+│       │           └── fa-v4compatibility.woff2 # سازگاری Font Awesome نسخه ۴
+│       ├── robots.txt                           # قوانین خزش موتورهای جست‌وجو
+│       └── sitemap.xml                          # نقشه صفحات سایت
+├── doc/features/                                # مستندات قابلیت‌های پروژه
+│   └── verse-corrections-system.md              # مستندات سامانه اصلاحات ابیات
+├── migrations/                                  # مهاجرت‌ها و نسخه‌بندی پایگاه داده
+│   ├── alembic.ini                              # تنظیمات Alembic
+│   ├── env.py                                   # محیط اجرای مهاجرت‌ها
+│   ├── script.py.mako                           # الگوی ایجاد فایل مهاجرت
+│   └── versions/                                # نسخه‌های مهاجرت پایگاه داده
+│       ├── ae847c4565e9_initial_migration_base_state.py # مهاجرت اولیه
+│       ├── 20240610_add_research_images_table.py # افزودن جدول تصاویر پژوهشی
+│       ├── 20251002_add_visit_table.py          # افزودن جدول بازدیدها
+│       └── 20260210_add_verse_corrections.py    # افزودن جدول اصلاحات ابیات
+├── tests/                                       # آزمون‌های خودکار پروژه
+│   ├── __init__.py                              # مقداردهی اولیه بسته آزمون‌ها
+│   ├── test_basic.py                            # آزمون قابلیت‌های پایه
+│   └── test_security.py                         # آزمون‌های امنیتی
+├── instance/                                    # داده‌های محلی زمان اجرا
+├── uploads/                                     # فایل‌های بارگذاری‌شده کاربران
+│   ├── images/                                  # تصاویر عمومی بارگذاری‌شده
+│   └── research_images/                         # تصاویر پژوهشی بارگذاری‌شده
+├── .env.example                                 # نمونه متغیرهای محیطی
+├── .gitignore                                   # فایل‌های نادیده‌گرفته‌شده Git
+├── .htaccess                                    # تنظیمات وب‌سرور Apache
+├── admin_create_admin.py                        # ایجاد کاربر مدیر
+├── admin_excel_to_sqlite_temp.py                # انتقال موقت Excel به SQLite
+├── admin_fix_title_ids_safe.py                  # اصلاح امن شناسه عنوان‌ها
+├── admin_migrate_research_data.py               # انتقال داده‌های پژوهشی
+├── config.py                                    # تنظیمات برنامه و محیط اجرا
+├── docker-compose.yml                           # تعریف سرویس‌های Docker Compose
+├── Dockerfile                                   # دستور ساخت تصویر Docker
+├── nginx.conf                                   # تنظیمات وب‌سرور Nginx
+├── populate_data.py                             # ورود داده‌های اولیه
+├── requirements.txt                             # وابستگی‌های Python
+├── run.py                                       # اجرای برنامه در محیط توسعه
+├── wsgi.py                                      # نقطه ورود WSGI در تولید
+└── yoyo.ini                                     # تنظیمات ابزار مهاجرت Yoyo
 ```
 
 ---

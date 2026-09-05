@@ -70,3 +70,13 @@ class ChangePasswordForm(FlaskForm):
         EqualTo('new_password', message='رمز عبور جدید و تکرار آن باید یکسان باشند')
     ])
     submit = SubmitField('تغییر رمز عبور') 
+
+
+
+class Word398Form(FlaskForm):
+    ayah = StringField(
+        'آیه قرآن',
+        validators=[DataRequired()]
+    )
+
+    submit = SubmitField('پردازش')

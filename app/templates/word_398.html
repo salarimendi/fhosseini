@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}کلمه {{ 398 | persian_number }} هزار و یک کلمه{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 pt-5">
+
+    <h1 class="text-center mb-4">
+        کلمه {{ 398 | persian_number }} هزار و یک کلمه
+    </h1>
+
+    <p class="text-center text-muted mb-4">
+        یک خط از آیات قرآن را وارد کنید تا پردازش و بررسی شود.
+    </p>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9">
+
+            <form method="POST">
+
+                {{ form.hidden_tag() }}
+
+                <div class="input-group input-group-lg">
+
+                    {{ form.ayah(
+                        class="form-control text-center",
+                        dir="rtl",
+                        placeholder="آیه قرآن را وارد کنید..."
+                    ) }}
+
+                    {{ form.submit(
+                        class="btn btn-primary px-4"
+                    ) }}
+
+                </div>
+
+                {% if form.ayah.errors %}
+                    <div class="text-danger mt-2 text-end">
+                        {% for error in form.ayah.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+            </form>
+
+
+            {% if result %}
+                <div class="card mt-4 shadow-sm">
+                    <div class="card-body text-center" dir="rtl">
+
+                        <div class="mb-2">
+                            <strong>نتیجه پردازش:</strong>
+                        </div>
+
+                        <div class="fs-5" style="white-space: pre-line;">
+                            {{ result }}
+                        </div>
+
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
