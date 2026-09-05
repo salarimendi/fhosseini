@@ -13,7 +13,7 @@ from flask import (
     Blueprint, render_template, abort, request, current_app, send_from_directory
 )
 
-from app import db
+from app import db, limiter
 from app.articles.models import Article, ArticleCategory
 
 public_bp = Blueprint(
@@ -27,6 +27,7 @@ public_bp = Blueprint(
 
 
 @public_bp.route('/media/<path:filename>')
+@limiter.exempt
 def media(filename):
     """
     سرو کردن تصاویر آپلودشده‌ی مقالات از پوشه‌ی سطح‌بالای uploads/articles_images

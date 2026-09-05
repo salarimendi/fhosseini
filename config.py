@@ -138,10 +138,10 @@ class Config:
     # Articles images
     # --------------------------------------------------------
 
-    ARTICLE_IMAGE_UPLOAD_FOLDER = env_config(
-        'ARTICLE_IMAGE_UPLOAD_FOLDER',
-        default=os.path.join(basedir, 'uploads', 'articles_images'),
-    )
+    ARTICLE_IMAGE_UPLOAD_FOLDER = env_path(
+        env_config('ARTICLE_IMAGE_UPLOAD_FOLDER', default='uploads/articles_images'),
+        'uploads/articles_images',
+    )    
     ARTICLE_IMAGE_MAX_SIZE_MB = env_config('ARTICLE_IMAGE_MAX_SIZE_MB', cast=int, default=5)
     ARTICLE_IMAGE_ALLOWED_EXTENSIONS = set(
         e.strip() for e in env_config(

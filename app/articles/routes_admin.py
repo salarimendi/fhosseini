@@ -263,6 +263,42 @@ def categories():
                            pending_corrections_count =0)
 
 
+@admin_bp.route('/categories/<int:category_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_category(category_id):
+    category = ArticleCategory.query.get_or_404(category_id)
+    form = ArticleCategoryForm(obj=category)
+
+    if form.validate_on_submit():
+        new_name = form.name.data.strip()
+        if new_name != category.name:
+            category.slug = unique_slug(new_name, ArticleCategory, instance_id=category.id)
+        category.name = new_name
+        category.description = form.description.data
+        db.session.commit()
+        flash('دسته‌بندی ویرایش شد.', 'success')
+        return redirect(url_for('articles_admin.categories'))
+
+    return render_template(
+        'articles/admin/categories.html',
+        form=form,
+        categories=ArticleCategory.query.order_by(ArticleCategory.name).all(),
+        editing_category=category,
+        pending_corrections_count=0,
+    )
+
+
+@admin_bp.route('/categories/<int:category_id>/delete', methods=['POST'])
+@admin_required
+def delete_category(category_id):
+    category = ArticleCategory.query.get_or_404(category_id)
+    Article.query.filter_by(category_id=category.id).update({Article.category_id: None})
+    db.session.delete(category)
+    db.session.commit()
+    flash('دسته‌بندی حذف شد و مقاله‌های آن بدون دسته‌بندی باقی ماندند.', 'info')
+    return redirect(url_for('articles_admin.categories'))
+
+
 # ---------------------------------------------------------------------------
 # آپلود تصویر داخل متن برای TinyMCE - پاسخ JSON با فیلد "location"
 # ---------------------------------------------------------------------------

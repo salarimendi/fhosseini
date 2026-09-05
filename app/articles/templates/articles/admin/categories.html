@@ -17,20 +17,34 @@
             <div class="mb-2">
                 {{ form.description.label }} {{ form.description(class_="form-control", rows=2) }}
             </div>
-            <button type="submit" class="btn btn-primary">افزودن دسته‌بندی</button>
+            <button type="submit" class="btn btn-primary">
+                {{ 'ذخیره تغییرات' if editing_category else 'افزودن دسته‌بندی' }}
+            </button>
+            {% if editing_category %}
+                <a href="{{ url_for('articles_admin.categories') }}" class="btn btn-outline-secondary">انصراف</a>
+            {% endif %}
         </form>
 
         <table class="table">
-            <thead><tr><th>نام</th><th>Slug</th><th>تعداد مقالات</th></tr></thead>
+            <thead><tr><th>نام</th><th>توضیحات</th><th>Slug</th><th>تعداد مقالات</th><th>عملیات</th></tr></thead>
             <tbody>
                 {% for category in categories %}
                 <tr>
                     <td>{{ category.name }}</td>
+                    <td>{{ category.description or '—' }}</td>
                     <td>{{ category.slug }}</td>
                     <td>{{ category.articles.count() }}</td>
+                    <td>
+                        <a href="{{ url_for('articles_admin.edit_category', category_id=category.id) }}" class="btn btn-sm btn-outline-primary">ویرایش</a>
+                        <form method="POST" action="{{ url_for('articles_admin.delete_category', category_id=category.id) }}" style="display:inline"
+                              onsubmit="return confirm('حذف این دسته‌بندی مطمئن هستید؟ مقاله‌های آن بدون دسته‌بندی باقی می‌مانند.');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+                        </form>
+                    </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="3">هنوز دسته‌بندی‌ای ثبت نشده است.</td></tr>
+                <tr><td colspan="5">هنوز دسته‌بندی‌ای ثبت نشده است.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
