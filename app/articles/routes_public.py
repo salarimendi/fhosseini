@@ -62,6 +62,7 @@ def list_articles():
 
 @public_bp.route('/category/<slug>')
 def by_category(slug):
+    slug = normalize('NFC', unquote(slug))
     category = ArticleCategory.query.filter_by(slug=slug).first_or_404()
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('ARTICLES_PER_PAGE', 10)
