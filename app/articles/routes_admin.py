@@ -33,6 +33,18 @@ admin_bp = Blueprint(
 # دیگری است (مثلاً 'researcher' با حروف/نام دیگر)، همین‌جا اصلاح کنید.
 ALLOWED_ROLES = ('admin', 'researcher')
 
+ADMIN_ONLY_ROLES = ('admin',)
+
+def admin_required(view):
+    @wraps(view)
+    @login_required
+    def wrapped(*args, **kwargs):
+        if getattr(current_user, 'role', None) not in ADMIN_ONLY_ROLES:
+            abort(403)
+        return view(*args, **kwargs)
+    return wrapped
+
+
 
 def article_editor_required(view):
     @wraps(view)
@@ -93,7 +105,7 @@ def image_url(filename):
 # لیست مقالات (پنل مدیریت مقالات)
 # ---------------------------------------------------------------------------
 @admin_bp.route('/')
-@article_editor_required
+@admin_required
 def list_articles():
     page = request.args.get('page', 1, type=int)
     status_filter = request.args.get('status')
@@ -120,6 +132,7 @@ def list_articles():
 @admin_bp.route('/new', methods=['GET', 'POST'])
 @article_editor_required
 def new_article():
+    print("new_article called")
 
     form = ArticleForm()
     form.category_id.choices = [(0, '— بدون دسته‌بندی —')] + [
@@ -157,7 +170,7 @@ def new_article():
         db.session.add(article)
         db.session.commit()
         flash('مقاله با موفقیت ذخیره شد.', 'success')
-        return redirect(url_for('articles_admin.list_articles'))
+        return redirect(url_for('articles_public.list_articles'))
 
     return render_template('articles/admin/editor.html', form=form, article=None, image_url=image_url,
                            pending_corrections_count =0)
@@ -170,6 +183,8 @@ def new_article():
 @article_editor_required
 def edit_article(article_id):
     article = Article.query.get_or_404(article_id)
+    if current_user.role != 'admin' and article.author_id != current_user.id:
+        abort(403)
     form = ArticleForm(obj=article)
     form.category_id.choices = [(0, '— بدون دسته‌بندی —')] + [
         (c.id, c.name) for c in ArticleCategory.query.order_by(ArticleCategory.name).all()
@@ -207,7 +222,7 @@ def edit_article(article_id):
 
         db.session.commit()
         flash('تغییرات ذخیره شد.', 'success')
-        return redirect(url_for('articles_admin.list_articles'))
+        return redirect(url_for('articles_public.list_articles'))
 
     return render_template('articles/admin/editor.html', form=form, article=article, image_url=image_url)
 
@@ -216,7 +231,7 @@ def edit_article(article_id):
 # حذف مقاله
 # ---------------------------------------------------------------------------
 @admin_bp.route('/<int:article_id>/delete', methods=['POST'])
-@article_editor_required
+@admin_required
 def delete_article(article_id):
     article = Article.query.get_or_404(article_id)
     db.session.delete(article)
@@ -229,7 +244,7 @@ def delete_article(article_id):
 # مدیریت دسته‌بندی‌ها
 # ---------------------------------------------------------------------------
 @admin_bp.route('/categories', methods=['GET', 'POST'])
-@article_editor_required
+@admin_required
 def categories():
     form = ArticleCategoryForm()
     if form.validate_on_submit():

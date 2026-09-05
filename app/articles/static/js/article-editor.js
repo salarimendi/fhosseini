@@ -51,3 +51,10 @@ document.addEventListener('DOMContentLoaded', function () {
         },
     });
 });
+
+
+var articleForm = document.getElementById('article-form');
+
+articleForm.addEventListener('submit', function () {
+    tinymce.triggerSave();
+});

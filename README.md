@@ -104,6 +104,24 @@ fhosseini/
 │   ├── __init__.py                            # ایجاد و پیکربندی برنامه Flask
 │   ├── forms.py                               # فرم‌ها و اعتبارسنجی ورودی‌ها
 │   ├── models.py                              # مدل‌های پایگاه داده و روابط آن‌ها
+│   ├── articles/                               # ماژول مستقل مقالات و وبلاگ
+│   │   ├── __init__.py                         # ثبت ماژول با register_articles(app)
+│   │   ├── models.py                            # مدل‌های Article و ArticleCategory
+│   │   ├── forms.py                             # فرم‌های ArticleForm و ArticleCategoryForm
+│   │   ├── utils.py                             # ساخت slug فارسی و پاکسازی HTML
+│   │   ├── routes_public.py                     # بلوپرینت عمومی مقالات (/articles/...)
+│   │   ├── routes_admin.py                      # بلوپرینت مدیریت مقالات (/admin/articles/...)
+│   │   ├── templates/articles/                  # قالب‌های اختصاصی ماژول مقالات
+│   │   │   ├── admin/                           # قالب‌های بخش مدیریت مقالات
+│   │   │   │   ├── editor.html                  # ویرایشگر مقاله
+│   │   │   │   ├── list.html                    # فهرست مقالات در پنل مدیریت
+│   │   │   │   └── categories.html              # مدیریت دسته‌بندی‌های مقالات
+│   │   │   └── public/                          # قالب‌های عمومی مقالات
+│   │   │       ├── list.html                    # فهرست مقالات منتشرشده
+│   │   │       └── detail.html                  # جزئیات یک مقاله
+│   │   └── static/                              # فایل‌های استاتیک اختصاصی مقالات
+│   │       ├── js/article-editor.js             # راه‌اندازی و تعامل ویرایشگر مقاله
+│   │       └── vendor/tinymce/                  # فایل‌های TinyMCE خودمیزبان
 │   ├── routes/                                # مسیرها و نماهای برنامه
 │   │   ├── __init__.py                        # مقداردهی اولیه بسته مسیرها
 │   │   ├── admin.py                           # مسیرهای پنل مدیریت

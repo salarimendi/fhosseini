@@ -4,10 +4,9 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-3">
-        {% include "admin/_sidebar.html" %}
-    </div>
-    <div class="col-md-9">
+    {% include "admin/_sidebar.html" %}
+
+    <div class="col-md-9 col-lg-10">
         <h1>دسته‌بندی‌های مقالات</h1>
 
         <form method="POST" class="mb-4">
@@ -37,4 +36,5 @@
         </table>
     </div>
 </div>
+
 {% endblock %}

@@ -4,10 +4,9 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-3">
-        {% include "admin/_sidebar.html" %}
-    </div>
-    <div class="col-md-9">
+    {% include "admin/_sidebar.html" %}
+
+    <div class="col-md-9 col-lg-10">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h1>مقالات</h1>
             <a href="{{ url_for('articles_admin.new_article') }}" class="btn btn-primary">+ مقاله‌ی جدید</a>
@@ -73,4 +72,5 @@
         {% endif %}
     </div>
 </div>
+
 {% endblock %}

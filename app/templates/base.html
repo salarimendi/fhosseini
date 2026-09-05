@@ -50,19 +50,14 @@
                         </a>
                     </li>
                     
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="{{ url_for('main.research_collaboration') }}">
-                            <i class="fas fa-users text-white me-1"></i>
-                            همکاری پژوهشی
-                        </a>
-                    </li>
-                    
+                  
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle text-white" href="#" id="researchDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-microscope text-white me-1"></i>
                             پژوهش‌ها
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="researchDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('main.research_collaboration') }}"><i class="fas fa-handshake me-2"></i>دعوت به همکاری</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.documentation_page') }}"><i class="fas fa-file-alt me-2"></i>مستندسازی</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.textual_criticism_page') }}"><i class="fas fa-book-open me-2"></i>نسخه‌پژوهی و مقابله</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.ilhami_manuscript_studies') }}"><i class="fas fa-scroll me-2"></i>نسخه شناسی الهامی</a></li>
@@ -70,12 +65,52 @@
                             <li><a class="dropdown-item" href="{{ url_for('main.word_398_page') }}"><i class="fas fa-language me-2"></i>کلمه {{ 398 | persian_number}} هزار و یک کلمه</a></li>
                         </ul>
                     </li>
+                    
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('articles_public.list_articles') }}">مقالات</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white"
+                        href="#"
+                        id="articlesDropdown"
+                        role="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                            <i class="fas fa-newspaper text-white me-1"></i>
+                            مقالات
+                        </a>
+
+                        <ul class="dropdown-menu" aria-labelledby="articlesDropdown">
+                            <li>
+                                <a class="dropdown-item"
+                                href="{{ url_for('articles_public.list_articles') }}">
+                                    <i class="fas fa-list me-2"></i>
+                                    فهرست مقالات
+                                </a>
+                            </li>
+
+                            {% if current_user.is_authenticated and current_user.role in ['admin', 'researcher'] %}
+                                <li>
+                                    <a class="dropdown-item"
+                                    href="{{ url_for('articles_admin.new_article') }}">
+                                        <i class="fas fa-pen me-2"></i>
+                                        نوشتن مقاله
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                                <li>
+                                    <a class="dropdown-item"
+                                    href="{{ url_for('articles_admin.list_articles') }}">
+                                        <i class="fas fa-edit me-2"></i>
+                                        مدیریت مقالات
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
                     </li>
 
-                    
+
+
                     <li class="nav-item">
                         <a class="nav-link text-white" href="{{ url_for('main.contact') }}">
                             <i class="fas fa-envelope text-white me-1"></i>

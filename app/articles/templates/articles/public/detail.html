@@ -20,6 +20,17 @@
 {% block content %}
 <article>
     <h1>{{ article.title }}</h1>
+
+    {% if current_user.is_authenticated
+        and (current_user.role == 'admin'
+        or article.author_id == current_user.id) %}
+        <a href="{{ url_for('articles_admin.edit_article', article_id=article.id) }}"
+        class="btn btn-outline-primary btn-sm mb-3">
+            <i class="fas fa-edit me-1"></i>
+            ویرایش مقاله
+        </a>
+    {% endif %}   
+     
     <p class="text-muted">
         {{ article.author.fullname if article.author else '' }}
         ·
