@@ -230,14 +230,14 @@
                 <div id="processing-result" class="processing-results">
 
                     <section class="result-card">
-                        <h2>مرحله {{ 1|persian_number }}: آیه پس از حذف علائم اضافی</h2>
+                        <h2>مرحله {{ 1|persian_number }}: سطر پس از حذف علائم اضافی</h2>
                         <div class="result-value">
                             {{ result.normalized }}
                         </div>
                     </section>
 
                     <section class="result-card">
-                        <h2>مرحله {{ 2|persian_number }}: حروف بدون تکرار</h2>
+                        <h2>مرحله {{ 2|persian_number }}: سطر با حذف مكرّرات به حروف مقطّعه:</h2>
                         <div class="result-value">
                             {{ result.unique_letters|join(' ') }}
                         </div>
@@ -251,14 +251,14 @@
                     </section>
 
                     <section class="result-card">
-                        <h2>مرحله {{ 4|persian_number }}: بینات مقطع‌شده و بدون تکرار</h2>
+                        <h2>مرحله {{ 4|persian_number }}: قلمی نمودن بيّنات حروف مرقومه به حذف مكرّرات در آخر سطر:</h2>
                         <div class="result-value">
                             {{ result.bayenat_segmented }}
                         </div>
                     </section>
 
                     <section class="result-card">
-                        <h2>مرحله {{ 5|persian_number }}: تکسیر</h2>
+                        <h2>مرحله {{ 5|persian_number }}: تكسير تا حصول زمام:</h2>
                         <div class="result-value">
                             {% for row in result.taksir %}
                                 <div class="taksir-row">
