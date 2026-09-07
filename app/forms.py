@@ -73,7 +73,7 @@ class ChangePasswordForm(FlaskForm):
 
 
 
-class Word398Form(FlaskForm):
+class Word389Form(FlaskForm):
     ayah = StringField(
         'آیه قرآن',
         validators=[DataRequired()]

@@ -12,7 +12,13 @@ PERSIAN_TO_ARABIC = {
     'ژ': 'ز',
 }
 
-
+ARABIC_TO_PERSIAN = {
+    'ي': 'ی',
+    'ى': 'ی',
+    'ك': 'ک',
+    'ة': 'ه',
+    'ۀ': 'ه',
+}
 # ============================================================
 # ۲. اسامی ۲۸ حرف الفبای عربی
 #
@@ -94,6 +100,7 @@ def normalize_text(text):
 
     for char in text:
 
+        char = ARABIC_TO_PERSIAN.get(char, char)
         # تبدیل گ، چ، پ، ژ
         char = PERSIAN_TO_ARABIC.get(char, char)
 
@@ -102,6 +109,25 @@ def normalize_text(text):
             result.append(char)
 
     return ''.join(result)
+
+
+def normalize_display_text(text):
+    """حروف را برای نمایش جدا می‌کند و حرکات هر حرف را حفظ می‌کند."""
+
+    result = []
+    current_letter = None
+
+    for char in text:
+        char = ARABIC_TO_PERSIAN.get(char, char)
+        char = PERSIAN_TO_ARABIC.get(char, char)
+
+        if char in ARABIC_LETTERS:
+            result.append(char)
+            current_letter = char
+        elif current_letter and unicodedata.category(char) == 'Mn':
+            result[-1] += char
+
+    return ' '.join(result)
 
 
 # ============================================================
@@ -212,13 +238,14 @@ def taksir(text):
 # ============================================================
 # ۷. پردازش کامل
 # ============================================================
-def process_word_398(text):
+def process_word_389(text):
 
     # مرحله اول: نرمال‌سازی
-    normalized = normalize_text(text)
+    normalized_raw = normalize_text(text)
+    normalized_display = normalize_display_text(text)
 
     # مرحله دوم: حذف حروف تکراری
-    unique_letters = remove_duplicates(normalized)
+    unique_letters = remove_duplicates(normalized_raw)
 
     # مرحله سوم: استخراج بینات
     bayenat = {}
@@ -247,7 +274,8 @@ def process_word_398(text):
     )
 
     return {
-        'normalized': normalized,
+        'normalized': normalized_display,
+        'normalized_raw': normalized_raw,
         'unique_letters': unique_letters,
         'bayenat': bayenat,
         'bayenat_segmented': bayenat_segmented,

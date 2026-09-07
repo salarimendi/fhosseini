@@ -738,37 +738,24 @@ def api_can_add_correction(verse_id):
 # =============================================================================
 # پایان Route های نظرات تصحیحی
 # =============================================================================
-from app.forms import Word398Form
-from app.routes.word_398 import  process_word_398
+from app.forms import Word389Form
+from app.routes.word_389 import process_word_389
 
-@main_bp.route('/research/word-398', methods=['GET', 'POST'])
-def word_398_page():
-    """صفحه کلمه 398 هزار و یک کلمه"""
+@main_bp.route('/research/word-389', methods=['GET', 'POST'])
+def word_389_page():
+    """صفحه کلمه 389 هزار و یک کلمه"""
 
-    form = Word398Form()
+    form = Word389Form()
     result = None
 
     if form.validate_on_submit():
         ayah = form.ayah.data
 
-        result = process_word_398(ayah)
-
-        taksir_text = '\n'.join(
-            f'سطر {i + 1}: {" ".join(row)}'
-            for i, row in enumerate(result['taksir'])
-        )
-
-        result = (
-            f"آیه پس از حذف علائم اضافی: \n{result['normalized']}\n\n"
-            f"حروف بدون تکرار: \n{' '.join(result['unique_letters'])}\n\n"
-            f"بینات حروف: \n{' | '.join(result['bayenat'].values())}\n\n"
-            f"بینات (مقطع‌شده و بدون تکرار): \n{result['bayenat_segmented']}\n\n"
-            f"تکسیر:\n{taksir_text}"
-        )
+        result = process_word_389(ayah)
 
 
     return render_template(
-        'word_398.html',
+        'word_389.html',
         form=form,
         result=result
     )

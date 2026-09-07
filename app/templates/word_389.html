@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}کلمه {{ 389 | persian_number }} هزار و یک کلمه{% endblock %}
+
+{% block head %}
+<style>
+    .word-article {
+        max-width: 920px;
+        margin: 0 auto 3rem;
+        color: var(--text-dark);
+    }
+
+    .word-article-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .word-article-kicker {
+        color: var(--secondary-color);
+        font-size: 0.95rem;
+        letter-spacing: 0;
+        margin-bottom: 0.65rem;
+    }
+
+    .word-article-title {
+        font-size: clamp(1.75rem, 4vw, 2.7rem);
+        font-weight: 800;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .word-article-rule {
+        width: 74px;
+        height: 4px;
+        margin: 1rem auto 0;
+        border: 0;
+        border-radius: 2px;
+        background: var(--primary-color);
+    }
+
+    .word-article-text {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-right: 5px solid var(--primary-color);
+        border-radius: 8px;
+        box-shadow: 0 12px 30px var(--shadow);
+        padding: clamp(1.25rem, 3vw, 2.5rem);
+        font-family: Tahoma, "Noto Naskh Arabic", serif;
+        font-size: 1.12rem;
+        line-height: 2.35;
+        text-align: justify;
+    }
+
+    .word-article-text p {
+        margin: 0 0 1.5rem;
+    }
+
+    .word-article-text p:last-child {
+        margin-bottom: 0;
+    }
+
+    .word-article-text .article-highlight {
+        color: var(--article-highlight-color, var(--secondary-color));
+        font-weight: 700;
+    }
+
+    .word-article-text .arabic-quote {
+        display: block;
+        margin: 1rem 0;
+        padding: 0.8rem 1rem;
+        border-right: 3px solid var(--accent-color);
+        background: var(--hover-bg);
+        text-align: right;
+    }
+
+    @media (max-width: 576px) {
+        .word-article-text {
+            font-size: 1rem;
+            line-height: 2.15;
+            text-align: right;
+        }
+    }
+
+
+
+.processing-results {
+    display: grid;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.result-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-right: 5px solid var(--primary-color);
+    border-radius: 8px;
+    box-shadow: 0 8px 22px var(--shadow);
+    padding: 1.25rem;
+    text-align: right;
+}
+
+.result-card h2 {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+
+
+.result-value {
+    direction: rtl;
+    font-family: Tahoma, "Noto Naskh Arabic", serif;
+    font-size: 1.2rem;
+    line-height: 2.2;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.result-value:has(.taksir-row) {
+    line-height: 1;
+    white-space: normal;
+}
+
+.taksir-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    line-height: 1.25;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 pt-5">
+
+    <article class="word-article" dir="rtl">
+        <header class="word-article-header">
+            <h1 class="word-article-title">کلمه {{ 389|persian_number }} از کتاب هزار و یک کلمه</h1>
+            <hr class="word-article-rule">
+        </header>
+
+        <div class="word-article-text">
+            <p>
+                <span class="article-highlight">طريق استخراج مطالب</span> از
+                {{ 1|persian_number }}/{{ 3|persian_number }} {{ 5|persian_number }}/{{ 3|persian_number }}
+                {{ 6|persian_number }}/{{ 2|persian_number }} {{ 1|persian_number }}/{{ 3|persian_number }}
+                {{ 1|persian_number }}/{{ 1|persian_number }} {{ 4|persian_number }}/{{ 3|persian_number }}
+                {{ 5|persian_number }}/{{ 2|persian_number }} كه اصحّ طرق است اين است كه:
+                أولا قرآن مجيد را به دست گرفته آية الكرسى و آيه‏ وَ عِنْدَهُ مَفاتِحُ الْغَيْبِ‏ را بخواند،
+                و {{ 10|persian_number }} مرتبه صلوات؛ و بعد از آن بگويد:
+            </p>
+
+            <p class="arabic-quote">
+                «اللهمّ إنّي تفألت بكتابك المنزل على محمّد (صلّى اللّه عليه و آله) و توكّلت عليك؛ فأرني من كتابك ما هو المكتوم من سرّك المخزون في علمك، اللهم أرني الخير خيرا حتى أتّبعه، و أرني الباطل باطلا حتى اجتنبه، اللهم يا من يعلم اهد من لا يعلم».
+            </p>
+
+            <p>
+                و بعد از آن قرآن مجيد را گشوده از صفحه دست راست آنچه لفظ جلاله باشد شماره نموده به عدد آن ورق از دست چپ بشمارد،
+                و بعد عدد آن سطور دست چپ را شمرده سطر آخر را به حذف مكرّرات بنويسد به حروف مقطّعه، و چون سطر به اتمام رسيد بيّنات حروف مرقومه را گرفته آن را نيز به حذف مكرّرات در آخر سطر قلمى نمايد، و بعد از آن تكسير نمايد تا به حدّى كه زمام حاصل شود- يعنى سطر آخر تكسير مطابق شود با سطر اول- و بعد از آن ملاحظه حروف مقطّعه نمايد دو تا دوتا، سه تا سه تا، چهار تا چهارتا، پنج تا پنج تا؛ و اگر ضميرى باشد يا حرفى از حروف زوايد تا {{ 6|persian_number }} حرف و {{ 7|persian_number }} حرف هم به تركيب و امتزاج در آورد به نحوى كه مثلا چهار حرفى را به شانزده تركيب توان امتزاج داد، هر چه از آن ناطق شود در تحت سطرى قلمى نمايد تا به آخر زمام، و بعد از آن مجموع را جمع نموده ترجمه فارسى در تحت آن قلمى نمايند اگر عارف به ترجمه عربى باشد، و إلّا همان ألفاظ عربيه را به عارف عربى عرض نموده به ترجمه آن عمل نمايد، و اين
+                {{ 1|persian_number }}/{{ 1|persian_number }} {{ 2|persian_number }}/{{ 3|persian_number }} {{ 1|persian_number }}/{{ 1|persian_number }}
+                {{ 5|persian_number }}/{{ 1|persian_number }} {{ 6|persian_number }}/{{ 2|persian_number }} {{ 1|persian_number }}/{{ 1|persian_number }}
+                {{ 6|persian_number }}/{{ 2|persian_number }} {{ 4|persian_number }}/{{ 3|persian_number }} {{ 7|persian_number }}/{{ 2|persian_number }}
+                {{ 5|persian_number }}/{{ 3|persian_number }} {{ 3|persian_number }}/{{ 3|persian_number }} {{ 2|persian_number }}/{{ 1|persian_number }}
+                {{ 1|persian_number }}/{{ 1|persian_number }} {{ 5|persian_number }}/{{ 1|persian_number }} {{ 6|persian_number }}/{{ 4|persian_number }}
+                {{ 4|persian_number }}/{{ 1|persian_number }} {{ 2|persian_number }}/{{ 1|persian_number }} {{ 1|persian_number }}/{{ 2|persian_number }}
+                {{ 8|persian_number }}/{{ 3|persian_number }} {{ 3|persian_number }}/{{ 3|persian_number }} {{ 6|persian_number }}/{{ 2|persian_number }}
+                {{ 1|persian_number }}/{{ 1|persian_number }} {{ 2|persian_number }}/{{ 1|persian_number }} {{ 4|persian_number }}/{{ 2|persian_number }}
+                {{ 1|persian_number }}/{{ 1|persian_number }} {{ 1|persian_number }}/{{ 1|persian_number }} {{ 4|persian_number }}/{{ 4|persian_number }}
+                {{ 4|persian_number }}/{{ 4|persian_number }} {{ 1|persian_number }}/{{ 2|persian_number }} {{ 1|persian_number }}/{{ 1|persian_number }}
+                {{ 3|persian_number }}/{{ 3|persian_number }} {{ 1|persian_number }}/{{ 4|persian_number }} {{ 1|persian_number }}/{{ 1|persian_number }}
+                {{ 1|persian_number }}/{{ 1|persian_number }} {{ 4|persian_number }}/{{ 3|persian_number }} {{ 2|persian_number }}/{{ 2|persian_number }}
+                {{ 7|persian_number }}/{{ 2|persian_number }} {{ 6|persian_number }}/{{ 4|persian_number }}.
+            </p>
+
+            <p>
+                و بدان كه جناب سيد على خان مدنى (رضوان اللّه عليه) در شرح دعاى سى و سوم از رياض السالكين في شرح صحيفة الإمام سيّد الساجدين عليه السّلام همه وجوه و صور انواع استخاره را به نحو استقصا و استيفا بيان فرموده است، از آن جمله از سيد ابن طاوس (على بن طاوس) نقل كرده است كه:
+            </p>
+
+            <p class="arabic-quote">
+                من أراد الاستخارة بالقرآن المجيد فليقرأ آية الكرسي الى‏ هُمْ فِيها خالِدُونَ‏، و آية وَ عِنْدَهُ مَفاتِحُ الْغَيْبِ لا يَعْلَمُها الى‏ مُبِينٍ‏، ثم يصلّى على النبي عشرا، ثم يدعو بهذا الدعاء: «اللهم انّي توكلت عليك و تفألت بكتابك فأرني ما هو المكتوم في سرّك المخزون في غيبك يا ذا الجلال و الاكرام، اللهم أنت الحقّ و أنزلت الحقّ بمحمد صلّى اللّه عليه و آله و سلّم اللهم أرني الحق حقا حتى اتبعه و أرني الباطل باطلا حتى اجتنبه برحمتك يا ارحم الراحمين» ثم تفتح المصحف و تعدّ الجلالات من الصفحة اليمنى و تعدّ بعدد الجلالات اوراقا من الصفحة اليسرى، ثمّ تعد الاسطر بعدد الأوراق من الصفحة اليسرى فما يأتي بعد ذلك فهو بمنزلة الوحي.
+            </p>
+
+            <p>
+                نگارنده حسن حسن‏زاده آملى گويد كه كأن دستور سيّد تسهيل وجه نخستين است كه اصحّ طرق است و آن را شأن و اهميّتى بسزاست فتدبّر.
+            </p>
+        </div>
+    </article>
+
+    <p class="text-center text-muted mb-4">
+        یک خط از آیات قرآن را وارد کنید تا پردازش و بررسی شود.
+    </p>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9">
+
+            <form method="POST" action="{{ url_for('main.word_389_page') }}#processing-result">
+
+                {{ form.hidden_tag() }}
+
+                <div class="input-group input-group-lg">
+
+                    {{ form.ayah(
+                        class="form-control text-center",
+                        dir="rtl",
+                        placeholder="آیه قرآن را وارد کنید..."
+                    ) }}
+
+                    {{ form.submit(
+                        class="btn btn-primary px-4"
+                    ) }}
+
+                </div>
+
+                {% if form.ayah.errors %}
+                    <div class="text-danger mt-2 text-end">
+                        {% for error in form.ayah.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+            </form>
+
+
+            {% if result %}
+                <div id="processing-result" class="processing-results">
+
+                    <section class="result-card">
+                        <h2>مرحله {{ 1|persian_number }}: آیه پس از حذف علائم اضافی</h2>
+                        <div class="result-value">
+                            {{ result.normalized }}
+                        </div>
+                    </section>
+
+                    <section class="result-card">
+                        <h2>مرحله {{ 2|persian_number }}: حروف بدون تکرار</h2>
+                        <div class="result-value">
+                            {{ result.unique_letters|join(' ') }}
+                        </div>
+                    </section>
+
+                    <section class="result-card">
+                        <h2>مرحله {{ 3|persian_number }}: بینات حروف</h2>
+                        <div class="result-value">
+                            {{ result.bayenat.values()|join('، ') }}
+                        </div>
+                    </section>
+
+                    <section class="result-card">
+                        <h2>مرحله {{ 4|persian_number }}: بینات مقطع‌شده و بدون تکرار</h2>
+                        <div class="result-value">
+                            {{ result.bayenat_segmented }}
+                        </div>
+                    </section>
+
+                    <section class="result-card">
+                        <h2>مرحله {{ 5|persian_number }}: تکسیر</h2>
+                        <div class="result-value">
+                            {% for row in result.taksir %}
+                                <div class="taksir-row">
+                                    <span class="taksir-label">سطر {{ loop.index|persian_number }}</span>
+                                    <span>{{ row|join(' ') }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{% if result %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const result = document.getElementById('processing-result');
+
+        if (result) {
+            result.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

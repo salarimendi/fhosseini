@@ -3,13 +3,21 @@ PassengerAppRoot "/home/qouyvwti/myflaskapp"
 PassengerBaseURI "/"
 PassengerPython "/home/qouyvwti/virtualenv/myflaskapp/3.11/bin/python"
 # DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+RewriteOptions inherit
+
 # DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION BEGIN
 <IfModule Litespeed>
 </IfModule>
 # DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
 
-# Enable HTTPS
 RewriteEngine On
+
+RewriteCond %{HTTP_HOST} ^elhamy\.ir$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.elhamy\.ir$
+RewriteRule ^(.*)$ "https\:\/\/ferdowsihosseini\.ir\/$1" [R=301,L]
+
+
+# Force HTTPS
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
