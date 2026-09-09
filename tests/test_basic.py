@@ -41,7 +41,6 @@ class BasicTestCase(unittest.TestCase):
     def tearDown(self):
         """Clean up after each test method."""
         db.session.remove()
-        db.drop_all()
         self.app_context.pop()
         
         # حذف متغیر محیطی
@@ -97,7 +96,6 @@ class ModelTestCase(unittest.TestCase):
     def tearDown(self):
         """Clean up after each test method."""
         db.session.remove()
-        db.drop_all()
         self.app_context.pop()
         
         # حذف متغیر محیطی

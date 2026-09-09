@@ -37,6 +37,12 @@
         </div>
         <div class="col-md-4">
             <label class="form-label" for="subtopic-reviewed-sources-{{ loop.index0 }}">منابع بررسی‌شده</label>
+            {% if not view_mode %}
+             <input type="text" class="form-control form-control-sm source-lookup mb-1"
+                 data-target="subtopic-reviewed-sources-{{ loop.index0 }}"
+                 placeholder="جست‌وجوی منبع و افزودن با Enter"
+                 autocomplete="off">
+            {% endif %}
             <textarea class="form-control auto-resize subtopic-reviewed-sources"
                    id="subtopic-reviewed-sources-{{ loop.index0 }}"
                    placeholder="کتاب‌ها و منابعی که بررسی کرده‌اید"
@@ -44,6 +50,12 @@
         </div>
         <div class="col-md-4">
             <label class="form-label" for="subtopic-sources-{{ loop.index0 }}">منابعی که مطلب فقط در آن‌ها یافت شد</label>
+             {% if not view_mode %}
+            <input type="text" class="form-control form-control-sm source-lookup mb-1"
+                   data-target="subtopic-sources-{{ loop.index0 }}"
+                   placeholder="جست‌وجوی منبع و افزودن با Enter"
+                 autocomplete="off">
+             {% endif %}
             <textarea class="form-control auto-resize subtopic-sources" 
                    id="subtopic-sources-{{ loop.index0 }}"
                    placeholder="منابع تاریخی"
@@ -98,12 +110,20 @@
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label" for="subtopic-reviewed-sources-0">منابع بررسی‌شده</label>
+                                            <input type="text" class="form-control form-control-sm source-lookup mb-1"
+                                                   data-target="subtopic-reviewed-sources-0"
+                                                   placeholder="جست‌وجوی منبع و افزودن با Enter"
+                                                   autocomplete="off">
                                             <textarea class="form-control auto-resize subtopic-reviewed-sources"
                                                    id="subtopic-reviewed-sources-0"
                                                    placeholder="کتاب‌ها و منابعی که بررسی کرده‌اید"></textarea>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label" for="subtopic-sources-0">منابعی که مطلب فقط در آن‌ها یافت شد</label>
+                                            <input type="text" class="form-control form-control-sm source-lookup mb-1"
+                                                   data-target="subtopic-sources-0"
+                                                   placeholder="جست‌وجوی منبع و افزودن با Enter"
+                                                   autocomplete="off">
                                             <textarea class="form-control auto-resize subtopic-sources" 
                                                    id="subtopic-sources-0"
                                                    placeholder="منابع تاریخی"></textarea>
@@ -193,6 +213,14 @@
 // متغیرهای سراسری برای تمپلیت‌های فرزند
 var commentId = {% if comment_id_js %}{{ comment_id_js }}{% else %}null{% endif %};
 var viewMode = {{ 'true' if view_mode else 'false' }};
+var researchSources = [
+    'دمع السجوم', 'ناسخ التواریخ', 'ارشاد', 'ملهوف', 'طبری',
+    'کامل ابن اثیر', 'مقاتل الطالبین', 'مروج الذهب', 'تذکرة الخواص',
+    'مطالب السئول', 'فصول المهمه', 'کشف الغمه', 'عقد الفرید', 'احتجاج',
+    'مناقب', 'روضة الواعظین', 'مثیر الاحزان', 'کامل بهایی', 'روضة الصفا',
+    'تسلیة المجالس', 'قمقام زخار', 'روضة الشهدا', 'بحارالانوار (علامه مجلسی)',
+    'سرّ الاسرار'
+];
 
 // کلاس مدیریت فرم پایه (بدون مدیریت عکس)
 class BaseFormManager {
@@ -209,7 +237,109 @@ class BaseFormManager {
     init() {
         this.initAutoResize();
 		this.updateRemoveButtonsState();
+		this.initSourceLookups();
         this.bindEvents();
+    }
+
+    initSourceLookups() {
+        document.querySelectorAll('.source-lookup').forEach(input => {
+            this.bindSourceLookup(input);
+        });
+    }
+
+    bindSourceLookup(input) {
+        if (input.dataset.sourceLookupBound === 'true') {
+            return;
+        }
+
+        input.dataset.sourceLookupBound = 'true';
+        const suggestions = document.createElement('div');
+        suggestions.className = 'source-suggestions list-group position-absolute w-100';
+        suggestions.style.zIndex = '1050';
+        input.parentElement.style.position = 'relative';
+        input.parentElement.appendChild(suggestions);
+
+        const renderSuggestions = () => {
+            const query = this.normalizeSourceText(input.value);
+            suggestions.innerHTML = '';
+
+            if (query.length < 2) {
+                suggestions.classList.remove('show');
+                return;
+            }
+
+            const matches = researchSources.filter(source =>
+                this.normalizeSourceText(source).includes(query)
+            );
+
+            matches.forEach(source => {
+                const option = document.createElement('button');
+                option.type = 'button';
+                option.className = 'list-group-item list-group-item-action py-1 text-end';
+                option.textContent = source;
+                option.addEventListener('mousedown', event => {
+                    event.preventDefault();
+                    this.addSourceToTextarea(input, source);
+                });
+                suggestions.appendChild(option);
+            });
+
+            suggestions.classList.toggle('show', matches.length > 0);
+        };
+
+        input.addEventListener('input', renderSuggestions);
+        input.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const firstMatch = suggestions.querySelector('button');
+                if (firstMatch) {
+                    this.addSourceToTextarea(input, firstMatch.textContent);
+                }
+            } else if (event.key === 'Escape') {
+                suggestions.innerHTML = '';
+                suggestions.classList.remove('show');
+            }
+        });
+
+        document.addEventListener('click', event => {
+            if (!input.parentElement.contains(event.target)) {
+                suggestions.innerHTML = '';
+                suggestions.classList.remove('show');
+            }
+        });
+    }
+
+    normalizeSourceText(value) {
+        return value
+            .replace(/ي/g, 'ی')
+            .replace(/ك/g, 'ک')
+            .replace(/[\u064B-\u065F]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLocaleLowerCase('fa');
+    }
+
+    addSourceToTextarea(input, source) {
+        const target = document.getElementById(input.dataset.target);
+        if (!target) {
+            return;
+        }
+
+        const existingText = target.value.trim();
+        const sourceText = target.classList.contains('subtopic-sources')
+            ? `${source}، صفحه `
+            : source;
+
+        if (existingText.split('\n').some(line => line.trim() === source)) {
+            input.value = '';
+            return;
+        }
+
+        target.value = existingText ? `${existingText}\n${sourceText}` : sourceText;
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+        input.value = '';
+        input.focus();
+        input.parentElement.querySelector('.source-suggestions').classList.remove('show');
     }
     
     // قابلیت auto-resize برای textareaها
@@ -306,12 +436,20 @@ class BaseFormManager {
                 </div>
                 <div class="col-md-4">
                     <label class="form-label" for="subtopic-reviewed-sources-${newIndex}">منابع بررسی‌شده</label>
+                    <input type="text" class="form-control form-control-sm source-lookup mb-1"
+                           data-target="subtopic-reviewed-sources-${newIndex}"
+                           placeholder="جست‌وجوی منبع و افزودن با Enter"
+                           autocomplete="off">
                     <textarea class="form-control auto-resize subtopic-reviewed-sources"
                            id="subtopic-reviewed-sources-${newIndex}"
                            placeholder="کتاب‌ها و منابعی که بررسی کرده‌اید"></textarea>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label" for="subtopic-sources-${newIndex}">منابعی که مطلب فقط در آن‌ها یافت شد</label>
+                    <input type="text" class="form-control form-control-sm source-lookup mb-1"
+                           data-target="subtopic-sources-${newIndex}"
+                           placeholder="جست‌وجوی منبع و افزودن با Enter"
+                           autocomplete="off">
                     <textarea class="form-control auto-resize subtopic-sources" 
                            id="subtopic-sources-${newIndex}"
                            placeholder="منابع تاریخی"></textarea>
@@ -329,6 +467,9 @@ class BaseFormManager {
         
         // فعال‌سازی auto-resize برای textareaهای جدید
         const newRow = this.subtopicsContainer.lastElementChild;
+        newRow.querySelectorAll('.source-lookup').forEach(input => {
+            this.bindSourceLookup(input);
+        });
         newRow.querySelectorAll('textarea.auto-resize').forEach(textarea => {
             this.autoResizeTextarea(textarea);
             textarea.addEventListener('input', () => {
@@ -437,6 +578,18 @@ class BaseFormManager {
 
 .manage-images-btn {
     white-space: nowrap;
+}
+
+.source-suggestions {
+    top: 100%;
+    left: 0;
+    display: none;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.source-suggestions.show {
+    display: block;
 }
 
 .form-control[readonly] {
