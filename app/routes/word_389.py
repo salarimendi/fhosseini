@@ -254,9 +254,9 @@ def process_word_389(text):
         bayenat[letter] = get_bayenat(letter)
 
     # مرحله چهارم:
-    # حذف مکررات بین تمام بینات از ابتدا به انتها
+    # ابتدا نتایج مرحله دوم و سپس بینات مرحله سوم
+    bayenat_segmented_parts = list(unique_letters)
     seen = set()
-    bayenat_segmented_parts = []
 
     for letter in unique_letters:
 
@@ -266,7 +266,9 @@ def process_word_389(text):
                 seen.add(char)
                 bayenat_segmented_parts.append(char)
 
+
     bayenat_segmented = ' '.join(bayenat_segmented_parts)
+    
 
     # مرحله پنجم: تکسیر
     taksir_rows = taksir(

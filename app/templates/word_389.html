@@ -130,6 +130,17 @@
     line-height: 1.25;
 }
 
+.taksir-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.copy-taksir-button {
+    flex-shrink: 0;
+}
+
 </style>
 {% endblock %}
 
@@ -258,10 +269,16 @@
                     </section>
 
                     <section class="result-card">
-                        <h2>مرحله {{ 5|persian_number }}: تكسير تا حصول زمام:</h2>
+                        <div class="taksir-header">
+                            <h2>مرحله {{ 5|persian_number }}: تكسير تا حصول زمام:</h2>
+                            <button type="button" class="btn btn-outline-primary copy-taksir-button" id="copyTaksirButton">
+                                <i class="fas fa-copy" aria-hidden="true"></i>
+                                <span>کپی</span>
+                            </button>
+                        </div>
                         <div class="result-value">
                             {% for row in result.taksir %}
-                                <div class="taksir-row">
+                                <div class="taksir-row" data-taksir-row="{{ row|join(' ') }}">
                                     <span class="taksir-label">سطر {{ loop.index|persian_number }}</span>
                                     <span>{{ row|join(' ') }}</span>
                                 </div>
@@ -285,11 +302,29 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const result = document.getElementById('processing-result');
+        const copyButton = document.getElementById('copyTaksirButton');
 
         if (result) {
             result.scrollIntoView({
                 behavior: 'smooth',
                 block: 'start'
+            });
+        }
+
+        if (copyButton) {
+            copyButton.addEventListener('click', async function () {
+                const rows = Array.from(document.querySelectorAll('[data-taksir-row]'));
+                const text = rows.map(row => row.dataset.taksirRow).join(' ');
+
+                try {
+                    await navigator.clipboard.writeText(text);
+                    copyButton.querySelector('span').textContent = 'کپی شد';
+                    setTimeout(() => {
+                        copyButton.querySelector('span').textContent = 'کپی';
+                    }, 1500);
+                } catch (error) {
+                    console.error('کپی در کلیپ‌برد انجام نشد:', error);
+                }
             });
         }
     });
