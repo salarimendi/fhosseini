@@ -185,7 +185,11 @@ def save_research_form(comment_obj, data, files, config, is_admin=False):
             raise ValueError('عنوان زیر موضوع نمی‌تواند خالی باشد')
 
     research_data = {
-        'subtopics': [{ 'title': s.get('title'), 'sources': s.get('sources', '') } for s in subtopics],
+        'subtopics': [{
+            'title': s.get('title'),
+            'reviewed_sources': s.get('reviewed_sources', ''),
+            'sources': s.get('sources', '')
+        } for s in subtopics],
         'extra_info': extra_info,
         'topic_narrative': topic_narrative,
         'primary_theory': primary_theory,
