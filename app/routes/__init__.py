@@ -7,6 +7,7 @@ from .auth import auth_bp
 from .verses import verses_bp
 from .comments import comments_bp
 from .admin import admin_bp
+from .stars import stars_bp
 from app.articles import register_articles
 
 def register_blueprints(app):
@@ -16,4 +17,5 @@ def register_blueprints(app):
     app.register_blueprint(verses_bp, url_prefix='/verses')
     app.register_blueprint(comments_bp, url_prefix='/comments')
     app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(stars_bp, url_prefix='/stars')
     register_articles(app)
