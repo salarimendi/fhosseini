@@ -105,6 +105,57 @@
             color: #c62828;
             font-weight: bold;
         }
+        .description-warning {
+            color: #c62828;
+            font-weight: bold;
+        }
+        .date-form button[type="button"] {
+            background: #546e7a;
+        }
+
+        .date-form button[type="button"]:hover {
+            background: #37474f;
+        }
+
+.poem-box {
+    max-width: 900px;
+    margin: 28px auto 22px;
+    padding: 14px 24px;
+    color: #37474f;
+    background: #fff;
+    border-top: 2px solid #2e7d32;
+    border-bottom: 2px solid #2e7d32;
+    box-shadow: 0 2px 8px #00000012;
+    font-family: Tahoma, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 2.2;
+    direction: rtl;
+}
+
+.poem-verse {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 90px;
+    text-align: center;
+}
+
+.poem-verse + .poem-verse {
+    margin-top: 4px;
+}
+
+@media (max-width: 700px) {
+    .poem-box {
+        padding: 10px;
+        font-size: 15px;
+    }
+
+    .poem-verse {
+        column-gap: 20px;
+    }
+}
+        
+        
 
         @media (max-width: 700px) {
             .stars-page {
@@ -140,6 +191,7 @@
                 value="{{ date_value }}"
                 required
             >
+            <button type="button" id="reset-date">زمان فعلی UTC</button>
 
             <button type="submit">محاسبه</button>
         </form>
@@ -149,6 +201,23 @@
             {{ utc.strftime("%Y-%m-%d %H:%M UTC") }}
         </div>
 
+
+
+        <div class="poem-box">
+            <div class="poem-verse">
+                <span>در جهان هفت کوکب سیار</span>
+                <span>آفریده است خدای عز و وجل</span>
+            </div>
+
+            <div class="poem-verse">
+                <span>قمر است و عطارد و زهره</span>
+                <span>شمس و مریخ و مشتری و زحل</span>
+            </div>
+        </div>
+
+
+
+
         <table>
             <thead>
                 <tr>
@@ -157,6 +226,7 @@
                     <th>DMS</th>
                     <th>طول جغرافیایی</th>
                     <th>سرعت طولی</th>
+                    <th>توضیحات</th>
                 </tr>
             </thead>
 
@@ -182,10 +252,63 @@
                     <td class="speed {% if planet.speed < 0 %}retrograde{% endif %}">
                         {{ "%.6f"|format(planet.speed) }}
                     </td>
+ 
+                    <td class="{% if planet.description %}description-warning{% endif %}">
+                        {{ planet.description }}
+                    </td>                    
+                    
+
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+        <div class="poem-box">
+            <div class="poem-verse">
+                <span>کواکب مه و تیر و ناهید میدان</span>
+                <span>چو خورشید و بهرام و برجیس و کیوان</span>
+            </div>
+        </div>        
+
+        <div class="poem-box">
+            <div class="poem-verse">
+                <span>جهان چون زلف و خط و خال و ابروست</span>
+                <span>که هر چیزی به جای خویش نیکوست</span>
+            </div>
+
+            <div class="poem-verse">
+                <span>هر آن چیزی که در عالم عیان است</span>
+                <span>چو عکسی ز آفتاب آن جهان است</span>
+            </div>
+
+
+            <div class="poem-verse">
+                <span>تجلی گه جمال و گه جلال است</span>
+                <span>رخ و زلف آن معانی را مثال است</span>
+            </div>
+            
+            <div class="poem-verse">
+                <span>صفات حق تعالی لطف و قهر است</span>
+                <span>رخ و زلف بتان را زان دو بهر است</span>
+            </div>            
+        </div>
+
         </div>
     </main>
+
+<script>
+    document.getElementById("reset-date").addEventListener("click", function () {
+        const now = new Date();
+
+        const year = now.getUTCFullYear();
+        const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+        const day = String(now.getUTCDate()).padStart(2, "0");
+        const hours = String(now.getUTCHours()).padStart(2, "0");
+        const minutes = String(now.getUTCMinutes()).padStart(2, "0");
+
+        document.getElementById("date_time").value =
+            `${year}-${month}-${day}T${hours}:${minutes}`;
+    });
+</script>
+
 {% endblock %}

@@ -77,12 +77,18 @@ def calculate_planets(dt):
         )
         sign_name, sign_symbol = SIGNS[sign_index]
 
+        description = ""
+
+        if body == swe.MOON and 210 < longitude <= 240:
+            description = "قمر در برج عقرب"
+
         planets.append({
             "name": name,
             "sign": f"{sign_name} {sign_symbol}",
             "dms": f"{dms}{'r' if speed < 0 else ''}",
             "longitude": longitude,
             "speed": speed,
+            "description": description,
         })
 
     return planets, julian_day
@@ -90,10 +96,13 @@ def calculate_planets(dt):
 
 @stars_bp.route("/calculate", methods=["GET", "POST"])
 def calculate():
-    date_value = "2026-09-16T20:15"
+    #date_value = "2026-09-16T20:15"
+    date_value = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
 
     if request.method == "POST":
-        date_value = request.form.get("date_time", date_value)
+        date_value = request.form.get("date_time") or datetime.now(
+            timezone.utc
+            ).strftime("%Y-%m-%dT%H:%M")
 
     dt = datetime.fromisoformat(date_value).replace(tzinfo=timezone.utc)
     planets, julian_day = calculate_planets(dt)
