@@ -203,6 +203,12 @@ def title(title_id):
     # تعداد کل ابیات (غیر زیرعنوان) در کل کتاب
     total_verses_all = Verse.query.filter_by(is_subtitle=0).count()
 
+    can_view_versions = (
+        current_user.is_authenticated
+        and current_user.role in ['admin', 'researcher']
+    )
+
+
     return render_template('poem.html',
         title=title_obj,
         verses=verses,
@@ -216,7 +222,9 @@ def title(title_id):
         user_has_recording=user_has_recording,
         user_recording_approved=user_recording_approved,
         prev_verses_count=prev_verses_count,
-        total_verses_all=total_verses_all
+        total_verses_all=total_verses_all,
+        can_view_versions=can_view_versions,
+        can_copy_poem=can_view_versions
     )
 
 @main_bp.route('/search')

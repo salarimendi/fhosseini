@@ -394,11 +394,22 @@ def api_recordings(title_id):
         'count': len(recordings_data)
     })
 
+
 @verses_bp.route('/compare_versions/<int:title_id>')
+@login_required
 def compare_versions(title_id):
     """مقایسه نسخه‌های مختلف یک شعر"""
+
+    if current_user.role not in ['admin', 'researcher']:
+        return 'شما اجازه مشاهده نسخه‌ها را ندارید.', 403
+
     title = Title.query.get_or_404(title_id)
-    return render_template('verses/compare_versions.html', title=title)
+    return render_template(
+        'verses/compare_versions.html',
+        title=title
+    )
+
+
 
 @verses_bp.route('/get_research_form', methods=['GET'])
 @login_required

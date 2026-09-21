@@ -123,6 +123,14 @@
     .verses-container {
         padding: 25px;
     }
+
+    .poem-text-protected,
+    .poem-text-protected .verse-text {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
     
     .verse-row-wrapper {
         display: flex;
@@ -1048,10 +1056,12 @@
                     {% endif %}
                 </div>
                 <div class="order-1 order-md-2 flex-grow-1 text-center">
+                {% if can_copy_poem %}
                 <button id="copyPoemBtn" class="btn btn-outline-primary">
                     <i class="fas fa-copy ms-1"></i>
                     کپی شعر
                 </button>
+                {% endif %}
                 <button class="btn btn-outline-info ms-2" 
                         id="toggleAllCorrectionsBtn"
                         title="نمایش/بستن تمام نظرات تصحیحی"
@@ -1078,20 +1088,24 @@
             </div>
 
             <!-- Verses with Sidebar -->
-            <div class="verses-container" id="poemContent">
+            <div class="verses-container{% if not can_copy_poem %} poem-text-protected{% endif %}" id="poemContent">
                 {% set ns = namespace(verse_count=0) %}
                 {% for verse in verses %}
                 {% if verse.is_subtitle == 0 %}
                     {% set ns.verse_count = ns.verse_count + 1 %}
                 {% endif %}
                 <div class="verse-row-wrapper" id="verse-{{ verse.id }}" data-verse-id="{{ verse.id }}">
+                    
+                    {% if can_view_versions %}
                     <div class="verse-sidebar">
                         <div class="sidebar-top"></div>
                         <div class="sidebar-middle">
                             {% if verse.present_in_versions %}
                             <div class="versions-info">
                                 <i class="fas fa-scroll"></i>
-                                <div class="versions-text">{{ verse.present_in_versions }}</div>
+                                <div class="versions-text">
+                                    {{ verse.present_in_versions }}
+                                </div>
                             </div>
                             {% else %}
                             <div class="versions-info empty">
@@ -1099,16 +1113,23 @@
                             </div>
                             {% endif %}
                         </div>
+
                         <div class="sidebar-bottom">
                             {% if verse.is_subtitle == 0 %}
                             <div class="stacked-number" role="note" aria-label="شماره بیت">
                                 <div class="stacked-top">{{ ns.verse_count|persian_number }}</div>
                                 <div class="stacked-sep" aria-hidden="true"></div>
-                                <div class="stacked-bottom">{{ (prev_verses_count + ns.verse_count)|persian_number }}</div>
+                                <div class="stacked-bottom">
+                                    {{ (prev_verses_count + ns.verse_count)|persian_number }}
+                                </div>
                             </div>
                             {% endif %}
                         </div>
                     </div>
+                    {% endif %}
+
+
+
                     <div class="verse-content">
                         <div class="verse-row">
                             <div class="row align-items-center">
@@ -1148,7 +1169,7 @@
                                 {% endif %}
                             </div>
                         </div>
-                        {% if verse.variant_diff %}
+                        {% if can_view_versions and verse.variant_diff %}
                         <div class="verse-variant">
                             <i class="fas fa-code-branch"></i>
                             <div class="variant-text">{{ verse.variant_diff }}</div>
@@ -1340,6 +1361,7 @@
 // تنظیم اطلاعات کاربر برای استفاده در verse-corrections.js
 window.isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
 window.canComment = {{ 'true' if current_user.is_authenticated and current_user.can_comment() else 'false' }};
+window.canCopyPoem = {{ 'true' if can_copy_poem else 'false' }};
 {% if current_user.is_authenticated %}
 window.currentUserId = {{ current_user.id }};
 window.currentUserFullname = "{{ current_user.fullname }}";
@@ -1480,6 +1502,21 @@ function uploadAudioFile() {
 // Copy poem functionality
 document.addEventListener('DOMContentLoaded', function() {
     const copyPoemBtn = document.getElementById('copyPoemBtn');
+    const poemContent = document.getElementById('poemContent');
+
+    if (!window.canCopyPoem && poemContent) {
+        ['copy', 'cut', 'contextmenu', 'dragstart'].forEach(function(eventName) {
+            poemContent.addEventListener(eventName, function(event) {
+                event.preventDefault();
+            });
+        });
+
+        poemContent.addEventListener('keydown', function(event) {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'c') {
+                event.preventDefault();
+            }
+        });
+    }
     
     if (copyPoemBtn) {
         copyPoemBtn.addEventListener('click', function() {
