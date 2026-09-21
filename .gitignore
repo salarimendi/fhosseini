@@ -171,3 +171,5 @@ deploy/
 uploads/
 instance/
 temp/
+tmp/
+logs/
