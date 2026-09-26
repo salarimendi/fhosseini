@@ -145,25 +145,16 @@ def create_app(config_name=None):
                 "TALISMAN_STRICT_TRANSPORT_SECURITY_INCLUDE_SUBDOMAINS"
             ]
         ),
-        session_cookie_secure=(
-            app.config["SESSION_COOKIE_SECURE"]
-        ),
         content_security_policy=(
-            app.config["TALISMAN_CONTENT_SECURITY_POLICY"]
+            app.config.get("CONTENT_SECURITY_POLICY")
         )
     )
 
     # --------------------------------------------------------
-    # Login Manager
+    # Login manager
     # --------------------------------------------------------
 
     login_manager.login_view = "auth.login"
-
-    login_manager.login_message = (
-        "لطفاً برای دسترسی به این صفحه وارد شوید."
-    )
-
-    login_manager.login_message_category = "info"
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -194,6 +185,7 @@ def create_app(config_name=None):
         if not admin_user:
 
             admin_password = app.config["ADMIN_PASSWORD"]
+
             if not admin_password:
                 raise RuntimeError(
                     "ADMIN_PASSWORD must be configured "
@@ -284,6 +276,7 @@ def create_app(config_name=None):
 
     @app.template_filter("persian_number")
     def persian_number_filter(number):
+
         persian_digits = "۰۱۲۳۴۵۶۷۸۹"
         english_digits = "0123456789"
 
