@@ -1752,6 +1752,32 @@ a:hover,
     border-top: 1px solid #444;
 }
 
+
+.research-title-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    margin-top: 0.65rem;
+    color: #344b46;
+}
+
+.research-title-meta__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid #d7e3de;
+    border-radius: 6px;
+    background: #f3f7f5;
+    font-size: 0.9rem;
+}
+
+.research-title-meta__item i {
+    color: #467765;
+}
+
+
+
 /* ریسپانسیو */
 @media (max-width: 991px) {
     .footer {

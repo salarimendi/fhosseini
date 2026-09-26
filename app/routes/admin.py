@@ -506,7 +506,8 @@ def edit_comment_research(comment_id):
                          is_admin=True,
                          username=comment.author.username if comment.author else '',
                          comment=comment,
-                         return_url=url_for('admin.comments'))
+                         return_url=url_for('admin.comments'),
+                         research_title=title)
 
 @admin_bp.route('/comments/<int:comment_id>/research-update', methods=['POST'])
 @login_required

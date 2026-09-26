@@ -446,7 +446,8 @@ def get_research_form():
                          comment_data=comment_data,
                          comment=existing_comment,
                          return_url=return_url,
-                         config=current_app.config)
+                         config=current_app.config,
+                         research_title=title)
 
 @verses_bp.route('/submit_research_form/<int:title_id>', methods=['POST'])
 @login_required
@@ -576,7 +577,8 @@ def view_research_comment(comment_id):
                             comment_id_js=comment.id,  # اضافه شد
                             return_url=return_url,
                             research_image_url_prefix='/verses/research_image_file/',
-                            config=current_app.config)
+                            config=current_app.config,
+                            research_title=title_obj)
         
     except Exception as e:
         current_app.logger.error(f"Error in view_research_comment: {e}")

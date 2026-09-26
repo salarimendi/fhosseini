@@ -15,10 +15,12 @@ conn = sqlite3.connect(SQLITE_DB)
 cur = conn.cursor()
 
 # =========================
-# حذف جداول قبلی
+# بکاپ یا حذف جداول قبلی
 # =========================
 cur.execute("DROP TABLE IF EXISTS verses;")
 cur.execute("DROP TABLE IF EXISTS titles;")
+#cur.execute("ALTER TABLE verses RENAME TO verses_backup;")
+#cur.execute("ALTER TABLE titles RENAME TO titles_backup;")
 conn.commit()
 
 # =========================
