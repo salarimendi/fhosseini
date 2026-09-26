@@ -76,7 +76,7 @@ Copy-Item .env.example .env
 FLASK_CONFIG=development
 SECRET_KEY=your-secret-key
 WTF_CSRF_SECRET_KEY=your-csrf-secret-key
-DATABASE_URL=sqlite:///ferdosi.db
+DATABASE_URL=sqlite:///instance/ferdosi.db
 ```
 
 برای محیط تولید مقدار محیط را تغییر دهید:

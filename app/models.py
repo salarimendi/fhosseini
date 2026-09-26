@@ -122,6 +122,21 @@ class Title(db.Model):
 
 
 # =========================
+# نسخ خطی
+# =========================
+
+class Version(db.Model):
+    __tablename__ = 'versions'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), unique=True, nullable=False)
+    sort_order = db.Column(db.Integer, nullable=False, default=0)
+
+    def __repr__(self):
+        return f'<Version {self.name}>'
+
+
+# =========================
 # ابیات
 # =========================
 

@@ -5,7 +5,8 @@ import unittest
 import os
 import tempfile
 from app import create_app, db
-from app.models import User, Title, Verse, Comment, Recording
+from app.models import User, Title, Verse, Comment, Recording, Version
+from app.utils.database import get_version_positions_for_title
 
 class TestConfig:
     """Test configuration class."""
@@ -139,6 +140,57 @@ class ModelTestCase(unittest.TestCase):
         self.assertEqual(title.garden, 1)
         self.assertEqual(title.order_in_garden, 1)
         self.assertEqual(title.garden_name, 'خیابان اول باغ فردوس')
+
+    def test_cumulative_version_positions_ignore_subtitles(self):
+        previous_title = Title(title='شعر پیشین', garden=1, order_in_garden=1)
+        current_title = Title(title='شعر جاری', garden=1, order_in_garden=2)
+        db.session.add_all([previous_title, current_title])
+        db.session.flush()
+
+        db.session.add_all([
+            Verse(title_id=previous_title.id, order_in_title=1, verse_1='بیت ۱', verse_1_tag='بیت ۱', variant_diff='', present_in_versions='کا، اد'),
+            Verse(title_id=previous_title.id, order_in_title=2, verse_1='بیت ۲', verse_1_tag='بیت ۲', variant_diff='', present_in_versions='کا'),
+            Version(name='کا', sort_order=1),
+            Version(name='اد', sort_order=2),
+        ])
+        db.session.flush()
+
+        current_first = Verse(
+            title_id=current_title.id,
+            order_in_title=1,
+            verse_1='بیت جاری ۱',
+            verse_1_tag='بیت جاری ۱',
+            variant_diff='',
+            present_in_versions='اد، کا',
+        )
+        subtitle = Verse(
+            title_id=current_title.id,
+            order_in_title=2,
+            verse_1='زیرعنوان',
+            verse_1_tag='زیرعنوان',
+            variant_diff='',
+            present_in_versions='کا، اد',
+            is_subtitle=1,
+        )
+        current_second = Verse(
+            title_id=current_title.id,
+            order_in_title=3,
+            verse_1='بیت جاری ۲',
+            verse_1_tag='بیت جاری ۲',
+            variant_diff='',
+            present_in_versions='کا',
+        )
+        db.session.add_all([current_first, subtitle, current_second])
+        db.session.flush()
+
+        _, positions = get_version_positions_for_title(
+            current_title,
+            [current_first, subtitle, current_second],
+        )
+
+        self.assertEqual(positions[current_first.id], [('کا', 3), ('اد', 2)])
+        self.assertEqual(positions[subtitle.id], [])
+        self.assertEqual(positions[current_second.id], [('کا', 4)])
     
     def test_verse_creation(self):
         """Test verse creation."""

@@ -185,7 +185,6 @@ def create_app(config_name=None):
 
     with app.app_context():
 
-        db.create_all()
         from app.models import User
 
         admin_user = User.query.filter_by(

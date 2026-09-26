@@ -3,8 +3,50 @@
 Database utilities and helper functions
 """
 from app import db
-from app.models import Title, Verse, User, Comment, Recording
-from sqlalchemy import or_
+from app.models import Title, Verse, User, Comment, Recording, Version
+from sqlalchemy import case, func, or_
+
+
+def get_version_positions_for_title(title, verses):
+    """Return each verse's cumulative number within the versions it belongs to."""
+    versions = Version.query.order_by(Version.sort_order, Version.name).all()
+    if not versions:
+        return versions, {}
+
+    previous_count_expressions = [
+        func.coalesce(
+            func.sum(case(
+                (Verse.present_in_versions.like(f'%{version.name}%'), 1),
+                else_=0,
+            )),
+            0,
+        )
+        for version in versions
+    ]
+
+    previous_counts = db.session.query(*previous_count_expressions).join(Title).filter(
+        Verse.is_subtitle == 0,
+        (
+            (Title.garden < title.garden) |
+            ((Title.garden == title.garden) & (Title.order_in_garden < title.order_in_garden))
+        )
+    ).one()
+    counts = {
+        version.name: int(previous_counts[index] or 0)
+        for index, version in enumerate(versions)
+    }
+
+    positions = {}
+    for verse in verses:
+        verse_positions = []
+        if verse.is_subtitle == 0:
+            for version in versions:
+                if verse.present_in_versions and version.name in verse.present_in_versions:
+                    counts[version.name] += 1
+                    verse_positions.append((version.name, counts[version.name]))
+        positions[verse.id] = verse_positions
+
+    return versions, positions
 
 def search_in_database(query):
     """جستجو در تیترها و ابیات"""

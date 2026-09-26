@@ -245,6 +245,53 @@
         font-weight: 500;
         letter-spacing: 0.3px;
     }
+
+    .versions-info-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .version-position-heading {
+        color: #64748b;
+        font-size: 0.65rem;
+        line-height: 1.2;
+    }
+
+    .version-position-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px;
+        max-width: 100%;
+    }
+
+    .version-position {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 2px 5px;
+        border: 1px solid #d5e0e8;
+        border-radius: 4px;
+        background: #fff;
+        color: #334155;
+        font-size: 0.67rem;
+        line-height: 1.3;
+        white-space: nowrap;
+    }
+
+    .version-position__code {
+        color: #315d52;
+        font-weight: 700;
+    }
+
+    .version-position__number {
+        color: #475569;
+        font-variant-numeric: tabular-nums;
+    }
     
     .verse-content {
         flex: 1;
@@ -501,6 +548,14 @@
         .versions-text {
             font-size: 0.75rem;
         }
+
+        .versions-info-content {
+            align-items: flex-start;
+        }
+
+        .version-position-list {
+            justify-content: flex-start;
+        }
         
         .verse-variant {
             padding: 8px 12px;
@@ -752,6 +807,24 @@
 
 [data-theme-mode="dark"] .versions-text {
     color: #cbd5e1;
+}
+
+[data-theme-mode="dark"] .version-position-heading {
+    color: #cbd5e1;
+}
+
+[data-theme-mode="dark"] .version-position {
+    background: rgba(15, 23, 42, 0.55);
+    border-color: rgba(203, 213, 225, 0.3);
+    color: #e2e8f0;
+}
+
+[data-theme-mode="dark"] .version-position__code {
+    color: #a7d8c4;
+}
+
+[data-theme-mode="dark"] .version-position__number {
+    color: #e2e8f0;
 }
 
 [data-theme-mode="dark"] .verse-row {
@@ -1103,8 +1176,25 @@
                             {% if verse.present_in_versions %}
                             <div class="versions-info">
                                 <i class="fas fa-scroll"></i>
-                                <div class="versions-text">
-                                    {{ verse.present_in_versions }}
+                                <div class="versions-info-content">
+                                    <div class="versions-text">
+                                        {{ verse.present_in_versions }}
+                                    </div>
+                                    {% set verse_positions = version_positions.get(verse.id, []) %}
+                                    {% if verse_positions %}
+                                    <div class="version-position-wrap" aria-label="شماره بیت در نسخه‌ها">
+                                        <div class="version-position-heading">شماره در نسخه</div>
+                                        <div class="version-position-list" dir="rtl">
+                                            {% for version_code, position in verse_positions %}
+                                            <span class="version-position">
+                                                <span class="version-position__code">{{ version_code }}</span>
+                                                <span aria-hidden="true">·</span>
+                                                <span class="version-position__number">{{ position|persian_number }}</span>
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% else %}

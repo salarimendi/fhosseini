@@ -22,7 +22,8 @@ from app.utils.database import (
     save_verse_correction, 
     delete_verse_correction,
     user_can_add_correction,
-    get_daily_verse
+    get_daily_verse,
+    get_version_positions_for_title,
 )
 
 
@@ -208,6 +209,10 @@ def title(title_id):
         and current_user.role in ['admin', 'researcher']
     )
 
+    version_positions = {}
+    if can_view_versions:
+        _, version_positions = get_version_positions_for_title(title_obj, verses)
+
 
     return render_template('poem.html',
         title=title_obj,
@@ -224,6 +229,7 @@ def title(title_id):
         prev_verses_count=prev_verses_count,
         total_verses_all=total_verses_all,
         can_view_versions=can_view_versions,
+        version_positions=version_positions,
         can_copy_poem=can_view_versions
     )
 
