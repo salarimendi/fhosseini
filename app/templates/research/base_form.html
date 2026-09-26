@@ -26,6 +26,11 @@
                         <strong>ترتیب در باغ:</strong>
                         {{ research_title.order_in_garden }}
                     </span>
+                    <span class="research-title-meta__item">
+                        <i class="fas fa-user" aria-hidden="true"></i>
+                        <strong>محقق:</strong>
+                        {{ researcher_name or 'نامشخص' }}
+                    </span>
                 </div>
                 {% endif %}
 

@@ -447,7 +447,8 @@ def get_research_form():
                          comment=existing_comment,
                          return_url=return_url,
                          config=current_app.config,
-                         research_title=title)
+                         research_title=title,
+                         researcher_name=current_user.fullname or current_user.username)
 
 @verses_bp.route('/submit_research_form/<int:title_id>', methods=['POST'])
 @login_required
@@ -564,6 +565,11 @@ def view_research_comment(comment_id):
             elif hasattr(comment, 'user_id'):
                 user = User.query.get(comment.user_id)
                 author_name = user.username if user else 'نامشخص'
+
+        researcher_name = (
+            comment.author.fullname or comment.author.username
+            if comment.author else author_name
+        )
         
         return_url = request.args.get('return_url') or url_for('main.title', title_id=comment.title_id)
         
@@ -578,7 +584,8 @@ def view_research_comment(comment_id):
                             return_url=return_url,
                             research_image_url_prefix='/verses/research_image_file/',
                             config=current_app.config,
-                            research_title=title_obj)
+                            research_title=title_obj,
+                            researcher_name=researcher_name)
         
     except Exception as e:
         current_app.logger.error(f"Error in view_research_comment: {e}")
