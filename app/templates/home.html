@@ -668,7 +668,7 @@
 <section class="hero-banner-improved">
     <div class="container">
         <!-- بخش اول: عنوان اصلی و معرفی شاعر -->
-        <div class="row align-items-stretch g-4 mb-4">
+        <div class="row align-items-stretch g-4 mb-3">
             <!-- ستون راست: عنوان و دکمه‌ها -->
             <div class="col-lg-7 d-flex flex-column justify-content-center">
                 <div class="hero-content animate-fade-in">
@@ -687,6 +687,14 @@
                             <i class="fas fa-graduation-cap me-2"></i>
                             پژوهش‌ها
                         </a>
+                    </div>
+
+                    <!-- دسترسی مستقیم به باغ‌ها؛ بدون نیاز به اسکرول -->
+                    <div class="hero-quick-gardens d-flex flex-wrap gap-2 mt-3">
+                        <a href="{{ url_for('main.garden', garden_num=1) }}" class="quick-garden-pill">خیابان اول</a>
+                        <a href="{{ url_for('main.garden', garden_num=2) }}" class="quick-garden-pill">خیابان دوم</a>
+                        <a href="{{ url_for('main.garden', garden_num=3) }}" class="quick-garden-pill">خیابان سوم</a>
+                        <a href="{{ url_for('main.garden', garden_num=4) }}" class="quick-garden-pill">خیابان چهارم</a>
                     </div>
                 </div>
             </div>
@@ -718,7 +726,7 @@
         </div>
 
         <!-- بخش دوم: شعر روزانه و جستجو -->
-        <div class="row g-4 mb-4">
+        <div class="row g-4 mb-3">
             <!-- شعر روزانه -->
             <div class="col-lg-6">
                 <div class="daily-poem-card-improved animate-fade-in-delay-1" style="height: auto; padding: 1.5rem;">
@@ -783,12 +791,15 @@
 
 
 <!-- Gardens Section -->
-<section class="py-5" id="gardens">
+<section class="py-4" id="gardens">
     <div class="container">
-        <div class="row justify-content-center mb-5">
-            <div class="col-lg-8 text-center">
-                <h2 class="mb-4">باغ‌های چهارگانه</h2>
-                <p class="text-muted">هر باغ حاوی مجموعه‌ای از اشعار زیبا و پرمعنا</p>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="section-heading">
+                    <span class="section-icon"><i class="fas fa-leaf"></i></span>
+                    <h2>باغ‌های چهارگانه</h2>
+                    <p class="text-muted">هر باغ حاوی مجموعه‌ای از اشعار زیبا و پرمعنا</p>
+                </div>
             </div>
         </div>
         
@@ -832,12 +843,15 @@
 </section>
 
 <!-- Articles Section -->
-<section class="articles-section py-5 bg-light">
+<section class="articles-section py-4 bg-light">
     <div class="container">
-        <div class="row justify-content-center mb-5">
-            <div class="col-lg-8 text-center">
-                <h2 class="mb-4">پژوهش های فردوسی حسینی</h2>
-                <p class="text-muted">پژوهش‌ها و مطالعات در خصوص حکیم میرزا احمد الهامی کرمانشاهی</p>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="section-heading">
+                    <span class="section-icon"><i class="fas fa-microscope"></i></span>
+                    <h2>پژوهش های فردوسی حسینی</h2>
+                    <p class="text-muted">پژوهش‌ها و مطالعات در خصوص حکیم میرزا احمد الهامی کرمانشاهی</p>
+                </div>
             </div>
         </div>
         
@@ -898,7 +912,7 @@
 </section>
 
 <!-- Research Collaboration Section -->
-<section class="py-5" style="background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%);">
+<section class="py-4" style="background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%);">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10">
@@ -970,7 +984,7 @@
 </section>
 
 <!-- Statistics Section -->
-<section class="py-5 bg-light">
+<section class="py-4 bg-light">
     <div class="container">
         <div class="row text-center">
             <div class="col-md-3 mb-4">

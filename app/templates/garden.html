@@ -5,7 +5,7 @@
 {% block head %}
 <style>
     .garden-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         color: white;
         padding: 80px 0 40px;
         margin-top: 56px;
@@ -27,13 +27,13 @@
         transition: all 0.3s ease;
         margin-bottom: 20px;
         overflow: hidden;
-        border-right: 4px solid #667eea;
+        border-right: 4px solid var(--primary-color);
     }
     
     .title-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-        border-right-color: #764ba2;
+        border-right-color: var(--secondary-color);
     }
     
     .title-card-body {
@@ -90,7 +90,7 @@
 
 
     .view-btn {
-        background: linear-gradient(45deg, #667eea, #764ba2);
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
         border: none;
         color: white;
         padding: 10px 20px;
@@ -102,7 +102,7 @@
     }
     
     .view-btn:hover {
-        background: linear-gradient(45deg, #764ba2, #667eea);
+        background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
         transform: translateY(-2px);
         color: white;
         text-decoration: none;
@@ -301,21 +301,21 @@
 
     .garden-btn:hover {
         transform: translateY(-2px);
-        border-color: #667eea;
-        color: #667eea;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        box-shadow: 0 4px 12px rgba(31, 122, 92, 0.15);
     }
 
     .garden-btn.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         color: white;
         border-color: transparent;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+        box-shadow: 0 6px 20px rgba(31, 122, 92, 0.35);
     }
 
     .garden-btn.active:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.45);
+        box-shadow: 0 8px 25px rgba(31, 122, 92, 0.45);
     }
 
     /* Dark Mode - Garden Navigator */
@@ -336,16 +336,16 @@
     }
 
     [data-theme-mode="dark"] .garden-btn:hover {
-        border-color: #667eea;
-        color: #667eea;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        box-shadow: 0 4px 12px rgba(31, 122, 92, 0.2);
     }
 
     [data-theme-mode="dark"] .garden-btn.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         color: white;
         border-color: transparent;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 6px 20px rgba(31, 122, 92, 0.4);
     }
 
     /* Responsive - Mobile */

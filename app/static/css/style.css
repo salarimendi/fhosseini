@@ -3,20 +3,20 @@
 
 /* سیستم متغیرهای رنگی */
 :root {
-    /* پالت پیش‌فرض - بنفش گرادیانت */
-    --primary-color: #667eea;
-    --secondary-color: #764ba2;
-    --accent-color: #5a6fd8;
-    --bg-light: #f5f7fa;
-    --bg-dark: #2c3e50;
-    --text-dark: #2c3e50;
-    --text-light: #ecf0f1;
+    /* پالت پیش‌فرض جدید - سبز باغ و طلایی تذهیب (به‌جای بنفش قالبی قبلی) */
+    --primary-color: #1f7a5c;
+    --secondary-color: #14503b;
+    --accent-color: #b8860b;
+    --bg-light: #f7f5ee;
+    --bg-dark: #16332a;
+    --text-dark: #22302a;
+    --text-light: #f3efe3;
     --card-bg: #ffffff;
-    --shadow: rgba(0,0,0,0.1);
+    --shadow: rgba(20, 60, 45, 0.12);
     
     /* رنگ‌های مکمل */
-    --border-color: #e0e0e0;
-    --hover-bg: #f8f9ff;
+    --border-color: #e2ddcd;
+    --hover-bg: #eef4ef;
 }
 
 
@@ -367,7 +367,7 @@ h1, h2, h3, h4, h5, h6,
 
 .hero-banner-improved {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    padding: 100px 0 60px;
+    padding: 70px 0 40px;
     margin-top: 56px;
     position: relative;
     overflow: hidden;
@@ -580,7 +580,7 @@ mydl::after {
 
 .garden-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 15px 40px rgba(31, 122, 92, 0.4);
     color: white;
     text-decoration: none;
 }
@@ -622,7 +622,7 @@ mydl::after {
 .search-input:focus {
     outline: none;
     border-color: #667eea;
-    box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 0 10px rgba(31, 122, 92, 0.2);
 }
 
 .search-btn {
@@ -919,7 +919,7 @@ mydl::after {
 .form-textarea:focus {
     outline: none;
     border-color: #667eea;
-    box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 0 10px rgba(31, 122, 92, 0.2);
 }
 
 .form-textarea {
@@ -1831,4 +1831,401 @@ a:hover,
 
 
 
+
+
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* بازطراحی UI/UX - هدر، فوتر و صفحه اصلی                            */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* ---------- Navbar (هدر) ---------- */
+.site-navbar {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.12);
+    transition: box-shadow 0.3s ease, padding 0.3s ease, background 0.3s ease;
+}
+
+.site-navbar.navbar-scrolled {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.22);
+}
+
+.site-navbar .navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.35rem;
+    letter-spacing: 0.2px;
+}
+
+.site-navbar .brand-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    font-size: 1rem;
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.site-navbar .navbar-brand:hover .brand-icon {
+    transform: rotate(-12deg) scale(1.08);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.site-navbar .nav-link {
+    position: relative;
+    margin: 0 0.15rem;
+    padding: 0.5rem 0.85rem !important;
+    border-radius: 8px;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.site-navbar .nav-item > .nav-link::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    left: 12px;
+    bottom: 4px;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.25s ease;
+    opacity: 0.85;
+}
+
+.site-navbar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #fff !important;
+}
+
+.site-navbar .nav-item > .nav-link:hover::after {
+    transform: scaleX(1);
+}
+
+.site-navbar .navbar-toggler {
+    border: none;
+    padding: 0.35rem 0.55rem;
+}
+
+.site-navbar .navbar-toggler:focus {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
+}
+
+.site-navbar .dropdown-menu {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    padding: 0.6rem;
+    margin-top: 0.6rem;
+    animation: navDropdownIn 0.18s ease-out;
+}
+
+@keyframes navDropdownIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.site-navbar .dropdown-item {
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.site-navbar .dropdown-item:hover,
+.site-navbar .dropdown-item:focus {
+    background-color: var(--hover-bg);
+    color: var(--accent-color);
+    transform: translateX(-3px);
+}
+
+.site-navbar .dropdown-header {
+    color: #9a9a9a;
+}
+
+@media (max-width: 991.98px) {
+    .site-navbar .navbar-collapse {
+        background: rgba(0, 0, 0, 0.12);
+        border-radius: 14px;
+        padding: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    .site-navbar .nav-item > .nav-link::after {
+        display: none;
+    }
+}
+
+/* ---------- Footer (فوتر) ---------- */
+.footer {
+    position: relative;
+    padding-top: 4.5rem;
+}
+
+.footer-wave {
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    line-height: 0;
+    transform: translateY(-99%);
+}
+
+.footer-wave svg {
+    width: 100%;
+    height: 60px;
+    display: block;
+}
+
+.footer-wave path {
+    fill: var(--primary-color);
+    opacity: 0.9;
+}
+
+.footer-links-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.footer-links-list a {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 1rem;
+    transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.footer-links-list a i {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    transition: transform 0.25s ease;
+}
+
+.footer-links-list a:hover {
+    color: #fff;
+    transform: translateX(-4px);
+}
+
+.footer-links-list a:hover i {
+    transform: translateX(-3px);
+}
+
+/* دکمه بازگشت به بالا */
+.back-to-top {
+    position: fixed;
+    bottom: 28px;
+    left: 28px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(15px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    z-index: 1050;
+    text-decoration: none;
+}
+
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    color: #fff;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 576px) {
+    .back-to-top {
+        left: 16px;
+        bottom: 16px;
+        width: 42px;
+        height: 42px;
+    }
+}
+
+/* ---------- عنوان بخش‌ها (Section Heading) ---------- */
+.section-heading {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* پیل‌های دسترسی سریع به باغ‌ها - داخل هیرو */
+.hero-quick-gardens {
+    justify-content: flex-start;
+}
+
+.quick-garden-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1.1rem;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.25s ease;
+}
+
+.quick-garden-pill:hover {
+    background: #fff;
+    color: var(--primary-color);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+    .hero-quick-gardens {
+        justify-content: center;
+    }
+}
+
+.section-heading .section-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.section-heading h2 {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.section-heading h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 50%;
+    transform: translateX(50%);
+    width: 70px;
+    height: 4px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+
+.section-heading p {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ---------- بازطراحی کارت‌های باغ ---------- */
+.garden-card {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.garden-card::before {
+    content: '';
+    position: absolute;
+    top: -60%;
+    left: -60%;
+    width: 220%;
+    height: 220%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.garden-header {
+    position: relative;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.garden-body i.fa-leaf {
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.15));
+}
+
+/* ---------- بهبود عمومی دکمه‌ها ---------- */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border: none;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* هماهنگ‌سازی کلاس‌های آماده بوت‌استرپ با پالت جدید سایت
+   (چون رنگ پیش‌فرض بوت‌استرپ آبی است و با پالت سبز/طلایی سایت هماهنگ نیست) */
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.border-primary {
+    border-color: var(--primary-color) !important;
+}
+
+.badge.bg-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+}
+
+/* ---------- ریتم فاصله‌گذاری بخش‌های صفحه اصلی ---------- */
+.articles-section {
+    background: var(--bg-light) !important;
+}
+
+/* ---------- کارت‌های تماس با ما ---------- */
+.contact-icon-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.18);
+}
 
