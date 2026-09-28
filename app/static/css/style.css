@@ -740,7 +740,7 @@ mydl::after {
     padding: 1.5rem;
     margin-bottom: 1rem;
     border-right: 4px solid #667eea;
-    animation: fadeInUp 0.6s ease forwards;
+    animation: fadeInUp 0.15s ease forwards;
     opacity: 0;
     transform: translateY(20px);
 }
@@ -1774,6 +1774,96 @@ a:hover,
 
 .research-title-meta__item i {
     color: #467765;
+}
+
+.research-title-meta__link {
+    color: #2f6552;
+    text-decoration: none;
+    transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.research-title-meta__link:hover {
+    color: #214b3c;
+    border-color: #8eb7a5;
+    background: #e7f2ec;
+    box-shadow: 0 2px 6px rgba(38, 91, 69, 0.12);
+}
+
+.research-title-meta__link:focus-visible {
+    outline: 2px solid #467765;
+    outline-offset: 2px;
+}
+
+.research-title-meta__next small {
+    display: inline-flex;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #dcebe3;
+    font-size: 0.75rem;
+}
+
+.research-title-meta__menu {
+    position: relative;
+}
+
+.research-title-meta__menu summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.research-title-meta__menu summary::-webkit-details-marker {
+    display: none;
+}
+
+.research-title-meta__menu-list {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    min-width: min(18rem, calc(100vw - 3rem));
+    max-height: 16rem;
+    overflow-y: auto;
+    border: 1px solid #d7e3de;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(31, 58, 47, 0.16);
+}
+
+.research-title-meta__menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    color: #344b46;
+    text-decoration: none;
+}
+
+.research-title-meta__menu-item + .research-title-meta__menu-item {
+    border-top: 1px solid #e5ece8;
+}
+
+.research-title-meta__menu-item:hover,
+.research-title-meta__menu-item:focus-visible {
+    color: #214b3c;
+    background: #e7f2ec;
+}
+
+.research-title-meta__menu-item small {
+    flex: 0 0 auto;
+    color: #68756f;
+}
+
+.research-title-meta__disabled {
+    color: #68756f;
+    opacity: 0.75;
+}
+
+.research-title-meta__disabled i {
+    color: #68756f;
 }
 
 

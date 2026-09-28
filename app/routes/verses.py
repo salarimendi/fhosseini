@@ -423,6 +423,15 @@ def get_research_form():
         return jsonify({'error': 'شناسه شعر یافت نشد'}), 400
         
     title = Title.query.get_or_404(title_id)
+
+    next_title = Title.query.filter(
+        Title.garden == title.garden,
+        Title.order_in_garden > title.order_in_garden
+    ).order_by(Title.order_in_garden.asc()).first()
+    next_title_url = (
+        url_for('verses.get_research_form', title_id=next_title.id)
+        if next_title else None
+    )
     
     # بازیابی نظر قبلی کاربر
     existing_comment = Comment.query.filter_by(
@@ -448,6 +457,8 @@ def get_research_form():
                          return_url=return_url,
                          config=current_app.config,
                          research_title=title,
+                         next_title=next_title,
+                         next_title_url=next_title_url,
                          researcher_name=current_user.fullname or current_user.username)
 
 @verses_bp.route('/submit_research_form/<int:title_id>', methods=['POST'])
@@ -529,6 +540,24 @@ def view_research_comment(comment_id):
         if not title_obj:
             flash('شعر مربوط به این نظر یافت نشد', 'error')
             return redirect(url_for('main.index'))
+
+        next_title = Title.query.filter(
+            Title.garden == title_obj.garden,
+            Title.order_in_garden > title_obj.order_in_garden
+        ).order_by(Title.order_in_garden.asc()).first()
+        next_title_url = None
+        if next_title:
+            next_comments = Comment.query.filter_by(
+                title_id=next_title.id,
+                status='approved'
+            ).order_by(Comment.created_at.desc()).all()
+            if len(next_comments) == 1:
+                next_title_url = url_for(
+                    'verses.view_research_comment',
+                    comment_id=next_comments[0].id
+                )
+            else:
+                next_title_url = url_for('main.title', title_id=next_title.id)
         
         poem_title = title_obj.title
         
@@ -585,6 +614,8 @@ def view_research_comment(comment_id):
                             research_image_url_prefix='/verses/research_image_file/',
                             config=current_app.config,
                             research_title=title_obj,
+                            next_title=next_title,
+                            next_title_url=next_title_url,
                             researcher_name=researcher_name)
         
     except Exception as e:

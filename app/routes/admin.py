@@ -492,6 +492,40 @@ def edit_comment_research(comment_id):
     """ویرایش نظر با فرم پژوهشی - بدون مدیریت عکس در این صفحه"""
     comment = Comment.query.get_or_404(comment_id)
     title = Title.query.get(comment.title_id) if comment.title_id else None
+
+    next_title = None
+    next_title_url = None
+    next_comment_options = []
+    if title:
+        next_title = Title.query.filter(
+            Title.garden == title.garden,
+            Title.order_in_garden > title.order_in_garden
+        ).order_by(Title.order_in_garden.asc()).first()
+        if next_title:
+            next_comments = Comment.query.filter_by(
+                title_id=next_title.id
+            ).order_by(Comment.created_at.desc()).all()
+            for next_comment in next_comments:
+                try:
+                    next_comment_data = json.loads(next_comment.comment)
+                except (json.JSONDecodeError, TypeError):
+                    continue
+                if not isinstance(next_comment_data, dict) or next_comment_data.get('form_type') != 'research_form':
+                    continue
+                author = next_comment.author
+                next_comment_options.append({
+                    'url': url_for(
+                        'admin.edit_comment_research',
+                        comment_id=next_comment.id
+                    ),
+                    'researcher_name': (
+                        author.fullname or author.username
+                        if author else 'نامشخص'
+                    ),
+                    'comment_id': next_comment.id
+                })
+            if len(next_comment_options) == 1:
+                next_title_url = next_comment_options[0]['url']
     
     try:
         comment_data = json.loads(comment.comment) if comment.comment else None
@@ -508,6 +542,9 @@ def edit_comment_research(comment_id):
                          comment=comment,
                          return_url=url_for('admin.comments'),
                          research_title=title,
+                         next_title=next_title,
+                         next_title_url=next_title_url,
+                         next_comment_options=next_comment_options,
                          researcher_name=(
                              comment.author.fullname or comment.author.username
                              if comment.author else 'نامشخص'

@@ -31,6 +31,54 @@
                         <strong>محقق:</strong>
                         {{ researcher_name or 'نامشخص' }}
                     </span>
+                    <a class="research-title-meta__item research-title-meta__link"
+                       href="{{ url_for('main.title', title_id=title_id) }}">
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        <span>بازگشت به شعر</span>
+                    </a>
+                    {% if is_admin and next_title %}
+                        {% if next_comment_options|length == 1 %}
+                    <a class="research-title-meta__item research-title-meta__link research-title-meta__next"
+                       href="{{ next_title_url }}">
+                        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                        <span>تیتر بعدی</span>
+                        <small>{{ next_title.order_in_garden }}</small>
+                    </a>
+                        {% elif next_comment_options|length > 1 %}
+                    <details class="research-title-meta__menu">
+                        <summary class="research-title-meta__item research-title-meta__link">
+                            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                            <span>تیتر بعدی</span>
+                            <small>{{ next_comment_options|length }}</small>
+                        </summary>
+                        <div class="research-title-meta__menu-list">
+                            {% for option in next_comment_options %}
+                            <a class="research-title-meta__menu-item" href="{{ option.url }}">
+                                <span>{{ option.researcher_name }}</span>
+                                <small>نظر {{ option.comment_id }}</small>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </details>
+                        {% else %}
+                    <span class="research-title-meta__item research-title-meta__disabled" aria-disabled="true">
+                        <i class="fas fa-comment-slash" aria-hidden="true"></i>
+                        <span>برای تیتر بعدی نظر پژوهشی ثبت نشده</span>
+                    </span>
+                        {% endif %}
+                    {% elif next_title_url %}
+                    <a class="research-title-meta__item research-title-meta__link research-title-meta__next"
+                       href="{{ next_title_url }}">
+                        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                        <span>تیتر بعدی</span>
+                        {% if next_title %}<small>{{ next_title.order_in_garden }}</small>{% endif %}
+                    </a>
+                    {% else %}
+                    <span class="research-title-meta__item research-title-meta__disabled" aria-disabled="true">
+                        <i class="fas fa-flag-checkered" aria-hidden="true"></i>
+                        <span>{% if is_admin and next_title %}برای تیتر بعدی نظر پژوهشی ثبت نشده{% else %}آخرین تیتر این باغ{% endif %}</span>
+                    </span>
+                    {% endif %}
                 </div>
                 {% endif %}
 
