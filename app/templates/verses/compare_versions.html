@@ -2,8 +2,22 @@
 
 {% block title %}مقایسه نسخه‌ها - {{ title.title }}{% endblock %}
 
+{% block content %}
+<div class="container py-4 compare-versions-page">
+    <header class="compare-page-heading mb-4">
+        <p class="eyebrow mb-2">نسخه‌پژوهی و مقابله</p>
+        <h1 class="mb-2">مقایسه نسخه‌ها</h1>
+        <p class="text-muted mb-0">{{ title.title }}</p>
+    </header>
+
+    <div class="row">
+        <div class="col-12">
+            <section class="card comparison-panel mb-4">
+                <div class="card-header">
+                    <h2 class="h5 mb-0"><i class="fas fa-code-branch ms-2" aria-hidden="true"></i>مقابله ابیات</h2>
+                </div>
                 <div class="card-body">
-                    {% if versions|length > 1 %}
+                    {% if versions is defined and versions|length > 1 %}
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="version1" class="form-label">نسخه اول:</label>
@@ -26,76 +40,55 @@
                                 </select>
                             </div>
                         </div>
-                        
-                        <div id="comparison-result">
-                            <!-- نتیجه مقایسه در اینجا نمایش داده می‌شود -->
+                        <div id="comparison-result" aria-live="polite">
+                            <div class="comparison-loading text-muted" role="status">در حال آماده‌سازی مقایسه...</div>
                         </div>
-                    {% else %}
-                            </div>
-                            <form id="correction-form-${vid}" onsubmit="submitCorrectionForm(event, ${vid}, null)">
-                                <div class="mb-2">
-                                    <label for="new-text-${vid}" class="form-label">نظر تصحیحی شما: *</label>
-                                    <textarea id="new-text-${vid}" name="new_text" rows="3" class="form-control" required placeholder="نظر تصحیحی خود را وارد کنید"></textarea>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <button type="submit" class="btn btn-primary btn-sm">ثبت نظر</button>
-                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeCorrectionForm(${vid})">انصراف</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Corrections list (hidden by default) -->
-                    <div id="corrections-${vid}" class="mt-3" style="display:none;">
-                        <div class="no-corrections">هنوز نظر تصحیحی ثبت نشده است</div>
-                    </div>
-
-                </div>
-            </div>
-        `;
-                        </div>
-                    {% else %}
-                        <div class="alert alert-warning text-center">
-                            <i class="fas fa-exclamation-triangle"></i>
+                    {% elif versions is defined %}
+                        <div class="alert alert-warning mb-0" role="status">
+                            <i class="fas fa-exclamation-triangle ms-2" aria-hidden="true"></i>
                             برای مقایسه حداقل دو نسخه مختلف لازم است.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0" role="status">
+                            <i class="fas fa-info-circle ms-2" aria-hidden="true"></i>
+                            اطلاعات نسخه‌ها برای این شعر در دسترس نیست.
                         </div>
                     {% endif %}
                 </div>
-            </div>
+            </section>
         </div>
     </div>
-    
-    <!-- نمایش نسخه اصلی -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-book"></i>
-                        نسخه اصلی
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% for verse in original_verses %}
-                        <div class="verse-item mb-3 p-3 border rounded">
-                            <div class="row">
-                                <div class="col-md-6 text-right">
-                                    <p class="verse-text">{{ verse.verse_1_tag|safe }}</p>
-                                </div>
-                                {% if verse.verse_2 %}
-                                <div class="col-md-6 text-left">
-                                    <p class="verse-text">{{ verse.verse_2_tag|safe }}</p>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
+    {% if original_verses is defined and original_verses %}
+    <section class="original-verses-section" aria-labelledby="originalVersesHeading">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 id="originalVersesHeading" class="h5 mb-0"><i class="fas fa-book ms-2" aria-hidden="true"></i>نسخه اصلی</h2>
+            </div>
+            <div class="card-body">
+                {% for verse in original_verses %}
+                    <div class="verse-item mb-3 p-3 border rounded">
+                        <div class="row">
+                            <div class="col-md-6 text-right">
+                                <p class="verse-text">{{ verse.verse_1_tag|safe }}</p>
+                            </div>
+                            {% if verse.verse_2 %}
+                            <div class="col-md-6 text-left">
+                                <p class="verse-text">{{ verse.verse_2_tag|safe }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if versions is defined and versions|length > 1 %}
 <script>
 function loadComparison() {
     const version1 = document.getElementById('version1').value;
@@ -234,67 +227,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+{% endif %}
 
-<style>
-.verse-text {
-    font-family: 'Nastaliq', serif;
-    font-size: 1.1em;
-    line-height: 1.8;
-    margin: 0;
-}
-
-.verse-line {
-    font-family: 'Nastaliq', serif;
-    font-size: 1.1em;
-    line-height: 1.8;
-    margin-bottom: 0.5em;
-}
-
-.comparison-container .card {
-    transition: all 0.3s ease;
-}
-
-.comparison-container .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.verse-container {
-    min-height: 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-/* Action buttons that sit at the top-right of each verse card */
-.verse-actions {
-    position: absolute;
-    top: 8px;
-    left: 8px; /* RTL page: keep buttons on left so they appear visually at start */
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.btn-vertical {
-    width: 34px;
-    height: 34px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-}
-
-@media (max-width: 768px) {
-    .border-end {
-        border-end: none !important;
-        border-bottom: 1px solid #dee2e6;
-    }
-}
-</style>
-{% endblock %}
-
-{% block scripts %}
 <script src="{{ url_for('static', filename='js/harakat.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
