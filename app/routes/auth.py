@@ -12,7 +12,7 @@ from flask_mail import Message
 from werkzeug.security import generate_password_hash
 from app import db, mail, limiter
 from app.models import User
-from app.forms import LoginForm, ChangePasswordForm, RegisterForm
+from app.forms import LoginForm, ChangePasswordForm, EditProfileForm, RegisterForm
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -109,6 +109,37 @@ def logout():
 def profile():
     """پروفایل کاربر"""
     return render_template('auth/profile.html')
+
+@auth_bp.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    """ویرایش نام کامل و ایمیل کاربر جاری"""
+    form = EditProfileForm()
+    if request.method == 'GET':
+        form.fullname.data = current_user.fullname
+        form.email.data = current_user.email
+
+    if form.validate_on_submit():
+        email = form.email.data.strip().lower()
+        existing_user = User.query.filter(
+            db.func.lower(User.email) == email,
+            User.id != current_user.id
+        ).first()
+        if existing_user:
+            form.email.errors.append('این ایمیل قبلاً ثبت شده است.')
+            return render_template('auth/edit_profile.html', form=form)
+
+        current_user.fullname = form.fullname.data.strip()
+        current_user.email = email
+        try:
+            db.session.commit()
+            flash('مشخصات شما با موفقیت به‌روزرسانی شد.', 'success')
+            return redirect(url_for('auth.profile'))
+        except Exception:
+            db.session.rollback()
+            flash('خطا در به‌روزرسانی مشخصات. لطفاً دوباره تلاش کنید.', 'error')
+
+    return render_template('auth/edit_profile.html', form=form)
 
 @auth_bp.route('/change_password', methods=['GET', 'POST'])
 @login_required

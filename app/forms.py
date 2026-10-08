@@ -72,6 +72,19 @@ class ChangePasswordForm(FlaskForm):
     submit = SubmitField('تغییر رمز عبور') 
 
 
+class EditProfileForm(FlaskForm):
+    fullname = StringField('نام کامل', validators=[
+        DataRequired(message='نام کامل الزامی است'),
+        Length(max=40, message='نام کامل نباید بیشتر از ۴۰ کاراکتر باشد')
+    ])
+    email = StringField('ایمیل', validators=[
+        DataRequired(message='ایمیل الزامی است'),
+        Email(message='لطفاً یک ایمیل معتبر وارد کنید'),
+        Length(max=120, message='ایمیل نباید بیشتر از ۱۲۰ کاراکتر باشد')
+    ])
+    submit = SubmitField('ذخیره تغییرات')
+
+
 
 class Word389Form(FlaskForm):
     ayah = StringField(

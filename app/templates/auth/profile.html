@@ -25,6 +25,15 @@
                             {{ current_user.username }}
                         </div>
                     </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>نام کامل:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            {{ current_user.fullname }}
+                        </div>
+                    </div>
                     
                     <div class="row mb-3">
                         <div class="col-sm-4">
@@ -58,7 +67,7 @@
                             <strong>تعداد نظرات:</strong>
                         </div>
                         <div class="col-sm-8">
-                            {{ current_user.comments|length }} نظر
+                            {{ current_user.comments.count() }} نظر
                         </div>
                     </div>
                     {% endif %}
@@ -69,7 +78,7 @@
                             <strong>تعداد ضبط‌ها:</strong>
                         </div>
                         <div class="col-sm-8">
-                            {{ current_user.recordings|length }} ضبط
+                            {{ current_user.recordings.count() }} ضبط
                         </div>
                     </div>
                     {% endif %}
@@ -86,15 +95,12 @@
                     <hr>
                     
                     <div class="d-grid gap-2">
+                        <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-primary">
+                            <i class="fas fa-user-edit"></i> ویرایش مشخصات
+                        </a>
                         <a href="{{ url_for('auth.change_password') }}" class="btn btn-warning">
                             <i class="fas fa-key"></i> تغییر رمز عبور
                         </a>
-                        
-                        {% if current_user.role == 'researcher' %}
-                        <a href="{{ url_for('comments.my_comments') }}" class="btn btn-info">
-                            <i class="fas fa-comments"></i> نظرات من
-                        </a>
-                        {% endif %}
                         
                         {% if current_user.role == 'reader' %}
                         <a href="{{ url_for('verses.my_recordings') }}" class="btn btn-success">

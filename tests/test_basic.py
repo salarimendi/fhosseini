@@ -4,6 +4,7 @@ Basic tests for the Ferdowsi Hosseini website
 import unittest
 import os
 import tempfile
+import uuid
 from app import create_app, db
 from app.models import User, Title, Verse, Comment, Recording, Version
 from app.utils.database import get_version_positions_for_title
@@ -21,7 +22,7 @@ class BasicTestCase(unittest.TestCase):
         """Set up test fixtures before each test method."""
         # استفاده از پایگاه داده در حافظه برای سرعت و سادگی بیشتر
         os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
-        
+
         # ایجاد اپلیکیشن با تنظیمات تست
         self.app = create_app()
         
@@ -34,6 +35,7 @@ class BasicTestCase(unittest.TestCase):
         self.app_context.push()
         
         self.client = self.app.test_client()
+        self._profile_test_user_ids = set()
         
         # ایجاد جداول پایگاه داده
         with self.app.app_context():
@@ -41,9 +43,15 @@ class BasicTestCase(unittest.TestCase):
         
     def tearDown(self):
         """Clean up after each test method."""
+        for user_id in self._profile_test_user_ids:
+            user = db.session.get(User, user_id)
+            if user:
+                db.session.delete(user)
+        if self._profile_test_user_ids:
+            db.session.commit()
         db.session.remove()
         self.app_context.pop()
-        
+
         # حذف متغیر محیطی
         if 'DATABASE_URL' in os.environ:
             del os.environ['DATABASE_URL']
@@ -74,13 +82,80 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('ثبت نام', response.get_data(as_text=True))
 
+    def _create_authenticated_user(self):
+        test_id = uuid.uuid4().hex
+        user = User(
+            username=f'profile_{test_id}',
+            email=f'profile-{test_id}@example.com',
+            fullname='Profile User',
+            role='user',
+            is_active=True
+        )
+        user.set_password('original-password')
+        db.session.add(user)
+        db.session.commit()
+        self._profile_test_user_ids.add(user.id)
+        with self.client.session_transaction() as session:
+            session['_user_id'] = str(user.id)
+            session['_fresh'] = True
+        return user
+
+    def test_profile_edit_updates_only_fullname_and_email(self):
+        user = self._create_authenticated_user()
+        original_username = user.username
+        updated_email = f'updated-{uuid.uuid4().hex}@example.com'
+
+        menu_response = self.client.get('/')
+        self.assertIn('ویرایش مشخصات', menu_response.get_data(as_text=True))
+
+        response = self.client.post('/auth/edit_profile', data={
+            'fullname': 'Updated Name',
+            'email': updated_email.upper()
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(user.fullname, 'Updated Name')
+        self.assertEqual(user.email, updated_email)
+        self.assertEqual(user.username, original_username)
+        self.assertTrue(user.check_password('original-password'))
+
+    def test_profile_edit_rejects_duplicate_email_and_long_fullname(self):
+        user = self._create_authenticated_user()
+        original_email = user.email
+        other_test_id = uuid.uuid4().hex
+        other_user = User(
+            username=f'other_{other_test_id}',
+            email=f'other-{other_test_id}@example.com',
+            fullname='Other User'
+        )
+        other_user.set_password('other-password')
+        db.session.add(other_user)
+        db.session.commit()
+        self._profile_test_user_ids.add(other_user.id)
+
+        duplicate_email_response = self.client.post('/auth/edit_profile', data={
+            'fullname': 'New Name',
+            'email': other_user.email.upper()
+        })
+        self.assertEqual(duplicate_email_response.status_code, 200)
+        self.assertIn('این ایمیل قبلاً ثبت شده است.', duplicate_email_response.get_data(as_text=True))
+        self.assertEqual(user.email, original_email)
+
+        long_name_response = self.client.post('/auth/edit_profile', data={
+            'fullname': 'ن' * 41,
+            'email': 'profile@example.com'
+        })
+        self.assertEqual(long_name_response.status_code, 200)
+        self.assertIn('۴۰ کاراکتر', long_name_response.get_data(as_text=True))
+        self.assertEqual(user.fullname, 'Profile User')
+
 class ModelTestCase(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures before each test method."""
         # استفاده از پایگاه داده در حافظه
         os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
-        
+
         self.app = create_app()
         
         # اعمال تنظیمات تست
@@ -98,7 +173,7 @@ class ModelTestCase(unittest.TestCase):
         """Clean up after each test method."""
         db.session.remove()
         self.app_context.pop()
-        
+
         # حذف متغیر محیطی
         if 'DATABASE_URL' in os.environ:
             del os.environ['DATABASE_URL']
