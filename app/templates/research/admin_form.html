@@ -1,0 +1,261 @@
+{% extends "research/base_form.html" %}
+
+{% block form_title %}
+    ویرایش نظر پژوهشی برای شعر: {{ poem_title }}
+{% endblock %}
+
+{% block form_hidden_fields %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="return_url" value="{{ url_for('admin.comments') }}">
+{% endblock %}
+
+{% block add_subtopic_button %}
+    <button type="button" class="btn btn-secondary mt-2" id="addSubtopic">افزودن زیر موضوع</button>
+{% endblock %}
+
+{% block form_buttons %}
+    <div class="row">
+        <div class="col-md-4">
+            <button type="submit"
+                    name="save_mode"
+                    value="stay"
+                    class="btn btn-primary w-100">
+                ویرایش
+            </button>
+        </div>
+
+        <div class="col-md-4">
+            <button type="submit"
+                    name="save_mode"
+                    value="return"
+                    class="btn btn-success w-100">
+                ویرایش و بازگشت
+            </button>
+        </div>
+
+        <div class="col-md-4">
+            <button type="button"
+                    class="btn btn-secondary w-100"
+                    id="cancelButton">
+                بازگشت
+            </button>
+        </div>
+    </div>
+    
+    <!-- Admin specific buttons -->
+    <div class="row mt-3">
+        <div class="col-md-4">
+            <button type="button" class="btn btn-success w-100" id="approveButton">تایید نظر</button>
+        </div>
+        <div class="col-md-4">
+            <button type="button" class="btn btn-warning w-100" id="rejectButton">رد نظر</button>
+        </div>
+        <div class="col-md-4">
+            <button type="button" class="btn btn-danger w-100" id="deleteButton">حذف نظر</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block form_scripts %}
+<script>
+// کلاس مدیر فرم ادمین - مشابه ResearcherFormManager با قابلیت‌های اضافی
+class AdminFormManager extends BaseFormManager {
+    constructor() {
+        super();
+        this.commentId = {{ comment.id | tojson }};
+        this.initAdminFormSpecifics();
+    }
+    
+    initAdminFormSpecifics() {
+        // اتصال رویداد ارسال فرم
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        
+        // اتصال دکمه‌های ادمین
+        this.bindAdminButtons();
+        
+        // اطمینان از وجود حداقل یک زیرموضوع
+        if (document.querySelectorAll('.subtopic-row').length === 0) {
+            this.addSubtopic();
+        }
+    }
+    
+    bindAdminButtons() {
+        // دکمه تایید
+        const approveBtn = document.getElementById('approveButton');
+        if (approveBtn) {
+            approveBtn.addEventListener('click', () => this.handleStatusChange('approved'));
+        }
+        
+        // دکمه رد
+        const rejectBtn = document.getElementById('rejectButton');
+        if (rejectBtn) {
+            rejectBtn.addEventListener('click', () => this.handleStatusChange('rejected'));
+        }
+        
+        // دکمه حذف
+        const deleteBtn = document.getElementById('deleteButton');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => this.handleDelete());
+        }
+    }
+    
+    async handleSubmit(e) {
+        const saveMode = e.submitter?.value || 'return';
+        e.preventDefault();
+        
+        try {
+            this.showLoading(true);
+            
+            // جمع‌آوری داده‌های زیرموضوعات
+            const subtopics = this.collectSubtopicsData();
+            
+            if (subtopics.length === 0) {
+                alert('لطفا حداقل یک زیرموضوع وارد کنید');
+                return;
+            }
+            
+            // ساخت FormData برای ارسال
+            const formData = this.buildFormData(subtopics);
+            formData.append('save_mode', saveMode);
+            
+            // ارسال به سرور
+            const response = await fetch(`/admin/comments/${this.commentId}/research-update`, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            });
+            
+            const data = await this.handleResponse(response);
+            
+            if (data.success) {
+                alert(data.message || 'نظر با موفقیت ویرایش شد');
+
+                if (saveMode === 'return') {
+                    window.location.href = data.return_url || this.returnUrl;
+                }
+            } else {
+                alert(data.message || 'خطا در ویرایش نظر');
+            }
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('خطا در ویرایش نظر: ' + error.message);
+        } finally {
+            this.showLoading(false);
+        }
+    }
+    
+	
+// برای researcher_form.html و admin_form.html
+// در متد buildFormData، فیلدهای قدیمی را حذف و فیلدهای جدید اضافه کنید:
+
+	buildFormData(subtopics) {
+		const formData = new FormData();
+		
+		// افزودن فیلدهای اصلی فرم
+		formData.append('extra_info', document.getElementById('extraInfo').value.trim());
+		formData.append('topic_narrative', document.getElementById('topicNarrative').value.trim());
+		
+		// فیلدهای جدید نظریه پژوهشی
+		formData.append('primary_theory', document.getElementById('primaryTheory').value.trim());
+		formData.append('review_theory', document.getElementById('reviewTheory').value.trim());
+		formData.append('final_theory', document.getElementById('finalTheory').value.trim());
+		
+		formData.append('return_url', this.returnUrl);
+		formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+		
+		// افزودن زیرموضوعات به صورت JSON
+		formData.append('subtopics', JSON.stringify(subtopics));
+		
+		return formData;
+	}
+    
+    async handleResponse(response) {
+        let data;
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType && contentType.indexOf('application/json') !== -1) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            throw new Error('خطای غیرمنتظره سرور: ' + text.substring(0, 200));
+        }
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'خطا در بروزرسانی نظر');
+        }
+        
+        return data;
+    }
+    
+    async handleStatusChange(status) {
+        const confirmMessage = status === 'approved' 
+            ? 'آیا از تایید این نظر مطمئن هستید؟' 
+            : 'آیا از رد این نظر مطمئن هستید؟';
+        
+        if (confirm(confirmMessage)) {
+            try {
+                const endpoint = status === 'approved' 
+                    ? `/admin/comments/${this.commentId}/approve` 
+                    : `/admin/comments/${this.commentId}/reject`;
+                    
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                    },
+                    credentials: 'same-origin'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(data.message || `نظر با موفقیت ${status === 'approved' ? 'تایید' : 'رد'} شد`);
+                    window.location.href = this.returnUrl;
+                } else {
+                    alert(data.message || 'خطا در تغییر وضعیت نظر');
+                }
+            } catch (error) {
+                console.error('Error changing status:', error);
+                alert('خطا در تغییر وضعیت نظر: ' + error.message);
+            }
+        }
+    }
+    
+    async handleDelete() {
+        if (confirm('آیا از حذف این نظر مطمئن هستید? این عمل قابل بازگشت نیست.')) {
+            if (confirm('توجه: تمام اطلاعات مربوط به این نظر از جمله تصاویر حذف خواهد شد. آیا مطمئن هستید؟')) {
+                try {
+                    const response = await fetch(`/admin/comments/delete/${this.commentId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                        },
+                        credentials: 'same-origin'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert(data.message || 'نظر با موفقیت حذف شد');
+                        window.location.href = this.returnUrl;
+                    } else {
+                        alert(data.message || 'خطا در حذف نظر');
+                    }
+                } catch (error) {
+                    console.error('Error deleting comment:', error);
+                    alert('خطا در حذف نظر: ' + error.message);
+                }
+            }
+        }
+    }
+}
+
+// راه‌اندازی مدیر فرم ادمین
+document.addEventListener('DOMContentLoaded', function() {
+    window.formManager = new AdminFormManager();
+});
+</script>
+{% endblock %}

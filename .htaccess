@@ -1,0 +1,36 @@
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppRoot "/home/qouyvwti/myflaskapp"
+PassengerBaseURI "/"
+PassengerPython "/home/qouyvwti/virtualenv/myflaskapp/3.11/bin/python"
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+RewriteOptions inherit
+
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION BEGIN
+<IfModule Litespeed>
+</IfModule>
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
+
+RewriteEngine On
+
+RewriteCond %{HTTP_HOST} ^elhamy\.ir$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.elhamy\.ir$
+RewriteRule ^(.*)$ "https\:\/\/ferdowsihosseini\.ir\/$1" [R=301,L]
+
+
+# Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Enable HSTS
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+# Security Headers
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Content Security Policy
+<IfModule mod_headers.c>
+Header always set Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdnjs.cloudflare.com; frame-src 'self' https://www.aparat.com;"
+</IfModule>

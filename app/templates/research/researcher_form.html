@@ -1,0 +1,118 @@
+{% extends "research/base_form.html" %}
+
+{% block form_title %}
+    {% if comment_data %}
+        ویرایش نظر پژوهشی برای شعر: {{ poem_title }}
+    {% else %}
+        فرم پژوهشی برای شعر: {{ poem_title }}
+    {% endif %}
+{% endblock %}
+
+{% block form_hidden_fields %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="return_url" value="{{ url_for('main.title', title_id=title_id) }}">
+{% endblock %}
+
+{% block add_subtopic_button %}
+    {% if not view_mode %}
+        <button type="button" class="btn btn-secondary mt-2" id="addSubtopic">افزودن زیر موضوع</button>
+    {% endif %}
+{% endblock %}
+
+{% block form_buttons %}
+    {% if not view_mode %}
+        <button type="submit" class="btn btn-primary">
+            {{ 'ویرایش نظر' if comment_data else 'ثبت نظر' }}
+        </button>
+        <button type="button" class="btn btn-secondary" id="cancelButton">بازگشت</button>
+    {% else %}
+        <button type="button" class="btn btn-secondary" id="cancelButton">بازگشت</button>
+    {% endif %}
+{% endblock %}
+
+{% block form_scripts %}
+<script>
+// کلاس مدیر فرم محقق - فقط برای ارسال داده‌های متنی
+class ResearcherFormManager extends BaseFormManager {
+    constructor() {
+        super();
+        this.initResearcherFormSpecifics();
+    }
+    
+    initResearcherFormSpecifics() {
+        if (!viewMode) {
+            // اتصال رویداد ارسال فرم
+            this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        }
+    }
+    
+    async handleSubmit(e) {
+        e.preventDefault();
+        
+        try {
+            this.showLoading(true);
+            
+            // جمع‌آوری داده‌های زیرموضوعات
+            const subtopics = this.collectSubtopicsData();
+            
+            // ساخت FormData برای ارسال
+            const formData = this.buildFormData(subtopics);
+            
+            // ارسال به سرور
+            const response = await fetch('/verses/submit_research_form/{{ title_id }}', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                alert(data.message || 'نظر با موفقیت ثبت شد');
+                window.location.href = data.return_url || this.returnUrl;
+            } else {
+                alert(data.message || 'خطا در ثبت نظر');
+            }
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('خطا در ثبت نظر: ' + error.message);
+        } finally {
+            this.showLoading(false);
+        }
+    }
+    
+// در متد buildFormData، فیلدهای قدیمی را حذف و فیلدهای جدید اضافه کنید:
+
+	buildFormData(subtopics) {
+		const formData = new FormData();
+		
+		// افزودن فیلدهای اصلی فرم
+		formData.append('extra_info', document.getElementById('extraInfo').value.trim());
+		formData.append('topic_narrative', document.getElementById('topicNarrative').value.trim());
+		
+		// فیلدهای جدید نظریه پژوهشی
+		formData.append('primary_theory', document.getElementById('primaryTheory').value.trim());
+		formData.append('review_theory', document.getElementById('reviewTheory').value.trim());
+		formData.append('final_theory', document.getElementById('finalTheory').value.trim());
+		
+		formData.append('return_url', this.returnUrl);
+		formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+		
+		// افزودن زیرموضوعات به صورت JSON
+		formData.append('subtopics', JSON.stringify(subtopics));
+		
+		return formData;
+	}
+}
+
+// راه‌اندازی مدیر فرم محقق
+document.addEventListener('DOMContentLoaded', function() {
+    window.formManager = new ResearcherFormManager();
+});
+</script>
+{% endblock %}

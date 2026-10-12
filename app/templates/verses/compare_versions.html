@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+
+{% block title %}مقایسه نسخه‌ها - {{ title.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4 compare-versions-page">
+    <header class="compare-page-heading mb-4">
+        <p class="eyebrow mb-2">نسخه‌پژوهی و مقابله</p>
+        <h1 class="mb-2">مقایسه نسخه‌ها</h1>
+        <p class="text-muted mb-0">{{ title.title }}</p>
+    </header>
+
+    <div class="row">
+        <div class="col-12">
+            <section class="card comparison-panel mb-4">
+                <div class="card-header">
+                    <h2 class="h5 mb-0"><i class="fas fa-code-branch ms-2" aria-hidden="true"></i>مقابله ابیات</h2>
+                </div>
+                <div class="card-body">
+                    {% if versions is defined and versions|length > 1 %}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="version1" class="form-label">نسخه اول:</label>
+                                <select id="version1" class="form-select" onchange="loadComparison()">
+                                    {% for version in versions %}
+                                        <option value="{{ version.id }}" {% if loop.first %}selected{% endif %}>
+                                            {{ version.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="version2" class="form-label">نسخه دوم:</label>
+                                <select id="version2" class="form-select" onchange="loadComparison()">
+                                    {% for version in versions %}
+                                        <option value="{{ version.id }}" {% if loop.index == 2 %}selected{% endif %}>
+                                            {{ version.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div id="comparison-result" aria-live="polite">
+                            <div class="comparison-loading text-muted" role="status">در حال آماده‌سازی مقایسه...</div>
+                        </div>
+                    {% elif versions is defined %}
+                        <div class="alert alert-warning mb-0" role="status">
+                            <i class="fas fa-exclamation-triangle ms-2" aria-hidden="true"></i>
+                            برای مقایسه حداقل دو نسخه مختلف لازم است.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0" role="status">
+                            <i class="fas fa-info-circle ms-2" aria-hidden="true"></i>
+                            اطلاعات نسخه‌ها برای این شعر در دسترس نیست.
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
+    </div>
+
+    {% if original_verses is defined and original_verses %}
+    <section class="original-verses-section" aria-labelledby="originalVersesHeading">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 id="originalVersesHeading" class="h5 mb-0"><i class="fas fa-book ms-2" aria-hidden="true"></i>نسخه اصلی</h2>
+            </div>
+            <div class="card-body">
+                {% for verse in original_verses %}
+                    <div class="verse-item mb-3 p-3 border rounded">
+                        <div class="row">
+                            <div class="col-md-6 text-right">
+                                <p class="verse-text">{{ verse.verse_1_tag|safe }}</p>
+                            </div>
+                            {% if verse.verse_2 %}
+                            <div class="col-md-6 text-left">
+                                <p class="verse-text">{{ verse.verse_2_tag|safe }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if versions is defined and versions|length > 1 %}
+<script>
+function loadComparison() {
+    const version1 = document.getElementById('version1').value;
+    const version2 = document.getElementById('version2').value;
+    
+    if (version1 === version2) {
+        document.getElementById('comparison-result').innerHTML = `
+            <div class="alert alert-warning text-center">
+                <i class="fas fa-info-circle"></i>
+                لطفاً دو نسخه متفاوت انتخاب کنید.
+            </div>
+        `;
+        return;
+    }
+    
+    // نمایش loading
+    document.getElementById('comparison-result').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">در حال بارگذاری...</span>
+            </div>
+        </div>
+    `;
+    
+    // ارسال درخواست AJAX
+    fetch(`{{ url_for('verses.api_compare_versions', title_id=title.id) }}?v1=${version1}&v2=${version2}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayComparison(data.comparison);
+            } else {
+                document.getElementById('comparison-result').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        خطا در بارگذاری مقایسه: ${data.message}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('comparison-result').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    خطا در ارتباط با سرور
+                </div>
+            `;
+        });
+}
+
+function displayComparison(comparison) {
+    let html = `
+        <div class="comparison-container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-primary">${comparison.version1_name}</h6>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-success">${comparison.version2_name}</h6>
+                </div>
+            </div>
+            <hr>
+    `;
+    
+    comparison.verses_comparison.forEach((item, index) => {
+        const isDifferent = item.different;
+        const cardClass = isDifferent ? 'border-warning bg-light' : 'border-secondary';
+        
+        // verse id for DOM elements (use index+1 to avoid zero id)
+        const vid = index + 1;
+
+        html += `
+            <div class="card mb-3 ${cardClass}">
+                <div class="card-body position-relative">
+                    ${isDifferent ? '<div class="badge bg-warning mb-2">تفاوت</div>' : ''}
+
+                    <!-- Artistic buttons: show form and toggle comments -->
+                    <div class="verse-actions">
+                        <button class="btn btn-sm btn-light btn-vertical" title="نمایش/پنهان نظرات" data-verse-id="${vid}" onclick="toggleCorrections(${vid})">&#x276F;</button>
+                        <button class="btn btn-sm btn-light.btn-vertical" title="ثبت نظر جدید" onclick="showCorrectionForm(${vid})">+</button>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="verse-container p-2 border-end">
+                                <div class="verse-line">${item.version1.verse_1}</div>
+                                ${item.version1.verse_2 ? `<div class="verse-line">${item.version1.verse_2}</div>` : ''}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="verse-container p-2">
+                                <div class="verse-line">${item.version2.verse_1}</div>
+                                ${item.version2.verse_2 ? `<div class="verse-line">${item.version2.verse_2}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Corrections form (hidden by default) -->
+                    <div id="correction-form-wrapper-${vid}" class="mt-3" style="display:none;">
+                        <div class="correction-form-wrapper p-3 border rounded">
+                            <div class="form-header d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">ثبت نظر تصحیحی جدید</h6>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="closeCorrectionForm(${vid})">×</button>
+                            </div>
+                            <form id="correction-form-${vid}" onsubmit="submitCorrectionForm(event, ${vid}, null)">
+                                <div class="mb-2">
+                                    <label for="new-text-${vid}" class="form-label">نظر تصحیحی شما: *</label>
+                                    <textarea id="new-text-${vid}" name="new_text" rows="3" class="form-control" required placeholder="نظر تصحیحی خود را وارد کنید"></textarea>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary btn-sm">ثبت نظر</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeCorrectionForm(${vid})">انصراف</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Corrections list (hidden by default) -->
+                    <div id="corrections-${vid}" class="mt-3" style="display:none;">
+                        <div class="no-corrections">هنوز نظر تصحیحی ثبت نشده است</div>
+                    </div>
+
+                </div>
+            </div>
+        `;
+    });
+    
+    html += `</div>`;
+    document.getElementById('comparison-result').innerHTML = html;
+}
+
+// بارگذاری مقایسه اولیه
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('version1') && document.getElementById('version2')) {
+        loadComparison();
+    }
+});
+</script>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/harakat.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    if (document.querySelector('.comparison-container') || document.querySelector('.verse-text')) {
+        window.HarakatColorize && window.HarakatColorize.init('.card-body');
+    }
+});
+</script>
+<script>
+// Toggle visibility of corrections list for a verse
+function toggleCorrections(vid) {
+    const el = document.getElementById(`corrections-${vid}`);
+    if (!el) return;
+    if (el.style.display === 'none' || el.style.display === '') {
+        el.style.display = 'block';
+    } else {
+        el.style.display = 'none';
+    }
+}
+
+function showCorrectionForm(vid) {
+    const fw = document.getElementById(`correction-form-wrapper-${vid}`);
+    if (!fw) return;
+    fw.style.display = 'block';
+    // optionally focus textarea
+    const ta = document.getElementById(`new-text-${vid}`);
+    if (ta) ta.focus();
+}
+
+function closeCorrectionForm(vid) {
+    const fw = document.getElementById(`correction-form-wrapper-${vid}`);
+    if (!fw) return;
+    fw.style.display = 'none';
+}
+
+function submitCorrectionForm(e, vid, correctionId=null) {
+    e.preventDefault();
+    const ta = document.getElementById(`new-text-${vid}`);
+    if (!ta) return;
+    const text = ta.value.trim();
+    if (!text) return;
+
+    // For now append to the corrections list locally; replace with real AJAX POST as needed
+    const list = document.getElementById(`corrections-${vid}`);
+    if (list) {
+        // reveal list if hidden
+        list.style.display = 'block';
+        const note = document.createElement('div');
+        note.className = 'correction-item mb-2 p-2 border rounded';
+        note.innerText = text;
+        // remove 'no-corrections' placeholder if present
+        const placeholder = list.querySelector('.no-corrections');
+        if (placeholder) placeholder.remove();
+        list.appendChild(note);
+    }
+
+    // clear and hide form
+    ta.value = '';
+    closeCorrectionForm(vid);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}نسخه‌پژوهی{% endblock %}
+{% block head %}
+<style>
+    .doc-section {margin-bottom: 2.5rem;}
+    .doc-icon {font-size: 2.2rem; margin-left: 0.7rem; color: #764ba2; vertical-align: middle;}
+    .doc-card {background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(118,75,162,0.07); padding: 2rem 1.5rem; margin-bottom: 2rem; border-right: 6px solid #764ba2;}
+    .doc-card h4 {color: #764ba2; font-weight: bold;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="text-center mb-5 mt-5 pt-5" style="color:#764ba2;"><i class="fas fa-book-open doc-icon"></i> نسخه‌پژوهی</h1>
+        </div>
+    </div>
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-search doc-icon"></i> معرفی اجمالی</h4>
+        <p>در این بخش به بررسی نسخه‌های خطی و چاپی اثر و مقایسه تفاوت‌های آن‌ها خواهیم پرداخت. (محتوا به زودی تکمیل می‌شود)</p>
+    </div>
+    <div class="doc-section doc-card">
+        <h4><i class="fas fa-tasks doc-icon"></i> اهداف نسخه‌پژوهی</h4>
+        <ul>
+            <li>شناسایی نسخه‌های معتبر و اصلی</li>
+            <li>مقایسه و تصحیح اختلافات متنی</li>
+            <li>ارائه نسخه تصحیح‌شده علمی</li>
+        </ul>
+    </div>
+</div>
+{% endblock %} 

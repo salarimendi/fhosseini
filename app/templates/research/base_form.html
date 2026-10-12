@@ -1,0 +1,831 @@
+{% extends "base.html" %}
+
+{% block title %}فرم پژوهشی - سایت فردوسی حسینی{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        {% block form_title %}
+                            فرم پژوهشی برای شعر: {{ poem_title }}
+                        {% endblock %}
+                    </h5>
+
+                {% if research_title %}
+                <div class="research-title-meta" dir="rtl">
+                    <span class="research-title-meta__item">
+                        <i class="fas fa-leaf" aria-hidden="true"></i>
+                        <strong>باغ:</strong>
+                        {{ research_title.garden }} - {{ research_title.garden_name }}
+                    </span>
+                    <span class="research-title-meta__item">
+                        <i class="fas fa-list-ol" aria-hidden="true"></i>
+                        <strong>ترتیب در باغ:</strong>
+                        {{ research_title.order_in_garden }}
+                    </span>
+                    <span class="research-title-meta__item">
+                        <i class="fas fa-user" aria-hidden="true"></i>
+                        <strong>محقق:</strong>
+                        {{ researcher_name or 'نامشخص' }}
+                    </span>
+                    <a class="research-title-meta__item research-title-meta__link"
+                       href="{{ url_for('main.title', title_id=title_id) }}">
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        <span>بازگشت به شعر</span>
+                    </a>
+                    {% if is_admin and next_title %}
+                        {% if next_comment_options|length == 1 %}
+                    <a class="research-title-meta__item research-title-meta__link research-title-meta__next"
+                       href="{{ next_title_url }}">
+                        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                        <span>تیتر بعدی</span>
+                        <small>{{ next_title.order_in_garden }}</small>
+                    </a>
+                        {% elif next_comment_options|length > 1 %}
+                    <details class="research-title-meta__menu">
+                        <summary class="research-title-meta__item research-title-meta__link">
+                            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                            <span>تیتر بعدی</span>
+                            <small>{{ next_comment_options|length }}</small>
+                        </summary>
+                        <div class="research-title-meta__menu-list">
+                            {% for option in next_comment_options %}
+                            <a class="research-title-meta__menu-item" href="{{ option.url }}">
+                                <span>{{ option.researcher_name }}</span>
+                                <small>نظر {{ option.comment_id }}</small>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </details>
+                        {% else %}
+                    <span class="research-title-meta__item research-title-meta__disabled" aria-disabled="true">
+                        <i class="fas fa-comment-slash" aria-hidden="true"></i>
+                        <span>برای تیتر بعدی نظر پژوهشی ثبت نشده</span>
+                    </span>
+                        {% endif %}
+                    {% elif next_title_url %}
+                    <a class="research-title-meta__item research-title-meta__link research-title-meta__next"
+                       href="{{ next_title_url }}">
+                        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                        <span>تیتر بعدی</span>
+                        {% if next_title %}<small>{{ next_title.order_in_garden }}</small>{% endif %}
+                    </a>
+                    {% else %}
+                    <span class="research-title-meta__item research-title-meta__disabled" aria-disabled="true">
+                        <i class="fas fa-flag-checkered" aria-hidden="true"></i>
+                        <span>{% if is_admin and next_title %}برای تیتر بعدی نظر پژوهشی ثبت نشده{% else %}آخرین تیتر این باغ{% endif %}</span>
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                </div>
+                <div class="card-body">
+                    <form id="researchForm" method="POST" enctype="multipart/form-data">
+                        {% block form_hidden_fields %}{% endblock %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">زیر موضوعات</label>
+                            <div id="subtopicsContainer">
+
+
+
+{% if comment_data and comment_data.subtopics %}
+
+{% for subtopic in comment_data.subtopics %}
+    <div class="row mb-2 subtopic-row" data-index="{{ loop.index0 }}">
+        <div class="col-md-4">
+            <label class="form-label" for="subtopic-title-{{ loop.index0 }}">عنوان زیرموضوع</label>
+            <textarea class="form-control auto-resize subtopic-title" 
+                   id="subtopic-title-{{ loop.index0 }}"
+                   placeholder="زیرموضوع" 
+                   {% if view_mode %}readonly{% else %}required{% endif %}>{{ subtopic.title if subtopic.title else '' }}</textarea>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label" for="subtopic-reviewed-sources-{{ loop.index0 }}">منابع بررسی‌شده</label>
+            {% if not view_mode %}
+             <input type="text" class="form-control form-control-sm source-lookup mb-1"
+                 data-target="subtopic-reviewed-sources-{{ loop.index0 }}"
+                 placeholder="جست‌وجوی منبع و افزودن با Enter"
+                 autocomplete="off">
+            {% endif %}
+            <textarea class="form-control auto-resize subtopic-reviewed-sources"
+                   id="subtopic-reviewed-sources-{{ loop.index0 }}"
+                   placeholder="کتاب‌ها و منابعی که بررسی کرده‌اید"
+                   {% if view_mode %}readonly{% endif %}>{{ subtopic.reviewed_sources if subtopic.reviewed_sources else '' }}</textarea>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label" for="subtopic-sources-{{ loop.index0 }}">منابعی که مطلب فقط در آن‌ها یافت شد</label>
+             {% if not view_mode %}
+            <input type="text" class="form-control form-control-sm source-lookup mb-1"
+                   data-target="subtopic-sources-{{ loop.index0 }}"
+                   placeholder="جست‌وجوی منبع و افزودن با Enter"
+                 autocomplete="off">
+             {% endif %}
+            <textarea class="form-control auto-resize subtopic-sources" 
+                   id="subtopic-sources-{{ loop.index0 }}"
+                   placeholder="منابع تاریخی"
+                   {% if view_mode %}readonly{% endif %}>{{ subtopic.sources if subtopic.sources else '' }}</textarea>
+        </div>
+        
+        {% block subtopic_buttons %}
+            {% if not view_mode %}
+            <div class="col-12 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-danger btn-sm remove-subtopic" title="حذف زیرموضوع">×</button>
+                <button type="button" class="btn btn-info btn-sm manage-images-btn"
+    title="مدیریت عکس‌های این زیرموضوع">📷</button>
+            </div>
+            {% endif %}
+        {% endblock %}
+        
+        <!-- بلوک نمایش تصاویر در حالت فقط خواندنی -->
+{% block subtopic_images %}
+    {# نمایش تصاویر در حالت فقط خواندنی #}
+    {% if view_mode %}
+    <div class="col-12 mt-3">
+        <div class="research-images-block" data-subtopic-index="{{ loop.index0 }}">
+            <h6 class="text-muted mb-2">
+                <i class="fas fa-images"></i> تصاویر این زیرموضوع:
+            </h6>
+            <div class="research-images-list d-flex flex-wrap gap-2">
+                <div class="text-muted small">در حال بارگذاری تصاویر...</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
+		
+		
+		
+		
+		
+		
+    </div>
+{% endfor %}
+
+
+
+
+                                {% elif not view_mode %}
+                                    <div class="row mb-2 subtopic-row" data-index="0">
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="subtopic-title-0">عنوان زیرموضوع</label>
+                                            <textarea class="form-control auto-resize subtopic-title" 
+                                                   id="subtopic-title-0"
+                                                   placeholder="زیرموضوع" required></textarea>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="subtopic-reviewed-sources-0">منابع بررسی‌شده</label>
+                                            <input type="text" class="form-control form-control-sm source-lookup mb-1"
+                                                   data-target="subtopic-reviewed-sources-0"
+                                                   placeholder="جست‌وجوی منبع و افزودن با Enter"
+                                                   autocomplete="off">
+                                            <textarea class="form-control auto-resize subtopic-reviewed-sources"
+                                                   id="subtopic-reviewed-sources-0"
+                                                   placeholder="کتاب‌ها و منابعی که بررسی کرده‌اید"></textarea>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="subtopic-sources-0">منابعی که مطلب فقط در آن‌ها یافت شد</label>
+                                            <input type="text" class="form-control form-control-sm source-lookup mb-1"
+                                                   data-target="subtopic-sources-0"
+                                                   placeholder="جست‌وجوی منبع و افزودن با Enter"
+                                                   autocomplete="off">
+                                            <textarea class="form-control auto-resize subtopic-sources" 
+                                                   id="subtopic-sources-0"
+                                                   placeholder="منابع تاریخی"></textarea>
+                                        </div>
+                                        <div class="col-12 d-flex justify-content-end gap-2">
+                                            <button type="button" class="btn btn-danger btn-sm remove-subtopic" title="حذف زیرموضوع">×</button>
+                                            <button type="button" class="btn btn-info btn-sm manage-images-btn"
+                                                data-subtopic-index="0"
+                                                title="مدیریت عکس‌های این زیرموضوع">📷</button>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% block add_subtopic_button %}{% endblock %}
+                        </div>
+
+
+<!-- جایگزینی برای بخش فیلدهای انتهایی در base_form.html -->
+
+                        <div class="mb-3">
+                            <label for="extraInfo" class="form-label">اطلاعات تکمیلی</label>
+                            <textarea class="form-control auto-resize" id="extraInfo" name="extra_info"
+                                    {% if view_mode %}readonly{% endif %}>{{ comment_data.extra_info if comment_data else '' }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="topicNarrative" class="form-label">نثر موضوع</label>
+                            <textarea class="form-control auto-resize" id="topicNarrative" name="topic_narrative"
+                                    {% if view_mode %}readonly{% endif %}>{{ comment_data.topic_narrative if comment_data else '' }}</textarea>
+                        </div>
+
+                        <!-- بخش جدید: نظریه پژوهشی -->
+                        <div class="research-theory-section {% if view_mode %}view-only{% endif %}">
+                            <label class="form-label fw-bold">نظریه پژوهشی (نقص تاریخی اشعار الهامی یا نیاز به اصلاح تاریخ)</label>
+                            
+                            <!-- نظریه محقق اصلی -->
+                            <div class="theory-field-wrapper theory-primary">
+                                <label for="primaryTheory" class="form-label">
+                                    <i class="fas fa-user-edit"></i> نظریه محقق اصلی
+                                </label>
+                                <textarea class="form-control auto-resize" id="primaryTheory" name="primary_theory"
+                                        {% if view_mode %}readonly{% endif %}
+                                        placeholder="نظریه اولیه محقق در مورد نقص تاریخی یا نیاز به اصلاح...">{{ comment_data.primary_theory if comment_data else '' }}</textarea>
+                            </div>
+
+                            <!-- نظریه بازبینی -->
+                            <div class="theory-field-wrapper theory-review">
+                                <label for="reviewTheory" class="form-label">
+                                    <i class="fas fa-sync-alt"></i> نظریه بازبینی
+                                </label>
+                                <textarea class="form-control auto-resize" id="reviewTheory" name="review_theory"
+                                        {% if view_mode %}readonly{% endif %}
+                                        placeholder="بازبینی و اصلاح نظریه اولیه پس از بررسی بیشتر...">{{ comment_data.review_theory if comment_data else '' }}</textarea>
+                                <small class="text-muted">این فیلد برای بازبینی و تکمیل نظریه اولیه است</small>
+                            </div>
+
+                            <!-- نظریه نهایی -->
+                            <div class="theory-field-wrapper theory-final">
+                                <label for="finalTheory" class="form-label">
+                                    <i class="fas fa-check-circle"></i> نظریه نهایی
+                                </label>
+                                <textarea class="form-control auto-resize" id="finalTheory" name="final_theory"
+                                        {% if view_mode %}readonly{% endif %}
+                                        placeholder="نظریه نهایی و قطعی پس از تمام بررسی‌ها...">{{ comment_data.final_theory if comment_data else '' }}</textarea>
+                                <small class="text-muted">این فیلد نظریه نهایی و تثبیت شده را نمایش می‌دهد</small>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            {% block form_buttons %}
+                                <button type="button" class="btn btn-secondary" id="cancelButton">بازگشت</button>
+                            {% endblock %}
+                        </div>						
+						
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% set comment_id_js = comment.id if (comment and comment.id) else None %}
+
+<script>
+// متغیرهای سراسری برای تمپلیت‌های فرزند
+var commentId = {% if comment_id_js %}{{ comment_id_js }}{% else %}null{% endif %};
+var viewMode = {{ 'true' if view_mode else 'false' }};
+var researchSources = [
+    'دمع السجوم', 'ناسخ التواریخ', 'ارشاد', 'ملهوف', 'طبری',
+    'کامل ابن اثیر', 'مقاتل الطالبین', 'مروج الذهب', 'تذکرة الخواص',
+    'مطالب السئول', 'فصول المهمه', 'کشف الغمه', 'عقد الفرید', 'احتجاج',
+    'مناقب', 'روضة الواعظین', 'مثیر الاحزان', 'کامل بهایی', 'روضة الصفا',
+    'تسلیة المجالس', 'قمقام زخار', 'روضة الشهدا', 'بحارالانوار (علامه مجلسی)',
+    'سرّ الاسرار'
+];
+
+// کلاس مدیریت فرم پایه (بدون مدیریت عکس)
+class BaseFormManager {
+    constructor() {
+        this.form = document.getElementById('researchForm');
+        this.subtopicsContainer = document.getElementById('subtopicsContainer');
+        this.addSubtopicBtn = document.getElementById('addSubtopic');
+        this.cancelButton = document.getElementById('cancelButton');
+        this.returnUrl = "{{ return_url if return_url else url_for('main.title', title_id=title_id) }}";
+        
+        this.init();
+    }
+    
+    init() {
+        this.initAutoResize();
+		this.updateRemoveButtonsState();
+		this.initSourceLookups();
+        this.bindEvents();
+    }
+
+    initSourceLookups() {
+        document.querySelectorAll('.source-lookup').forEach(input => {
+            this.bindSourceLookup(input);
+        });
+    }
+
+    bindSourceLookup(input) {
+        if (input.dataset.sourceLookupBound === 'true') {
+            return;
+        }
+
+        input.dataset.sourceLookupBound = 'true';
+        const suggestions = document.createElement('div');
+        suggestions.className = 'source-suggestions list-group position-absolute w-100';
+        suggestions.style.zIndex = '1050';
+        input.parentElement.style.position = 'relative';
+        input.parentElement.appendChild(suggestions);
+
+        const renderSuggestions = () => {
+            const query = this.normalizeSourceText(input.value);
+            suggestions.innerHTML = '';
+
+            if (query.length < 2) {
+                suggestions.classList.remove('show');
+                return;
+            }
+
+            const matches = researchSources.filter(source =>
+                this.normalizeSourceText(source).includes(query)
+            );
+
+            matches.forEach(source => {
+                const option = document.createElement('button');
+                option.type = 'button';
+                option.className = 'list-group-item list-group-item-action py-1 text-end';
+                option.textContent = source;
+                option.addEventListener('mousedown', event => {
+                    event.preventDefault();
+                    this.addSourceToTextarea(input, source);
+                });
+                suggestions.appendChild(option);
+            });
+
+            suggestions.classList.toggle('show', matches.length > 0);
+        };
+
+        input.addEventListener('input', renderSuggestions);
+        input.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const firstMatch = suggestions.querySelector('button');
+                if (firstMatch) {
+                    this.addSourceToTextarea(input, firstMatch.textContent);
+                }
+            } else if (event.key === 'Escape') {
+                suggestions.innerHTML = '';
+                suggestions.classList.remove('show');
+            }
+        });
+
+        document.addEventListener('click', event => {
+            if (!input.parentElement.contains(event.target)) {
+                suggestions.innerHTML = '';
+                suggestions.classList.remove('show');
+            }
+        });
+    }
+
+    normalizeSourceText(value) {
+        return value
+            .replace(/ي/g, 'ی')
+            .replace(/ك/g, 'ک')
+            .replace(/[\u064B-\u065F]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLocaleLowerCase('fa');
+    }
+
+    addSourceToTextarea(input, source) {
+        const target = document.getElementById(input.dataset.target);
+        if (!target) {
+            return;
+        }
+
+        const existingText = target.value.trim();
+        const sourceText = target.classList.contains('subtopic-sources')
+            ? `${source}، صفحه `
+            : source;
+
+        if (existingText.split('\n').some(line => line.trim() === source)) {
+            input.value = '';
+            return;
+        }
+
+        target.value = existingText ? `${existingText}\n${sourceText}` : sourceText;
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+        input.value = '';
+        input.focus();
+        input.parentElement.querySelector('.source-suggestions').classList.remove('show');
+    }
+    
+    // قابلیت auto-resize برای textareaها
+    initAutoResize() {
+        document.querySelectorAll('textarea.auto-resize').forEach(textarea => {
+            this.autoResizeTextarea(textarea);
+            textarea.addEventListener('input', () => {
+                this.autoResizeTextarea(textarea);
+            });
+        });
+    }
+    
+    autoResizeTextarea(element) {
+        element.style.height = 'auto';
+        element.style.height = (element.scrollHeight) + 'px';
+    }
+    
+    // اتصال رویدادها
+    bindEvents() {
+        // دکمه بازگشت
+        if (this.cancelButton) {
+            this.cancelButton.addEventListener('click', () => {
+                window.location.href = this.returnUrl;
+            });
+        }
+        
+        // دکمه افزودن زیرموضوع
+        if (this.addSubtopicBtn) {
+            this.addSubtopicBtn.addEventListener('click', () => {
+                this.addSubtopic();
+            });
+        }
+        
+        // دکمه‌های حذف زیرموضوع
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-subtopic')) {
+                this.removeSubtopic(e.target);
+            }
+        });
+        
+
+		
+
+		// دکمه مدیریت عکس‌ها
+		document.addEventListener('click', (e) => {
+			const button = e.target.closest('.manage-images-btn');
+			if (button) {
+				e.preventDefault();
+				const row = button.closest('.subtopic-row');
+				const subtopicIndex = row.getAttribute('data-index');
+				console.log('Clicked button with index:', subtopicIndex);
+				this.openImageManager(subtopicIndex);
+			}
+		});		
+		
+		
+    }
+    
+	 // باز کردن صفحه مدیریت عکس‌ها
+	openImageManager(subtopicIndex) {
+		console.log('Opening for index:', subtopicIndex, 'commentId:', commentId);
+		
+		if (!commentId) {
+			alert('ابتدا باید فرم پژوهشی را ذخیره کنید');
+			return;
+		}
+		
+		// تبدیل به عدد و اعتبارسنجی
+		const index = parseInt(subtopicIndex, 10);
+		if (isNaN(index) || index < 0) {
+			alert('خطا: شماره زیرموضوع نامعتبر است');
+			console.error('Invalid subtopic index:', subtopicIndex);
+			return;
+		}
+		
+		const url = `/verses/manage_research_images/${commentId}/${index}`;
+		console.log('Opening URL:', url);
+		window.open(url, '_blank', 'width=900,height=700');
+	}
+   
+
+    // افزودن زیرموضوع جدید
+    addSubtopic() {
+        const subtopicRows = document.querySelectorAll('.subtopic-row');
+        const newIndex = subtopicRows.length;
+        
+        const newSubtopicHTML = `
+            <div class="row mb-2 subtopic-row" data-index="${newIndex}">
+                <div class="col-md-4">
+                    <label class="form-label" for="subtopic-title-${newIndex}">عنوان زیرموضوع</label>
+                    <textarea class="form-control auto-resize subtopic-title" 
+                           id="subtopic-title-${newIndex}"
+                           placeholder="زیرموضوع" required></textarea>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="subtopic-reviewed-sources-${newIndex}">منابع بررسی‌شده</label>
+                    <input type="text" class="form-control form-control-sm source-lookup mb-1"
+                           data-target="subtopic-reviewed-sources-${newIndex}"
+                           placeholder="جست‌وجوی منبع و افزودن با Enter"
+                           autocomplete="off">
+                    <textarea class="form-control auto-resize subtopic-reviewed-sources"
+                           id="subtopic-reviewed-sources-${newIndex}"
+                           placeholder="کتاب‌ها و منابعی که بررسی کرده‌اید"></textarea>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="subtopic-sources-${newIndex}">منابعی که مطلب فقط در آن‌ها یافت شد</label>
+                    <input type="text" class="form-control form-control-sm source-lookup mb-1"
+                           data-target="subtopic-sources-${newIndex}"
+                           placeholder="جست‌وجوی منبع و افزودن با Enter"
+                           autocomplete="off">
+                    <textarea class="form-control auto-resize subtopic-sources" 
+                           id="subtopic-sources-${newIndex}"
+                           placeholder="منابع تاریخی"></textarea>
+                </div>
+                <div class="col-12 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-danger btn-sm remove-subtopic" title="حذف زیرموضوع">×</button>
+                    <button type="button" class="btn btn-info btn-sm manage-images-btn"
+                        data-subtopic-index="${newIndex}"
+                        title="مدیریت عکس‌های این زیرموضوع">📷</button>
+                </div>
+            </div>
+        `;
+        
+        this.subtopicsContainer.insertAdjacentHTML('beforeend', newSubtopicHTML);
+        
+        // فعال‌سازی auto-resize برای textareaهای جدید
+        const newRow = this.subtopicsContainer.lastElementChild;
+        newRow.querySelectorAll('.source-lookup').forEach(input => {
+            this.bindSourceLookup(input);
+        });
+        newRow.querySelectorAll('textarea.auto-resize').forEach(textarea => {
+            this.autoResizeTextarea(textarea);
+            textarea.addEventListener('input', () => {
+                this.autoResizeTextarea(textarea);
+            });
+        });
+		
+		this.updateRemoveButtonsState();
+
+    }
+    
+    
+	// حذف زیرموضوع
+	removeSubtopic(button) {
+		const subtopicRows = this.subtopicsContainer.querySelectorAll('.subtopic-row');
+		if (subtopicRows.length <= 1) {
+			alert('حداقل باید یک زیرموضوع وجود داشته باشد.');
+			return;
+		}
+
+		const row = button.closest('.subtopic-row');
+		if (confirm('آیا از حذف این زیرموضوع مطمئن هستید؟')) {
+			row.remove();
+			this.reindexSubtopics();
+			this.updateRemoveButtonsState();
+		}
+	}
+	
+	// فعال یا غیرفعال کردن دکمه‌های حذف بر اساس تعداد زیرموضوع‌ها
+	updateRemoveButtonsState() {
+		const subtopicRows = this.subtopicsContainer.querySelectorAll('.subtopic-row');
+		const removeButtons = this.subtopicsContainer.querySelectorAll('.remove-subtopic');
+
+		if (subtopicRows.length <= 1) {
+			// اگر فقط یک زیرموضوع داریم، دکمه حذف را غیرفعال کن
+			removeButtons.forEach(btn => btn.disabled = true);
+		} else {
+			// در غیر این صورت همه را فعال کن
+			removeButtons.forEach(btn => btn.disabled = false);
+		}
+	}
+	
+	
+    // شماره‌گذاری مجدد زیرموضوعات
+    reindexSubtopics() {
+        document.querySelectorAll('.subtopic-row').forEach((row, index) => {
+            row.setAttribute('data-index', index);
+            
+            const manageBtn = row.querySelector('.manage-images-btn');
+            if (manageBtn) {
+                manageBtn.setAttribute('data-subtopic-index', index);
+            }
+        });
+    }
+    
+    // جمع‌آوری داده‌های زیرموضوعات
+    collectSubtopicsData() {
+        const subtopics = [];
+        document.querySelectorAll('.subtopic-row').forEach((row) => {
+            const title = row.querySelector('.subtopic-title').value.trim();
+            const reviewedSources = row.querySelector('.subtopic-reviewed-sources').value.trim();
+            const sources = row.querySelector('.subtopic-sources').value.trim();
+            
+            if (title) {
+                subtopics.push({
+                    title: title,
+                    reviewed_sources: reviewedSources,
+                    sources: sources
+                });
+            }
+        });
+        return subtopics;
+    }
+    
+    // نمایش وضعیت لودینگ
+    showLoading(show = true) {
+        const submitBtn = this.form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = show;
+            const originalText = submitBtn.getAttribute('data-original-text') || submitBtn.innerHTML;
+            submitBtn.innerHTML = show ? 'در حال ارسال...' : originalText;
+            if (!show && !submitBtn.getAttribute('data-original-text')) {
+                submitBtn.setAttribute('data-original-text', originalText);
+            }
+        }
+    }
+}
+
+
+
+</script>
+
+{% block form_scripts %}{% endblock %}
+
+<style>
+.remove-subtopic, .manage-images-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    line-height: 1.2;
+}
+
+.manage-images-btn {
+    white-space: nowrap;
+}
+
+.source-suggestions {
+    top: 100%;
+    left: 0;
+    display: none;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.source-suggestions.show {
+    display: block;
+}
+
+.form-control[readonly] {
+    background-color: #f8f9fa;
+    opacity: 1;
+}
+
+textarea.form-control {
+    min-height: 38px;
+    overflow: hidden;
+    resize: none;
+}
+
+.form-control {
+    margin-bottom: 0.5rem;
+}
+
+.subtopic-row {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 0.375rem;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background-color: #d1eddc;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: 0.375rem;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+}
+
+/* ==========================================
+   استایل‌های جدید برای بخش نظریه پژوهشی
+   ========================================== */
+
+/* Container نظریه پژوهشی */
+.research-theory-section {
+    background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+    border: 2px solid #dee2e6;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-top: 2rem !important;
+    margin-bottom: 2rem !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Label اصلی */
+.research-theory-section > .form-label.fw-bold {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 3px solid #3498db;
+    display: block;
+}
+
+/* هر بخش نظریه */
+.theory-field-wrapper {
+    background: #ffffff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.theory-field-wrapper:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+/* Label‌های داخلی با آیکون */
+.theory-field-wrapper .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.theory-field-wrapper .form-label i {
+    font-size: 1rem;
+}
+
+/* رنگ‌بندی آیکون‌ها */
+.theory-primary .form-label i {
+    color: #3498db; /* آبی برای محقق اصلی */
+}
+
+.theory-review .form-label i {
+    color: #f39c12; /* نارنجی برای بازبینی */
+}
+
+.theory-final .form-label i {
+    color: #27ae60; /* سبز برای نهایی */
+}
+
+/* Textarea داخل بخش نظریه */
+.theory-field-wrapper textarea {
+    min-height: 120px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+.theory-field-wrapper textarea:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.theory-field-wrapper textarea[readonly] {
+    background-color: #f8f9fa;
+    cursor: default;
+}
+
+/* متن راهنما */
+.theory-field-wrapper small.text-muted {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: #6c757d;
+}
+
+/* حالت View-Only */
+.research-theory-section.view-only {
+    background: #ffffff;
+    border-color: #3498db;
+}
+
+.research-theory-section.view-only .theory-field-wrapper {
+    border-left: 4px solid #3498db;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .research-theory-section {
+        padding: 1rem;
+    }
+    
+    .research-theory-section > .form-label.fw-bold {
+        font-size: 1rem;
+    }
+    
+    .theory-field-wrapper {
+        padding: 0.75rem;
+    }
+    
+    .theory-field-wrapper textarea {
+        min-height: 100px;
+        font-size: 0.9rem;
+    }
+}
+
+
+
+</style>
+{% endblock %}
