@@ -10,107 +10,71 @@
 
         <!-- محتوای اصلی -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <div class="admin-page-head">
                 <h1 class="h2">داشبورد مدیریت</h1>
             </div>
 
             <!-- آمار کلی -->
-            <div class="row mb-4">
+            <div class="row g-3 mb-4">
                 <div class="col-xl-3 col-md-6">
-                    <div class="card border-left-primary shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                        تعداد کاربران
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.users }}</div>
-                                </div>
-                            </div>
+                    <div class="stat-tile stat-tile--primary">
+                        <span class="stat-tile__icon"><i class="fas fa-users"></i></span>
+                        <div>
+                            <div class="stat-tile__label">تعداد کاربران</div>
+                            <div class="stat-tile__value">{{ stats.users }}</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-xl-3 col-md-6">
-                    <div class="card border-left-success shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                        تعداد نظرات
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.comments }}</div>
-                                </div>
-                            </div>
+                    <div class="stat-tile stat-tile--success">
+                        <span class="stat-tile__icon"><i class="fas fa-comments"></i></span>
+                        <div>
+                            <div class="stat-tile__label">تعداد نظرات</div>
+                            <div class="stat-tile__value">{{ stats.comments }}</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-xl-3 col-md-6">
-                    <div class="card border-left-info shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                        تعداد ضبط‌ها
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.recordings }}</div>
-                                </div>
-                            </div>
+                    <div class="stat-tile stat-tile--info">
+                        <span class="stat-tile__icon"><i class="fas fa-microphone"></i></span>
+                        <div>
+                            <div class="stat-tile__label">تعداد ضبط‌ها</div>
+                            <div class="stat-tile__value">{{ stats.recordings }}</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-xl-3 col-md-6">
-                    <div class="card border-left-warning shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                        تعداد اشعار
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.poems }}</div>
-                                </div>
-                            </div>
+                    <div class="stat-tile stat-tile--warning">
+                        <span class="stat-tile__icon"><i class="fas fa-scroll"></i></span>
+                        <div>
+                            <div class="stat-tile__label">تعداد اشعار</div>
+                            <div class="stat-tile__value">{{ stats.poems }}</div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- ردیف دوم آمار - نظرات اصلاحی -->
-            <div class="row mb-4">
+            <div class="row g-3 mb-4">
                 <div class="col-xl-6 col-md-6">
-                    <div class="card border-left-danger shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                        نظرات اصلاحی در انتظار تایید
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.pending_corrections }}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
+                    <div class="stat-tile stat-tile--danger">
+                        <span class="stat-tile__icon"><i class="fas fa-circle-exclamation"></i></span>
+                        <div>
+                            <div class="stat-tile__label">نظرات اصلاحی در انتظار تایید</div>
+                            <div class="stat-tile__value">{{ stats.pending_corrections }}</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-xl-6 col-md-6">
-                    <div class="card border-left-secondary shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
-                                        کل نظرات اصلاحی تایید شده
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.approved_corrections }}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
+                    <div class="stat-tile stat-tile--secondary">
+                        <span class="stat-tile__icon"><i class="fas fa-circle-check"></i></span>
+                        <div>
+                            <div class="stat-tile__label">کل نظرات اصلاحی تایید شده</div>
+                            <div class="stat-tile__value">{{ stats.approved_corrections }}</div>
                         </div>
                     </div>
                 </div>
@@ -119,9 +83,9 @@
             <!-- آخرین فعالیت‌ها -->
             <div class="row">
                 <div class="col-lg-6">
-                    <div class="card shadow mb-4">
+                    <div class="card mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">آخرین کاربران ثبت نام شده</h6>
+                            <h6 class="m-0 fw-bold text-primary">آخرین کاربران ثبت نام شده</h6>
                         </div>
                         <div class="card-body">
                             {% if recent_users %}
@@ -147,9 +111,9 @@
                 </div>
 
                 <div class="col-lg-6">
-                    <div class="card shadow mb-4">
+                    <div class="card mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">آخرین نظرات</h6>
+                            <h6 class="m-0 fw-bold text-primary">آخرین نظرات</h6>
                         </div>
                         <div class="card-body">
                             {% if recent_comments %}

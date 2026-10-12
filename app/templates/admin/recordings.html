@@ -13,19 +13,9 @@
 
         <!-- محتوای اصلی -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <div class="admin-page-head">
                 <h1 class="h2">مدیریت ضبط‌های صوتی</h1>
             </div>
-
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    <div class="alert alert-info">
-                        {% for message in messages %}
-                            {{ message }}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% endwith %}
 
             <!-- جستجو و فیلتر -->
             <div class="row mb-3">
@@ -50,10 +40,10 @@
             </div>
 
             <!-- جدول ضبط‌ها -->
-            <div class="card shadow">
+            <div class="card">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-striped">
+                        <table class="table table-hover align-middle">
                             <thead>
                                 <tr>
                                     <th>شناسه</th>

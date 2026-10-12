@@ -1,0 +1,58 @@
+{# ماکروهای مشترک رابط کاربری — فقط ظاهر؛ هیچ مسیر یا منطقی در اینجا نیست #}
+
+{% macro flashes() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      {% set cat = 'danger' if category == 'error' else (category if category in ['success','warning','info','danger'] else 'info') %}
+      <div class="alert alert-{{ cat }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="بستن"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+{% endmacro %}
+
+{% macro errors(field) %}
+  {% for error in field.errors %}<div class="field-error"><i class="fas fa-circle-exclamation"></i> {{ error }}</div>{% endfor %}
+{% endmacro %}
+
+{% macro page_header(title, subtitle='', icon='') %}
+<header class="page-hero">
+  <div class="container">
+    {% if icon %}<span class="page-hero__icon"><i class="fas {{ icon }}"></i></span>{% endif %}
+    <h1 class="page-hero__title">{{ title }}</h1>
+    {% if subtitle %}<p class="page-hero__sub">{{ subtitle }}</p>{% endif %}
+    {{ caller() if caller else '' }}
+  </div>
+</header>
+{% endmacro %}
+
+{# کارت مرکزی صفحات ورود/ثبت‌نام/بازیابی #}
+{% macro auth_card(title, subtitle='', icon='fa-feather-alt', wide=False) %}
+<div class="auth-wrap">
+  <div class="auth-card{% if wide %} auth-card--wide{% endif %}">
+    <div class="auth-card__head">
+      <span class="auth-icon"><i class="fas {{ icon }}"></i></span>
+      <h1 class="auth-title">{{ title }}</h1>
+      {% if subtitle %}<p class="auth-sub">{{ subtitle }}</p>{% endif %}
+    </div>
+    <div class="auth-card__body">
+      {{ caller() }}
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro password_toggle_script() %}
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const icon = document.getElementById(fieldId + '_icon');
+    if (!field || !icon) return;
+    if (field.type === 'password') { field.type = 'text'; icon.className = 'fas fa-eye-slash'; }
+    else { field.type = 'password'; icon.className = 'fas fa-eye'; }
+}
+</script>
+{% endmacro %}

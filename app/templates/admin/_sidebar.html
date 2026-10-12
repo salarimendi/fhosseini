@@ -6,27 +6,27 @@
         <ul class="nav flex-column">
             <li class="nav-item">
                 <a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">
-                    داشبورد
+                    <i class="fas fa-gauge fa-fw me-2"></i>داشبورد
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {% if request.endpoint == 'admin.users' %}active{% endif %}" href="{{ url_for('admin.users') }}">
-                    مدیریت کاربران
+                    <i class="fas fa-users fa-fw me-2"></i>مدیریت کاربران
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {% if request.endpoint == 'admin.comments' %}active{% endif %}" href="{{ url_for('admin.comments') }}">
-                    مدیریت نظرات
+                    <i class="fas fa-comments fa-fw me-2"></i>مدیریت نظرات
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {% if request.endpoint == 'admin.recordings' %}active{% endif %}" href="{{ url_for('admin.recordings') }}">
-                    مدیریت ضبط‌ها
+                    <i class="fas fa-microphone fa-fw me-2"></i>مدیریت ضبط‌ها
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {% if request.endpoint == 'admin.admin_corrections' %}active{% endif %}" href="{{ url_for('admin.admin_corrections') }}">
-                    مدیریت نظرات اصلاحی
+                    <i class="fas fa-pen-to-square fa-fw me-2"></i>مدیریت نظرات اصلاحی
                     {% if pending_corrections_count > 0 %}
                     <span class="badge bg-warning rounded-pill">{{ pending_corrections_count }}</span>
                     {% endif %}
@@ -35,7 +35,7 @@
 
             <li class="nav-item">
                 <a class="nav-link {% if request.endpoint == 'articles_admin.list_articles' %}active{% endif %}" href="{{ url_for('articles_admin.list_articles') }}">
-                    مدیریت مقالات 
+                    <i class="fas fa-newspaper fa-fw me-2"></i>مدیریت مقالات 
                     {% if pending_corrections_count > 0 %}
                     <span class="badge bg-warning rounded-pill">{{ pending_corrections_count }}</span>
                     {% endif %}
