@@ -656,6 +656,336 @@
     }
 }
 
+.home-project-message {
+    max-width: 680px;
+    margin: 0 auto 1.75rem;
+    padding: 1rem 1.25rem;
+    color: #22302a;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid rgba(184, 134, 11, 0.35);
+    border-radius: 1rem;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.12);
+}
+
+.home-project-message img {
+    display: block;
+    width: min(100%, 445px);
+    height: auto;
+    margin: 0 auto 0.75rem;
+}
+
+.hero-banner-improved > .container {
+    max-width: 1080px;
+}
+
+.hero-banner-improved .row.align-items-stretch {
+    align-items: center !important;
+    margin-bottom: 1.25rem !important;
+}
+
+.hero-title {
+    font-size: clamp(2.1rem, 4vw, 3.25rem);
+    margin-bottom: 0.75rem !important;
+}
+
+.hero-subtitle {
+    margin-bottom: 1.25rem !important;
+}
+
+.hero-buttons .btn {
+    padding: 0.65rem 1.25rem !important;
+    font-size: 0.95rem;
+}
+
+.hero-quick-gardens {
+    gap: 0.5rem !important;
+}
+
+.quick-garden-pill {
+    padding: 0.45rem 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.poet-intro-improved {
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.poet-intro-improved:hover {
+    transform: none;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.poet-intro-improved .text-center {
+    margin-bottom: 0.75rem !important;
+}
+
+.poet-image-improved,
+.poet-intro-improved .poet-image-improved {
+    width: 130px !important;
+    height: 160px !important;
+    border-width: 3px;
+    border-radius: 1rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+}
+
+.poet-image-improved:hover {
+    transform: none;
+}
+
+.poet-name-improved {
+    margin-bottom: 0.2rem;
+    font-size: 1.15rem !important;
+}
+
+.poet-title-improved {
+    margin-bottom: 0;
+    font-size: 0.95rem !important;
+}
+
+.home-search {
+    max-width: 620px;
+    margin-top: 1.5rem;
+    padding: 0 !important;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.home-search .search-header-improved {
+    justify-content: flex-start;
+    gap: 0.55rem;
+    margin-bottom: 0.5rem !important;
+}
+
+.home-search .search-icon-improved {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem !important;
+}
+
+.home-search .search-title-improved {
+    font-size: 1rem !important;
+    text-shadow: none;
+}
+
+.home-search .search-input-group {
+    gap: 0.5rem;
+}
+
+.home-search .search-input-improved {
+    min-width: 0;
+    padding: 0.7rem 1rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    box-shadow: none;
+}
+
+.home-search .search-input-improved:focus {
+    transform: none;
+    border-color: #fff;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.home-search .btn-search-improved {
+    padding: 0.65rem 1rem !important;
+    border: 0;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.home-search .search-results-improved {
+    margin-top: 0.75rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+.daily-poem-card-improved {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 1.25rem !important;
+    border-radius: 1.25rem;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+}
+
+.daily-poem-card-improved:hover {
+    transform: none;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+}
+
+.daily-poem-card-improved .poem-badge-improved {
+    align-self: flex-start;
+    margin-bottom: 0.5rem !important;
+}
+
+.daily-poem-card-improved .poem-content-improved {
+    padding: 0.25rem 0 !important;
+}
+
+.daily-poem-card-improved .verse-line-improved {
+    margin-bottom: 0.25rem;
+    padding: 0.25rem;
+}
+
+.daily-poem-card-improved .poem-meta-improved {
+    margin-top: 0.5rem !important;
+    padding-top: 0.5rem !important;
+}
+
+@media (max-width: 991px) {
+    .hero-banner-improved .hero-content {
+        text-align: center;
+    }
+
+    .hero-banner-improved .hero-buttons,
+    .hero-banner-improved .hero-quick-gardens {
+        justify-content: center;
+    }
+
+    .home-search {
+        margin-right: auto;
+        margin-left: auto;
+        text-align: right;
+    }
+}
+
+@media (max-width: 576px) {
+    .home-project-message {
+        margin-bottom: 1.25rem;
+        padding: 0.85rem;
+    }
+
+    .hero-banner-improved .row.align-items-stretch {
+        row-gap: 1.25rem !important;
+    }
+
+    .home-search .search-input-group {
+        gap: 0.4rem;
+    }
+
+    .home-search .btn-search-improved {
+        padding: 0.65rem 0.8rem !important;
+    }
+
+    .daily-poem-card-improved {
+        padding: 1rem !important;
+    }
+}
+
+
+
+/* ==========================================================================
+   Hero v4 — تابلوی آغازین: نشان «هو»، عنوان، دسترسی سریع، جستجو و پرتره
+   ========================================================================== */
+body .hero-banner-improved { padding: clamp(1.25rem, 3.5vw, 2.5rem) 0 clamp(2rem, 4vw, 3rem) !important; }
+body .hero-banner-improved > .container { max-width: 1040px; }
+
+/* نشان بالای صفحه: جمع‌وجور و مرکزی */
+body .home-project-message {
+    max-width: 360px; margin: 0 auto clamp(1rem, 2.5vw, 1.6rem); padding: 0.55rem 0.9rem;
+    background: #fff; border: 2px solid #d9a441;
+    border-radius: 22px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+body .home-project-message img { width: 100%; max-width: 330px; margin: 0 auto; }
+
+body .hero-main { margin-bottom: clamp(1rem, 2.5vw, 1.5rem) !important; row-gap: 1.5rem; }
+body .hero-banner-improved .hero-content { max-width: none; }
+body .hero-title { max-width: none; margin-bottom: 0.4rem !important; font-size: clamp(1.7rem, 1.1rem + 3.2vw, 3.3rem); line-height: 1.35; }
+body .hero-subtitle { margin-bottom: 1.4rem !important; font-size: clamp(1rem, 0.9rem + 0.5vw, 1.2rem); color: rgba(255, 255, 255, 0.88); }
+
+/* پنج دکمه در یک ردیف منسجم */
+.hero-actions { display: grid; grid-template-columns: 1.25fr repeat(4, 1fr); gap: 0.55rem; margin: 0 0 1.1rem; }
+.hero-actions > a {
+    display: flex; align-items: center; justify-content: center; gap: 0.45rem; min-height: 46px; padding: 0.5rem 0.6rem;
+    border-radius: 12px; font-size: 0.92rem; font-weight: 700; text-decoration: none; white-space: nowrap;
+    transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+.hero-actions .quick-garden-pill { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.4); color: #fff; border-radius: 12px; padding: 0.5rem 0.6rem; }
+.hero-actions .quick-garden-pill:hover { background: rgba(255, 255, 255, 0.95); color: var(--secondary-color); transform: translateY(-2px); }
+.hero-actions .hero-action--primary { background: linear-gradient(135deg, #f0c879, #d9a441); color: #1b2a2e; border: 0; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22); }
+.hero-actions .hero-action--primary:hover { transform: translateY(-2px); color: #1b2a2e; box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3); }
+
+/* جستجو: یک نوار یکپارچه */
+body .home-search.search-container-improved { max-width: none; margin-top: 0; padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none !important; }
+body .home-search .search-header-improved { margin-bottom: 0.45rem !important; }
+body .home-search .search-input-group {
+    display: flex; gap: 0; padding: 0.3rem; background: rgba(255, 255, 255, 0.97);
+    border-radius: 14px; box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+}
+body .home-search .search-input-improved { flex: 1 1 auto; border: 0; background: transparent; color: #1c2a30; box-shadow: none !important; border-radius: 10px; }
+body .home-search .search-input-improved::placeholder { color: #7a8a8e; }
+body .home-search .btn-search-improved { flex: 0 0 auto; border-radius: 10px; background: var(--primary-color); color: #fff; font-weight: 700; }
+body .home-search .btn-search-improved:hover { background: var(--secondary-color); }
+
+/* پرتره‌ی شاعر: قاب طاقی با حاشیه‌ی زرین */
+body .poet-intro-improved {
+    max-width: 260px; padding: 1.1rem 1rem 1rem; text-align: center;
+    background: rgba(250, 245, 232, 0.97); border: 1px solid rgba(226, 178, 90, 0.65);
+    border-radius: 20px; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+}
+body .poet-intro-improved .poet-image-improved {
+    width: 124px !important; height: 156px !important; object-fit: cover;
+    border: 3px solid #d9a441; border-radius: 62px 62px 14px 14px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+}
+body .poet-intro-improved .poet-name-improved { font-size: 1.1rem !important; color: var(--secondary-color); line-height: 1.7; }
+body .poet-intro-improved .poet-title-improved { font-size: 0.92rem !important; color: var(--accent-color); }
+
+/* شعر روزانه: هم‌عرض با محتوای بالا */
+
+@media (max-width: 991.98px) {
+    body .hero-banner-improved .hero-content { text-align: center; }
+    body .hero-main { row-gap: 1.25rem; }
+    /* پرتره در موبایل/تبلت افقی و کم‌ارتفاع می‌شود */
+    body .poet-intro-improved { display: flex; align-items: center; gap: 1rem; max-width: 420px; padding: 0.8rem 1rem; text-align: right; }
+    body .poet-intro-improved .text-center { margin: 0 !important; flex: 0 0 auto; }
+    body .poet-intro-improved .poet-image-improved { width: 76px !important; height: 94px !important; border-radius: 38px 38px 10px 10px; }
+    body .poet-intro-improved .poet-info { text-align: right !important; }
+}
+@media (max-width: 767.98px) {
+    .hero-actions { grid-template-columns: repeat(2, 1fr); }
+    .hero-actions .hero-action--primary { grid-column: 1 / -1; }
+    body .home-search .search-header-improved { justify-content: center; }
+}
+
+/* جستجو همیشه یک ردیف می‌ماند و متن دکمه دیده می‌شود */
+body .home-search .search-input-group { flex-direction: row !important; align-items: stretch; }
+body .home-search .search-input-improved { width: 1%; min-width: 0; padding: 0.7rem 0.9rem !important; font-size: 0.95rem !important; }
+body .home-search .btn-search-improved { width: auto !important; min-width: 0; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1rem !important; font-size: 0.9rem !important; }
+body .home-search .btn-search-improved i { font-size: 0.9rem; }
+@media (max-width: 991.98px) {
+    body .poet-intro-improved { margin-inline: auto; width: 100%; overflow: hidden; }
+    body .poet-intro-improved .poet-image-wrapper { width: 76px; flex: 0 0 auto; }
+    body .poet-intro-improved .poet-info { min-width: 0; }
+}
+
+/* شعر روزانه — دسکتاپ: کادر جمع‌وجور، مصراع‌ها کنار هم، دکمه‌های کوچک */
+body .hero-daily .daily-poem-card-improved { height: auto; max-width: 820px; margin-inline: auto; padding: 1.1rem 1.5rem 1rem !important; }
+body .hero-daily .poem-badge-improved { padding: 0.3rem 0.9rem; font-size: 0.82rem; margin-bottom: 0.5rem !important; }
+.daily-poem-verses { display: grid; gap: 0.15rem; padding: 0.25rem 0 !important; text-align: center; }
+.daily-poem-verses .verse-line-improved { font-size: 1.15rem; line-height: 2; margin: 0; padding: 0.1rem 0.25rem; }
+.daily-poem-footer { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; margin-top: 0.6rem; padding-top: 0.7rem; border-top: 1px solid rgba(0, 0, 0, 0.1); }
+.daily-poem-footer .poem-meta-improved { margin: 0 !important; padding: 0 !important; border: 0 !important; font-size: 0.88rem; }
+.daily-poem-actions { display: flex; gap: 0.5rem; flex: 0 0 auto; }
+.daily-poem-actions .btn-poem-link { margin: 0; padding: 0.45rem 1rem; font-size: 0.88rem; border-radius: 10px; width: auto; flex: 0 0 auto; }
+.daily-poem-actions .daily-poem-share { padding: 0.45rem 0.8rem; }
+
+@media (min-width: 768px) {
+    /* دو مصراع در یک ردیف، مانند چیدمان سنتی بیت */
+    .daily-poem-verses { grid-auto-flow: column; grid-auto-columns: 1fr; gap: 1.5rem; align-items: center; }
+    .daily-poem-verses .verse-line-improved { padding: 0.35rem 0.5rem; }
+}
+@media (max-width: 767.98px) {
+    body .hero-daily .daily-poem-card-improved { max-width: none; padding: 1rem !important; }
+    .daily-poem-footer { flex-direction: column; align-items: stretch; text-align: center; }
+    .daily-poem-actions { justify-content: center; }
+    .daily-poem-actions .btn-poem-link { flex: 1 1 auto; }
+    .daily-poem-actions .daily-poem-share { flex: 0 0 auto; }
+}
 
 
 </style>
@@ -667,8 +997,13 @@
 <!-- Hero Banner یکپارچه با تمام المان‌ها -->
 <section class="hero-banner-improved">
     <div class="container">
+        <figure class="home-project-message">
+            <img src="{{ url_for('static', filename='images/hoo.webp') }}"
+                 alt="هو — در این طرح از بیت‌المال مردم ایران استفاده نشود">
+        </figure>
+
         <!-- بخش اول: عنوان اصلی و معرفی شاعر -->
-        <div class="row align-items-stretch g-4 mb-3">
+        <div class="row align-items-center g-4 hero-main">
             <!-- ستون راست: عنوان و دکمه‌ها -->
             <div class="col-lg-7 d-flex flex-column justify-content-center">
                 <div class="hero-content animate-fade-in">
@@ -678,23 +1013,34 @@
                     <p class="hero-subtitle mb-4">
                         از سروده‌های حکیم میرزا احمد الهامی کرمانشاهی
                     </p>
-                    <div class="hero-buttons d-flex gap-3 flex-wrap">
-                        <a href="#gardens" class="btn btn-light btn-lg rounded-pill px-4 shadow-sm">
-                            <i class="fas fa-book-open me-2"></i>
-                            مشاهده باغ‌ها
+                    <nav class="hero-actions" aria-label="دسترسی سریع">
+                        <a href="{{ url_for('main.articles') }}" class="hero-action hero-action--primary">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>پژوهش‌ها</span>
                         </a>
-                        <a href="{{ url_for('main.articles') }}" class="btn btn-outline-light btn-lg rounded-pill px-4">
-                            <i class="fas fa-graduation-cap me-2"></i>
-                            پژوهش‌ها
-                        </a>
-                    </div>
-
-                    <!-- دسترسی مستقیم به باغ‌ها؛ بدون نیاز به اسکرول -->
-                    <div class="hero-quick-gardens d-flex flex-wrap gap-2 mt-3">
                         <a href="{{ url_for('main.garden', garden_num=1) }}" class="quick-garden-pill">خیابان اول</a>
                         <a href="{{ url_for('main.garden', garden_num=2) }}" class="quick-garden-pill">خیابان دوم</a>
                         <a href="{{ url_for('main.garden', garden_num=3) }}" class="quick-garden-pill">خیابان سوم</a>
                         <a href="{{ url_for('main.garden', garden_num=4) }}" class="quick-garden-pill">خیابان چهارم</a>
+                    </nav>
+
+                    <div class="search-container-improved home-search">
+                        <div class="search-header-improved">
+                            <i class="fas fa-search search-icon-improved"></i>
+                            <h4 class="search-title-improved">جستجو در اشعار</h4>
+                        </div>
+                        <div class="search-input-group">
+                            <input type="text"
+                                   id="searchInput"
+                                   class="search-input-improved"
+                                   placeholder="جستجو در عناوین و ابیات..."
+                                   autocomplete="off">
+                            <button type="button" class="btn-search-improved" id="searchButton">
+                                <i class="fas fa-search"></i>
+                                جستجو
+                            </button>
+                        </div>
+                        <div id="searchResults" class="search-results-improved"></div>
                     </div>
                 </div>
             </div>
@@ -704,20 +1050,20 @@
                 <div class="poet-intro-improved animate-slide-in">
                     <div class="text-center mb-3">
                         <div class="poet-image-wrapper d-inline-block">
-                            <img src="{{ url_for('static', filename='images/poet.png') }}" 
-                                 alt="حکیم میرزا احمد الهامی کرمانشاهی" 
-                                 class="poet-image-improved" 
-                                 style="width: 160px; height: 200px;">
+                            <img src="{{ url_for('static', filename='images/poet.webp') }}"
+                                 alt="حکیم میرزا احمد الهامی کرمانشاهی"
+                                 class="poet-image-improved"
+                                 width="160" height="200">
                             <div class="poet-image-overlay">
                                 <i class="fas fa-user-circle"></i>
                             </div>
                         </div>
                     </div>
                     <div class="poet-info text-center">
-                        <h3 class="poet-name-improved" style="font-size: 1.5rem;">
+                        <h3 class="poet-name-improved">
                             حکیم میرزا احمد الهامی
                         </h3>
-                        <h5 class="poet-title-improved" style="font-size: 1.1rem;">
+                        <h5 class="poet-title-improved">
                             کرمانشاهی
                         </h5>
                     </div>
@@ -726,33 +1072,35 @@
         </div>
 
         <!-- بخش دوم: شعر روزانه و جستجو -->
-        <div class="row g-4 mb-3">
+        <div class="row hero-daily">
             <!-- شعر روزانه -->
-            <div class="col-lg-6">
-                <div class="daily-poem-card-improved animate-fade-in-delay-1" style="height: auto; padding: 1.5rem;">
-                    <div class="poem-badge-improved" style="padding: 0.4rem 1rem; font-size: 0.85rem; margin-bottom: 1rem;">
+            <div class="col-12">
+                <div class="daily-poem-card-improved animate-fade-in-delay-1">
+                    <div class="poem-badge-improved">
                         <i class="fas fa-star me-2"></i>
                         شعر روزانه
                     </div>
                     {% if daily_verse %}
-                    <div class="poem-content-improved" style="padding: 0.5rem 0;">
-                        <div class="verse-line-improved" style="font-size: 1.2rem;">{{ daily_verse.verse_1|safe }}</div>
+                    <div class="poem-content-improved daily-poem-verses">
+                        <div class="verse-line-improved">{{ daily_verse.verse_1|safe }}</div>
                         {% if daily_verse.verse_2 %}
-                        <div class="verse-line-improved" style="font-size: 1.2rem;">{{ daily_verse.verse_2|safe }}</div>
+                        <div class="verse-line-improved">{{ daily_verse.verse_2|safe }}</div>
                         {% endif %}
                     </div>
-                    <div class="poem-meta-improved" style="margin-top: 1rem; padding-top: 1rem;">
+                    <div class="daily-poem-footer">
+                    <div class="poem-meta-improved">
                         <i class="fas fa-book me-2"></i>
                         <span id="dailyVerseInfo">{{ daily_verse.garden_name }} - سروده {{ daily_verse.title_order_in_garden|persian_number }} - بیت {{ daily_verse.verse_order_in_title|persian_number }}</span>
                     </div>
-                    <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
-                        <a href="{{ url_for('main.title', title_id=daily_verse.title_id) }}" class="btn btn-poem-link" style="padding: 0.6rem 1.2rem; font-size: 0.95rem; flex: 1;">
+                    <div class="daily-poem-actions">
+                        <a href="{{ url_for('main.title', title_id=daily_verse.title_id) }}" class="btn btn-poem-link">
                             مشاهده شعر کامل
                             <i class="fas fa-chevron-left ms-2"></i>
                         </a>
-                        <button onclick="shareDailyVerse('{{ daily_verse.verse_1|replace("'", "\\'") }}', '{% if daily_verse.verse_2 %}{{ daily_verse.verse_2|replace("'", "\\'") }}{% endif %}', '{{ daily_verse.garden_name }}', '{{ daily_verse.title_order_in_garden|persian_number }}', '{{ daily_verse.verse_order_in_title|persian_number }}')" class="btn btn-poem-link" style="padding: 0.6rem 1.2rem; font-size: 0.95rem; flex: 0.5;">
+                        <button onclick="shareDailyVerse('{{ daily_verse.verse_1|replace("'", "\\'") }}', '{% if daily_verse.verse_2 %}{{ daily_verse.verse_2|replace("'", "\\'") }}{% endif %}', '{{ daily_verse.garden_name }}', '{{ daily_verse.title_order_in_garden|persian_number }}', '{{ daily_verse.verse_order_in_title|persian_number }}')" class="btn btn-poem-link daily-poem-share" aria-label="اشتراک‌گذاری بیت">
                             <i class="fas fa-share-alt"></i>
                         </button>
+                    </div>
                     </div>
                     {% else %}
                     <div class="alert alert-info" role="alert">
@@ -763,28 +1111,6 @@
                 </div>
             </div>
 
-            <!-- جستجو -->
-            <div class="col-lg-6">
-                <div class="search-container-improved animate-fade-in-delay-1" style="height: 100%; padding: 1.5rem;">
-                    <div class="search-header-improved" style="margin-bottom: 1rem;">
-                        <i class="fas fa-search search-icon-improved" style="font-size: 1.5rem;"></i>
-                        <h4 class="search-title-improved" style="font-size: 1.4rem;">جستجو در اشعار</h4>
-                    </div>
-                    <div class="search-input-group">
-                        <input type="text" 
-                               id="searchInput" 
-                               class="search-input-improved" 
-                               placeholder="جستجو در عناوین و ابیات..."
-                               autocomplete="off"
-                               style="padding: 0.9rem 1.2rem; font-size: 1rem;">
-                        <button type="button" class="btn-search-improved" id="searchButton" style="padding: 0.9rem 1.5rem; font-size: 1rem;">
-                            <i class="fas fa-search"></i>
-                            جستجو
-                        </button>
-                    </div>
-                    <div id="searchResults" class="search-results-improved"></div>
-                </div>
-            </div>
         </div>
     </div>
 </section>

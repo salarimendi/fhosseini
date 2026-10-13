@@ -196,7 +196,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('../images/pattern.png') repeat;
+    background: url('../images/pattern.webp') repeat;
     opacity: 0.05;
     pointer-events: none;
 }
@@ -381,7 +381,7 @@ h1, h2, h3, h4, h5, h6,
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('../images/pattern.png') repeat;
+    background: url('../images/pattern.webp') repeat;
     opacity: 0.05;
     pointer-events: none;
 }
@@ -2318,4 +2318,3 @@ a:hover,
     margin-bottom: 1rem;
     box-shadow: 0 12px 25px rgba(0, 0, 0, 0.18);
 }
-

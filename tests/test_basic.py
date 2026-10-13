@@ -68,7 +68,32 @@ class BasicTestCase(unittest.TestCase):
         """Test that the index page loads."""
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
-        self.assertIn('فردوسی حسینی', response.get_data(as_text=True))
+        page = response.get_data(as_text=True)
+        self.assertIn('فردوسی حسینی', page)
+        self.assertNotIn('/static/images/besm.webp', page)
+        self.assertIn('/static/images/hoo.webp', page)
+        self.assertIn('در این طرح از بیت‌المال مردم ایران استفاده نشود', page)
+        self.assertEqual(page.count('id="searchInput"'), 1)
+        self.assertLess(
+            page.index('id="searchInput"'),
+            page.index('<div class="daily-poem-card-improved')
+        )
+        for image in (
+            'besm.webp',
+            'favicon-3.webp',
+            'form.webp',
+            'hand-write-1.webp',
+            'hand-write-2.webp',
+            'hand-write-3.webp',
+            'hand-write-4.webp',
+            'hoo.webp',
+            'pattern.webp',
+            'poet.webp',
+        ):
+            with self.subTest(image=image):
+                image_response = self.client.get(f'/static/images/{image}')
+                self.assertEqual(image_response.status_code, 200)
+                self.assertEqual(image_response.mimetype, 'image/webp')
     
     def test_login_page(self):
         """Test that the login page loads."""

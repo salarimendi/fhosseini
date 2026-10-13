@@ -5,6 +5,7 @@
 فایل اصلی اپلیکیشن فردوسی حسینی
 """
 
+import mimetypes
 import os
 
 from flask import Flask, request
@@ -49,6 +50,8 @@ talisman = Talisman()
 
 def create_app(config_name=None):
     """ایجاد و تنظیم اپلیکیشن Flask."""
+
+    mimetypes.add_type("image/webp", ".webp")
 
     # --------------------------------------------------------
     # تعیین محیط
