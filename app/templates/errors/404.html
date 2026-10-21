@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}صفحه پیدا نشد - سایت فردوسی حسینی{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="state-page">
+        <div class="state-page__icon"><i class="fas fa-compass"></i></div>
+        <div class="state-page__code">۴۰۴</div>
+        <h1 class="h3 mt-2">صفحه‌ی موردنظر پیدا نشد</h1>
+        <p class="lead text-muted">ممکن است نشانی را اشتباه وارد کرده باشید یا صفحه جابه‌جا شده باشد.</p>
+        <a href="{{ url_for('main.home') }}" class="btn btn-primary mt-2"><i class="fas fa-home me-2"></i>بازگشت به صفحه اصلی</a>
+    </div>
+</div>
+{% endblock %}

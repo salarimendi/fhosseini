@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}پروفایل کاربری{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card auth-card--wide">
+    <div class="auth-card__head">
+      <div class="profile-avatar" style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);box-shadow:none"><i class="fas fa-user"></i></div>
+      <h1 class="auth-title">{{ current_user.fullname or current_user.username }}</h1>
+      <p class="auth-sub" dir="ltr">@{{ current_user.username }}</p>
+    </div>
+    <div class="auth-card__body">
+      <ul class="info-list">
+        <li><span class="k">نام کاربری</span><span class="v" dir="ltr">{{ current_user.username }}</span></li>
+        <li><span class="k">نام کامل</span><span class="v">{{ current_user.fullname }}</span></li>
+        <li><span class="k">ایمیل</span><span class="v" dir="ltr">{{ current_user.email }}</span></li>
+        <li><span class="k">نقش</span><span class="v">
+          {% if current_user.role == 'admin' %}<span class="badge bg-danger">مدیر</span>
+          {% elif current_user.role == 'researcher' %}<span class="badge bg-info">محقق</span>
+          {% elif current_user.role == 'reader' %}<span class="badge bg-success">خواننده</span>
+          {% else %}<span class="badge bg-secondary">کاربر عادی</span>{% endif %}
+        </span></li>
+        {% if current_user.role == 'researcher' %}
+        <li><span class="k">تعداد نظرات</span><span class="v">{{ current_user.comments.count() }} نظر</span></li>
+        {% endif %}
+        {% if current_user.role == 'reader' %}
+        <li><span class="k">تعداد ضبط‌ها</span><span class="v">{{ current_user.recordings.count() }} ضبط</span></li>
+        {% endif %}
+        <li><span class="k">تاریخ عضویت</span><span class="v">{{ current_user.created_at.strftime('%Y/%m/%d') if current_user.created_at else 'نامشخص' }}</span></li>
+      </ul>
+
+      <div class="action-stack">
+        <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-primary"><i class="fas fa-user-edit me-1"></i> ویرایش مشخصات</a>
+        <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline-primary"><i class="fas fa-key me-1"></i> تغییر رمز عبور</a>
+        {% if current_user.role == 'reader' %}
+        <a href="{{ url_for('verses.my_recordings') }}" class="btn btn-outline-primary"><i class="fas fa-microphone me-1"></i> ضبط‌های من</a>
+        {% endif %}
+        {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-primary"><i class="fas fa-cog me-1"></i> پنل مدیریت</a>
+        {% endif %}
+        <a href="{{ url_for('main.home') }}" class="btn btn-outline-secondary"><i class="fas fa-home me-1"></i> بازگشت به صفحه اصلی</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

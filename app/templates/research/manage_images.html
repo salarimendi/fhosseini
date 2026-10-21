@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت عکس‌های پژوهشی{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">مدیریت عکس‌های زیرموضوع: {{ subtopic_title }}</h5>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.close()">بستن</button>
+        </div>
+        <div class="card-body">
+            <!-- بخش آپلود عکس جدید -->
+            <div class="mb-4">
+                <h6>افزودن عکس جدید</h6>
+                <div class="input-group mb-2">
+                    <input type="file" class="form-control" id="imageFile" accept="image/*">
+                    <button class="btn btn-primary" type="button" id="uploadBtn">آپلود</button>
+                </div>
+                <small class="text-muted">حداکثر حجم: {{ config.RESEARCH_IMAGE_MAX_SIZE_MB }} مگابایت | فرمت‌های مجاز: jpg, png, gif, webp</small>
+                <div id="uploadProgress" class="progress mt-2" style="display: none;">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- لیست عکس‌های موجود -->
+            <div class="mb-3">
+                <h6>عکس‌های موجود (<span id="imageCount">0</span>)</h6>
+                <div id="imagesList" class="row g-3">
+                    <!-- عکس‌ها به صورت داینامیک اضافه می‌شوند -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal برای ویرایش کپشن -->
+<div class="modal fade" id="captionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ویرایش کپشن</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" class="img-fluid mb-3" alt="تصویر">
+                <textarea class="form-control" id="captionInput" rows="3" placeholder="توضیحات تصویر..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" id="saveCaptionBtn">ذخیره</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const commentId = {{ comment_id }};
+const subtopicIndex = {{ subtopic_index }};
+const isReadOnly = {{ 'true' if is_readonly else 'false' }};
+const csrfToken = "{{ csrf_token() }}";
+const maxFileSize = {{ config.RESEARCH_IMAGE_MAX_SIZE_MB * 1024 * 1024 }};
+
+let currentEditingImageId = null;
+let captionModal = null;
+
+class ImageManager {
+    constructor() {
+        this.images = [];
+        this.init();
+    }
+
+    init() {
+        captionModal = new bootstrap.Modal(document.getElementById('captionModal'));
+        this.bindEvents();
+        this.loadImages();
+    }
+
+    bindEvents() {
+        if (!isReadOnly) {
+            document.getElementById('uploadBtn').addEventListener('click', () => this.uploadImage());
+            document.getElementById('imageFile').addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    this.validateFile(e.target.files[0]);
+                }
+            });
+            document.getElementById('saveCaptionBtn').addEventListener('click', () => this.saveCaption());
+        }
+    }
+
+    validateFile(file) {
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        
+        if (!validTypes.includes(file.type)) {
+            alert('فرمت فایل پشتیبانی نمی‌شود. فقط فایل‌های تصویری مجاز هستند.');
+            document.getElementById('imageFile').value = '';
+            return false;
+        }
+        
+        if (file.size > maxFileSize) {
+            alert(`حجم فایل بیش از حد مجاز است. حداکثر ${Math.round(maxFileSize / 1024 / 1024)} مگابایت مجاز است.`);
+            document.getElementById('imageFile').value = '';
+            return false;
+        }
+        
+        return true;
+    }
+
+    async uploadImage() {
+        const fileInput = document.getElementById('imageFile');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            alert('لطفاً یک فایل انتخاب کنید');
+            return;
+        }
+
+        if (!this.validateFile(file)) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const progressDiv = document.getElementById('uploadProgress');
+        const progressBar = progressDiv.querySelector('.progress-bar');
+        
+        try {
+            progressDiv.style.display = 'block';
+            progressBar.style.width = '50%';
+
+            const response = await fetch(`/verses/upload_research_image/${commentId}/${subtopicIndex}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                progressBar.style.width = '100%';
+                setTimeout(() => {
+                    progressDiv.style.display = 'none';
+                    progressBar.style.width = '0%';
+                    fileInput.value = '';
+                    this.loadImages();
+                }, 500);
+            } else {
+                alert(data.message || 'خطا در آپلود فایل');
+                progressDiv.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('خطا در آپلود فایل: ' + error.message);
+            progressDiv.style.display = 'none';
+        }
+    }
+
+    async loadImages() {
+        try {
+            const response = await fetch(`/verses/get_research_images/${commentId}/${subtopicIndex}`);
+            const data = await response.json();
+
+            if (data.success && data.images) {
+                this.images = data.images;
+                this.renderImages();
+            }
+        } catch (error) {
+            console.error('Error loading images:', error);
+        }
+    }
+
+    renderImages() {
+        const container = document.getElementById('imagesList');
+        document.getElementById('imageCount').textContent = this.images.length;
+
+        if (this.images.length === 0) {
+            container.innerHTML = '<div class="col-12 text-center text-muted">هیچ عکسی وجود ندارد</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+
+        this.images.forEach(img => {
+            const col = document.createElement('div');
+            col.className = 'col-md-4 col-sm-6';
+            
+            const deleteBtn = !isReadOnly ? 
+                `<button class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" 
+                        onclick="imageManager.deleteImage(${img.id})" 
+                        title="حذف">×</button>` : '';
+            
+            const editBtn = !isReadOnly ?
+                `<button class="btn btn-primary btn-sm w-100 mt-2" 
+                        onclick="imageManager.editCaption(${img.id}, '${this.escapeHtml(img.caption || '')}', '/verses/research_image_file/${img.filename}')">
+                    ویرایش کپشن
+                </button>` : '';
+
+            col.innerHTML = `
+                <div class="card position-relative">
+                    ${deleteBtn}
+                    <img src="/verses/research_image_file/${img.filename}" 
+                         class="card-img-top" 
+                         alt="${this.escapeHtml(img.caption || 'تصویر پژوهشی')}"
+                         style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <p class="card-text small" style="min-height: 60px;">
+                            ${this.escapeHtml(img.caption || 'بدون توضیحات')}
+                        </p>
+                        <small class="text-muted d-block">
+                            ${img.original_filename || ''} (${this.formatFileSize(img.file_size)})
+                        </small>
+                        ${editBtn}
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(col);
+        });
+    }
+
+    editCaption(imageId, currentCaption, imageUrl) {
+        currentEditingImageId = imageId;
+        document.getElementById('captionInput').value = currentCaption;
+        document.getElementById('modalImage').src = imageUrl;
+        captionModal.show();
+    }
+
+    async saveCaption() {
+        const newCaption = document.getElementById('captionInput').value;
+
+        try {
+            const response = await fetch(`/verses/update_research_image_caption/${currentEditingImageId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ caption: newCaption })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                captionModal.hide();
+                this.loadImages();
+            } else {
+                alert(data.message || 'خطا در ذخیره کپشن');
+            }
+        } catch (error) {
+            console.error('Error saving caption:', error);
+            alert('خطا در ذخیره کپشن: ' + error.message);
+        }
+    }
+
+    async deleteImage(imageId) {
+        if (!confirm('آیا از حذف این عکس مطمئن هستید؟')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/verses/delete_research_image/${imageId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.loadImages();
+            } else {
+                alert(data.message || 'خطا در حذف عکس');
+            }
+        } catch (error) {
+            console.error('Error deleting image:', error);
+            alert('خطا در حذف عکس: ' + error.message);
+        }
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    formatFileSize(bytes) {
+        if (!bytes) return '0 KB';
+        const kb = bytes / 1024;
+        if (kb < 1024) return kb.toFixed(1) + ' KB';
+        return (kb / 1024).toFixed(1) + ' MB';
+    }
+}
+
+// Initialize
+let imageManager;
+document.addEventListener('DOMContentLoaded', () => {
+    imageManager = new ImageManager();
+});
+</script>
+
+<style>
+.card-img-top {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.card-img-top:hover {
+    transform: scale(1.05);
+}
+
+.btn-close {
+    margin-left: 0 !important;
+}
+</style>
+{% endblock %}

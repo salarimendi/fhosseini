@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}تنظیمات سایت{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+  <div class="row">
+    {% include "admin/_sidebar.html" %}
+
+    <div class="col-md-9 col-lg-10 admin-main">
+        <div class="admin-page-head">
+            <div>
+                <h1>تنظیمات سایت</h1>
+                <p>فونت پیش‌فرض نمایش اشعار برای همه‌ی بازدیدکنندگان</p>
+            </div>
+        </div>
+
+        <section class="panel" style="max-width: 720px">
+            <form method="POST" action="{{ url_for('admin.settings') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label for="poem_font" class="form-label">فونت پیش‌فرض اشعار</label>
+                <select id="poem_font" name="poem_font" class="form-select mb-3">
+                    {% for key, label in poem_fonts.items() %}
+                    <option value="{{ key }}" {% if key == current_font %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+
+                <div class="poem-font-preview verse-text" id="fontPreview" data-poem-font="{{ current_font }}">
+                    بسم الله الرَّحمنِ الرَّحيم — نمونه‌ی شعر با حرکات: مَنْ لَمْ يَذُقْ
+                </div>
+                <div class="field-hint mb-3">هر کاربر می‌تواند در صفحه‌ی هر شعر برای خودش فونت دیگری انتخاب کند؛ این انتخاب روی پیش‌فرض دیگران اثری ندارد.</div>
+
+                <button type="submit" class="btn btn-primary"><i class="fas fa-floppy-disk me-1"></i> ذخیره</button>
+            </form>
+        </section>
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById('poem_font').addEventListener('change', function () {
+    document.getElementById('fontPreview').setAttribute('data-poem-font', this.value);
+});
+</script>
+{% endblock %}

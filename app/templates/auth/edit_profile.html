@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_ui.html" import auth_card, errors %}
+{% block title %}ویرایش مشخصات{% endblock %}
+
+{% block content %}
+{% call auth_card('ویرایش مشخصات', 'نام و ایمیل خود را به‌روز کنید', 'fa-user-pen') %}
+<form method="POST" novalidate>
+    {{ form.csrf_token }}
+    <div class="mb-3">
+        {{ form.fullname.label(class="form-label") }}
+        {{ form.fullname(class="form-control", maxlength="40", autocomplete="name") }}
+        {{ errors(form.fullname) }}
+    </div>
+    <div class="mb-3">
+        {{ form.email.label(class="form-label") }}
+        {{ form.email(class="form-control", type="email", dir="ltr", autocomplete="email") }}
+        {{ errors(form.email) }}
+    </div>
+    <div class="d-grid gap-2 mt-4">
+        {{ form.submit(class="btn btn-primary") }}
+        <a href="{{ url_for('auth.profile') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-right"></i> بازگشت</a>
+    </div>
+</form>
+{% endcall %}
+{% endblock %}
