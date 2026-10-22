@@ -149,6 +149,21 @@
                         </ul>
                     </li>
 
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white {{ 'active' if _ep.startswith('activities_public') }}" href="#" id="activitiesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-timeline text-white me-1"></i> وبلاگ فعالیت‌ها
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="activitiesDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('activities_public.list_activities') }}"><i class="fas fa-list me-2"></i>همه‌ی مراحل و اقدامات</a></li>
+                            {% if nav_activity_categories %}
+                            <li><hr class="dropdown-divider"></li>
+                            {% for nav_cat in nav_activity_categories %}
+                            <li><a class="dropdown-item" href="{{ url_for('activities_public.by_category', slug=nav_cat.slug) }}"><i class="fas fa-folder me-2"></i>{{ nav_cat.name }}</a></li>
+                            {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </li>
+
 
 
                     <li class="nav-item">

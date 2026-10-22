@@ -17,6 +17,13 @@ from datetime import datetime
 from app import db
 
 
+# بخش‌های محتوا: «مقالات» و «وبلاگ فعالیت‌ها» از یک ساختار (مدل، پنل، ویرایشگر) استفاده می‌کنند
+# و فقط با ستون section از هم جدا می‌شوند؛ افزودن بخش جدید فقط افزودن یک مقدار به SECTIONS است.
+SECTION_ARTICLES = 'articles'
+SECTION_ACTIVITIES = 'activities'
+SECTIONS = (SECTION_ARTICLES, SECTION_ACTIVITIES)
+
+
 class ArticleCategory(db.Model):
     """
     دسته‌بندی مقالات.
@@ -29,6 +36,8 @@ class ArticleCategory(db.Model):
     name = db.Column(db.String(120), nullable=False)
     slug = db.Column(db.String(160), unique=True, nullable=False, index=True)
     description = db.Column(db.Text, nullable=True)
+    section = db.Column(db.String(20), nullable=False, default=SECTION_ARTICLES,
+                        server_default=SECTION_ARTICLES, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     articles = db.relationship('Article', back_populates='category', lazy='dynamic')
@@ -87,6 +96,15 @@ class Article(db.Model):
         """HTML برای نمایش؛ آدرس تصاویر قدیمیِ نسبی را هم به /articles/media/... اصلاح می‌کند."""
         from app.articles.utils import normalize_media_urls
         return normalize_media_urls(self.content_html)
+
+    @property
+    def contributors_list(self):
+        return [line.strip() for line in (self.contributors or '').splitlines() if line.strip()]
+
+    @property
+    def video_embed_url(self):
+        from app.articles.utils import video_embed_url
+        return video_embed_url(self.video_url)
 
     @property
     def is_published(self):

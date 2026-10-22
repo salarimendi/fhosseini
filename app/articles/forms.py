@@ -7,7 +7,7 @@ app/articles/forms.py
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, TextAreaField, SelectField
-from wtforms.validators import DataRequired, Length, Optional
+from wtforms.validators import DataRequired, Length, Optional, ValidationError
 
 
 class ArticleCategoryForm(FlaskForm):
@@ -16,6 +16,16 @@ class ArticleCategoryForm(FlaskForm):
 
 
 class ArticleForm(FlaskForm):
+    # --- فقط برای «وبلاگ فعالیت‌ها» (در بخش مقالات نمایش داده نمی‌شوند) ---
+    stage_label = StringField('عنوان مرحله (مثلاً «مرحله ۲: تصحیح نسخه‌ها»)', validators=[Optional(), Length(max=120)])
+    contributors = TextAreaField('مشارکت‌کنندگان (هر نفر در یک خط)', validators=[Optional(), Length(max=2000)])
+    video_url = StringField('لینک ویدیو (آپارات یا یوتیوب)', validators=[Optional(), Length(max=500)])
+
+    def validate_video_url(self, field):
+        from app.articles.utils import video_embed_url
+        if field.data and not video_embed_url(field.data):
+            raise ValidationError('فقط لینک ویدیوی آپارات (aparat.com/v/…) یا یوتیوب پذیرفته می‌شود.')
+
     title = StringField('عنوان مقاله', validators=[DataRequired(), Length(max=255)])
 
     category_id = SelectField('دسته‌بندی', coerce=int, validators=[Optional()])

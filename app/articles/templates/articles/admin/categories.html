@@ -7,7 +7,7 @@
     {% include "admin/_sidebar.html" %}
 
     <div class="col-md-9 col-lg-10">
-        <h1>دسته‌بندی‌های مقالات</h1>
+        <h1>{{ 'دسته‌بندی‌های وبلاگ فعالیت‌ها' if section == 'activities' else 'دسته‌بندی‌های مقالات' }}</h1>
 
         <form method="POST" class="mb-4">
             {{ form.hidden_tag() }}
@@ -21,7 +21,7 @@
                 {{ 'ذخیره تغییرات' if editing_category else 'افزودن دسته‌بندی' }}
             </button>
             {% if editing_category %}
-                <a href="{{ url_for('articles_admin.categories') }}" class="btn btn-outline-secondary">انصراف</a>
+                <a href="{{ url_for('articles_admin.categories', section=section) }}" class="btn btn-outline-secondary">انصراف</a>
             {% endif %}
         </form>
 

@@ -1,6 +1,6 @@
 {# app/articles/templates/articles/admin/list.html #}
 {% extends "base.html" %}
-{% block title %}مقالات{% endblock %}
+{% block title %}{{ 'وبلاگ فعالیت‌ها' if section == 'activities' else 'مقالات' }}{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -8,15 +8,15 @@
 
     <div class="col-md-9 col-lg-10">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1>مقالات</h1>
-            <a href="{{ url_for('articles_admin.new_article') }}" class="btn btn-primary">+ مقاله‌ی جدید</a>
+            <h1>{{ 'وبلاگ فعالیت‌ها' if section == 'activities' else 'مقالات' }}</h1>
+            <a href="{{ url_for('articles_admin.new_article', section=section) }}" class="btn btn-primary">{{ '+ مطلب جدید' if section == 'activities' else '+ مقاله‌ی جدید' }}</a>
         </div>
 
         <div class="mb-3">
-            <a href="{{ url_for('articles_admin.list_articles') }}" class="btn btn-sm {{ 'btn-secondary' if not status_filter else 'btn-outline-secondary' }}">همه</a>
-            <a href="{{ url_for('articles_admin.list_articles', status='published') }}" class="btn btn-sm {{ 'btn-secondary' if status_filter=='published' else 'btn-outline-secondary' }}">منتشرشده</a>
-            <a href="{{ url_for('articles_admin.list_articles', status='draft') }}" class="btn btn-sm {{ 'btn-secondary' if status_filter=='draft' else 'btn-outline-secondary' }}">پیش‌نویس</a>
-            <a href="{{ url_for('articles_admin.categories') }}" class="btn btn-sm btn-outline-dark">مدیریت دسته‌بندی‌ها</a>
+            <a href="{{ url_for('articles_admin.list_articles', section=section) }}" class="btn btn-sm {{ 'btn-secondary' if not status_filter else 'btn-outline-secondary' }}">همه</a>
+            <a href="{{ url_for('articles_admin.list_articles', section=section, status='published') }}" class="btn btn-sm {{ 'btn-secondary' if status_filter=='published' else 'btn-outline-secondary' }}">منتشرشده</a>
+            <a href="{{ url_for('articles_admin.list_articles', section=section, status='draft') }}" class="btn btn-sm {{ 'btn-secondary' if status_filter=='draft' else 'btn-outline-secondary' }}">پیش‌نویس</a>
+            <a href="{{ url_for('articles_admin.categories', section=section) }}" class="btn btn-sm btn-outline-dark">مدیریت دسته‌بندی‌ها</a>
         </div>
 
         <table class="table">
@@ -54,7 +54,7 @@
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="6">هنوز مقاله‌ای ثبت نشده است.</td></tr>
+                <tr><td colspan="6">هنوز مطلبی ثبت نشده است.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -64,7 +64,7 @@
             <ul class="pagination">
                 {% for p in range(1, pagination.pages + 1) %}
                 <li class="page-item {{ 'active' if p == pagination.page else '' }}">
-                    <a class="page-link" href="{{ url_for('articles_admin.list_articles', page=p, status=status_filter) }}">{{ p }}</a>
+                    <a class="page-link" href="{{ url_for('articles_admin.list_articles', section=section, page=p, status=status_filter) }}">{{ p }}</a>
                 </li>
                 {% endfor %}
             </ul>

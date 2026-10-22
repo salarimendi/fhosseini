@@ -14,6 +14,7 @@ from werkzeug.utils import secure_filename
 from app import db
 from app.models import Title, Verse, Recording, Comment, User
 from app.utils.database import save_research_form, safe_internal_path, get_adjacent_titles
+from app.utils.images import save_upload as save_image_upload
 
 verses_bp = Blueprint('verses', __name__)
 
@@ -84,13 +85,20 @@ def upload_research_image(comment_id, subtopic_index):
                 'message': f'حجم فایل نباید بیشتر از {current_app.config.get("RESEARCH_IMAGE_MAX_SIZE_MB", 5)} مگابایت باشد.'
             }), 400
 
-        # ذخیره فایل
+        # ذخیره فایل (تبدیل به WebP؛ در صورت خاموش‌بودن تنظیم، عین فایل)
         ext = file.filename.rsplit('.', 1)[1].lower()
-        unique_filename = f"comment{comment_id}_subtopic{subtopic_index}_{uuid.uuid4().hex}.{ext}"
         upload_folder = get_research_image_upload_folder()
-        file_path = os.path.join(upload_folder, unique_filename)
-        
-        file.save(file_path)
+        try:
+            saved = save_image_upload(
+                file, upload_folder,
+                f"comment{comment_id}_subtopic{subtopic_index}_{uuid.uuid4().hex}", ext,
+                convert=current_app.config.get('IMAGE_WEBP_ON_UPLOAD', True),
+                quality=current_app.config.get('IMAGE_WEBP_QUALITY', 82),
+                max_side=current_app.config.get('IMAGE_MAX_SIDE', 2560))
+        except ValueError as e:
+            return jsonify({'success': False, 'message': str(e)}), 400
+        unique_filename = saved.filename
+        file_size = saved.size
 
         # ذخیره در دیتابیس
         image = ResearchImage(

@@ -1,0 +1,78 @@
+{# صفحه‌ی یک مرحله/فعالیت #}
+{% extends "base.html" %}
+{% block title %}{{ activity.get_meta_title() }}{% endblock %}
+
+{% block head %}
+    {{ super() if super }}
+    <meta name="description" content="{{ activity.get_meta_description() }}">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ activity.get_meta_title() }}">
+    {% if activity.featured_image_filename %}
+    <meta property="og:image" content="{{ url_for('articles_public.media', filename=activity.featured_image_filename, _external=True) }}">
+    {% endif %}
+    <link rel="canonical" href="{{ url_for('activities_public.detail', slug=activity.slug, _external=True) }}">
+{% endblock %}
+
+{% block content %}
+<div class="container pb-4 article-detail-page">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ url_for('activities_public.list_activities') }}">وبلاگ فعالیت‌ها</a></li>
+            {% if activity.category %}
+            <li class="breadcrumb-item"><a href="{{ url_for('activities_public.by_category', slug=activity.category.slug) }}">{{ activity.category.name }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ activity.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9 article-detail-wrap">
+            <article class="article-detail-card">
+                <header class="article-head">
+                    {% if activity.stage_label %}<span class="chip">{{ activity.stage_label }}</span>{% endif %}
+                    <h1 class="article-head__title">{{ activity.title }}</h1>
+                    <div class="article-head__meta">
+                        {% if activity.published_at %}<span><i class="far fa-calendar me-1"></i>{{ activity.published_at.strftime('%Y-%m-%d') }}</span>{% endif %}
+                        {% if current_user.is_authenticated and (current_user.role == 'admin' or activity.author_id == current_user.id) %}
+                        <a href="{{ url_for('articles_admin.edit_article', article_id=activity.id) }}" class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>ویرایش</a>
+                        {% endif %}
+                    </div>
+                    {% if activity.contributors_list %}
+                    <div class="activity-people">
+                        <strong><i class="fas fa-users me-1" aria-hidden="true"></i>مشارکت‌کنندگان:</strong>
+                        {% for person in activity.contributors_list %}<span class="chip chip--soft">{{ person }}</span>{% endfor %}
+                    </div>
+                    {% endif %}
+                </header>
+
+                {% if activity.featured_image_filename %}
+                <img src="{{ url_for('articles_public.media', filename=activity.featured_image_filename) }}" alt="{{ activity.title }}" class="featured-image mb-4">
+                {% endif %}
+
+                <div class="article-content">{{ activity.content_html_display | safe }}</div>
+
+                {% if activity.video_embed_url %}
+                <div class="activity-video mt-4">
+                    <iframe src="{{ activity.video_embed_url }}" title="ویدیوی {{ activity.title }}" loading="lazy"
+                            allowfullscreen referrerpolicy="no-referrer"
+                            sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"></iframe>
+                </div>
+                {% endif %}
+            </article>
+
+            <nav class="activity-steps mt-4" aria-label="مراحل قبلی و بعدی">
+                {% if older %}
+                <a class="activity-steps__link" href="{{ url_for('activities_public.detail', slug=older.slug) }}" rel="prev">
+                    <small><i class="fas fa-arrow-right ms-1" aria-hidden="true"></i>مرحله‌ی قبل</small><span>{{ older.title }}</span>
+                </a>
+                {% else %}<span></span>{% endif %}
+                {% if newer %}
+                <a class="activity-steps__link activity-steps__link--next" href="{{ url_for('activities_public.detail', slug=newer.slug) }}" rel="next">
+                    <small>مرحله‌ی بعد<i class="fas fa-arrow-left me-1" aria-hidden="true"></i></small><span>{{ newer.title }}</span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -270,12 +270,13 @@ def create_app(config_name=None):
         پس افزودن/تغییر نام/حذف دسته‌بندی فوراً در منو دیده می‌شود."""
         try:
             from app.articles.models import ArticleCategory
-            categories = ArticleCategory.query.order_by(ArticleCategory.name).all()
+            categories = ArticleCategory.query.filter_by(section="articles").order_by(ArticleCategory.name).all()
+            activity_categories = ArticleCategory.query.filter_by(section="activities").order_by(ArticleCategory.name).all()
         except Exception as e:
             db.session.rollback()
             app.logger.error(f"خطا در دریافت دسته‌بندی مقالات برای منو: {e}")
-            categories = []
-        return {"nav_article_categories": categories}
+            categories, activity_categories = [], []
+        return {"nav_article_categories": categories, "nav_activity_categories": activity_categories}
 
     @app.context_processor
     def inject_poem_font():

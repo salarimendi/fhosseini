@@ -18,3 +18,4 @@ Flask-Talisman==1.1.0
 bleach==6.1.0
 python-slugify==8.0.4
 pysweph>=2.10.3.6
+Pillow>=10.0.0

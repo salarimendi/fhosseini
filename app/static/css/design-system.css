@@ -2346,3 +2346,40 @@ audio { width: 100%; border-radius: 999px; }
 @media (max-width: 575.98px) {
     .article-detail-card .article-content img { max-width: 100%; max-height: 60vh; border-radius: 10px; }
 }
+
+/* ==========================================================================
+   وبلاگ فعالیت‌ها: خط زمانی، کارت مرحله، ویدیو و ناوبری مراحل
+   ========================================================================== */
+.chip--soft { background: var(--surface-soft); color: var(--text-dark); }
+.chip--active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+.activity-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.activity-timeline { list-style: none; margin: 0; padding: 0 1.75rem 0 0; position: relative; }
+.activity-timeline::before { content: ""; position: absolute; top: 0.5rem; bottom: 0.5rem; right: 0.45rem; width: 2px; background: var(--border-color); }
+.activity-item { position: relative; margin-bottom: 1.25rem; }
+.activity-item__dot { position: absolute; top: 1.35rem; right: -1.75rem; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent-color); border: 3px solid var(--bg-light); box-shadow: 0 0 0 2px var(--accent-color); }
+.activity-card { display: flex; flex-direction: row; overflow: hidden; padding: 0 !important; }
+.activity-card__media { flex: 0 0 clamp(130px, 24%, 210px); background: var(--surface-soft); }
+.activity-card__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.activity-card .card-body { min-width: 0; padding: 1rem 1.25rem; }
+.activity-card__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem; margin-bottom: 0.4rem; font-size: 0.82rem; color: var(--ink-muted); }
+.activity-card__title a { color: var(--text-dark); text-decoration: none; }
+.activity-card__title a:hover { color: var(--primary-color); }
+.activity-card__excerpt { color: var(--ink-muted); font-size: 0.92rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 0.5rem; }
+.activity-card__people { display: flex; flex-wrap: wrap; gap: 0.3rem 0.5rem; font-size: 0.82rem; color: var(--ink-muted); }
+.activity-card__people span + span::before { content: "·"; margin-inline-end: 0.5rem; }
+.activity-people { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-top: 0.75rem; font-size: 0.9rem; }
+.activity-video { position: relative; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: #000; box-shadow: var(--shadow-soft); }
+.activity-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.activity-steps { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.activity-steps__link { flex: 1 1 14rem; display: flex; flex-direction: column; gap: 0.15rem; padding: 0.85rem 1.1rem; border: 1px solid var(--border-color);
+    border-radius: var(--radius-surface); background: var(--card-bg); text-decoration: none; color: var(--text-dark); transition: border-color 160ms ease, transform 160ms ease; }
+.activity-steps__link:hover { border-color: var(--primary-color); transform: translateY(-2px); }
+.activity-steps__link small { color: var(--ink-muted); }
+.activity-steps__link--next { text-align: left; }
+@media (max-width: 575.98px) {
+    .activity-card { flex-direction: column; }
+    .activity-card__media { flex: none; aspect-ratio: 16 / 9; }
+    .activity-timeline { padding-right: 1.4rem; }
+    .activity-item__dot { right: -1.4rem; }
+}

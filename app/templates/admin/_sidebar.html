@@ -25,6 +25,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link {% if request.endpoint in ['articles_admin.list_articles','articles_admin.categories'] and request.args.get('section') == 'activities' %}active{% endif %}" href="{{ url_for('articles_admin.list_articles', section='activities') }}">
+                    <i class="fas fa-timeline fa-fw me-2"></i>
+                    وبلاگ فعالیت‌ها
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link {% if request.endpoint == 'admin.settings' %}active{% endif %}" href="{{ url_for('admin.settings') }}">
                     <i class="fas fa-sliders fa-fw me-2"></i>
                     تنظیمات سایت
@@ -40,7 +46,7 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'articles_admin.list_articles' %}active{% endif %}" href="{{ url_for('articles_admin.list_articles') }}">
+                <a class="nav-link {% if request.endpoint == 'articles_admin.list_articles' and request.args.get('section') != 'activities' %}active{% endif %}" href="{{ url_for('articles_admin.list_articles') }}">
                     <i class="fas fa-newspaper fa-fw me-2"></i>مدیریت مقالات 
                     {% if pending_corrections_count > 0 %}
                     <span class="badge bg-warning rounded-pill">{{ pending_corrections_count }}</span>

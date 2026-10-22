@@ -173,3 +173,5 @@ instance/
 temp/
 tmp/
 logs/
+# پشتیبان‌های اسکریپت تبدیل WebP
+backups/

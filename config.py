@@ -150,6 +150,13 @@ class Config:
     )
     ARTICLES_PER_PAGE = env_config('ARTICLES_PER_PAGE', cast=int, default=10)
 
+    # تبدیل تصاویر آپلودی (مستندات و مقالات) به WebP.
+    # اگر سرور ضعیف است و آپلود کند شد: IMAGE_WEBP_ON_UPLOAD=false و تبدیل دوره‌ای با
+    # scripts/convert_images_to_webp.py
+    IMAGE_WEBP_ON_UPLOAD = get_bool('IMAGE_WEBP_ON_UPLOAD', True)
+    IMAGE_WEBP_QUALITY = env_config('IMAGE_WEBP_QUALITY', cast=int, default=82)
+    IMAGE_MAX_SIDE = env_config('IMAGE_MAX_SIDE', cast=int, default=2560)
+
     # --------------------------------------------------------
     # Session
     # --------------------------------------------------------
@@ -341,7 +348,8 @@ class Config:
         ],
         "frame-src": [
             "'self'",
-            "https://www.aparat.com"
+            "https://www.aparat.com",
+            "https://www.youtube-nocookie.com"
         ]
     }
 

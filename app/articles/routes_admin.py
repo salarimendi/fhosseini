@@ -18,6 +18,8 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
 from app import db
+from app.utils.images import save_upload as save_image
+from app.articles.models import SECTIONS, SECTION_ARTICLES, SECTION_ACTIVITIES
 from app.articles.models import Article, ArticleCategory, ArticleMedia
 from app.articles.forms import ArticleForm, ArticleCategoryForm
 from app.articles.utils import (
@@ -88,18 +90,21 @@ def save_uploaded_image(file_storage):
         raise ValueError(f'حجم تصویر نباید بیشتر از {max_size_mb} مگابایت باشد.')
 
     ext = secure_filename(file_storage.filename).rsplit('.', 1)[-1].lower()
-    unique_name = f'{uuid.uuid4().hex}.{ext}'
-
     upload_folder = current_app.config['ARTICLE_IMAGE_UPLOAD_FOLDER']
-    os.makedirs(upload_folder, exist_ok=True)
-    file_storage.save(os.path.join(upload_folder, unique_name))
+    # تبدیل به WebP (یا ذخیره‌ی عین فایل اگر IMAGE_WEBP_ON_UPLOAD=false)؛ فایل نامعتبر → ValueError
+    saved = save_image(
+        file_storage, upload_folder, uuid.uuid4().hex, ext,
+        convert=current_app.config.get('IMAGE_WEBP_ON_UPLOAD', True),
+        quality=current_app.config.get('IMAGE_WEBP_QUALITY', 82),
+        max_side=current_app.config.get('IMAGE_MAX_SIDE', 2560))
+    unique_name = saved.filename
 
     # متادیتای فایل در دیتابیس ثبت می‌شود؛ خود فایل فقط در uploads می‌ماند.
     db.session.add(ArticleMedia(
         filename=unique_name,
         original_name=secure_filename(file_storage.filename)[:255],
-        mime_type=file_storage.mimetype,
-        size_bytes=int(size_mb * 1024 * 1024),
+        mime_type=saved.mime,
+        size_bytes=saved.size,
         uploaded_by=getattr(current_user, 'id', None),
     ))
 
@@ -157,13 +162,41 @@ def image_url(filename):
 # ---------------------------------------------------------------------------
 # لیست مقالات (پنل مدیریت مقالات)
 # ---------------------------------------------------------------------------
+def _section():
+    """بخش جاری پنل: «مقالات» (پیش‌فرض) یا «وبلاگ فعالیت‌ها» — از ?section=activities."""
+    value = request.args.get('section')
+    return value if value in SECTIONS else SECTION_ARTICLES
+
+
+def _category_choices(section):
+    return [(0, '— بدون دسته‌بندی —')] + [
+        (c.id, c.name)
+        for c in ArticleCategory.query.filter_by(section=section).order_by(ArticleCategory.name).all()
+    ]
+
+
+def _after_save_url(article):
+    if article.section == SECTION_ACTIVITIES:
+        return url_for('activities_public.list_activities')
+    return url_for('articles_public.list_articles')
+
+
+def _apply_activity_fields(article, form):
+    """فیلدهای مخصوص وبلاگ فعالیت‌ها (برای مقالات معمولی خالی می‌مانند)."""
+    if article.section == SECTION_ACTIVITIES:
+        article.stage_label = (form.stage_label.data or '').strip() or None
+        article.contributors = (form.contributors.data or '').strip() or None
+        article.video_url = (form.video_url.data or '').strip() or None
+
+
 @admin_bp.route('/')
 @admin_required
 def list_articles():
     page = request.args.get('page', 1, type=int)
     status_filter = request.args.get('status')
 
-    query = Article.query.order_by(Article.created_at.desc())
+    section = _section()
+    query = Article.query.filter_by(section=section).order_by(Article.created_at.desc())
     if status_filter in ('draft', 'published'):
         query = query.filter_by(status=status_filter)
 
@@ -173,6 +206,7 @@ def list_articles():
         articles=pagination.items,
         pagination=pagination,
         status_filter=status_filter,
+        section=section,
         image_url=image_url,
         pending_corrections_count = 0
     )
@@ -185,10 +219,9 @@ def list_articles():
 @admin_bp.route('/new', methods=['GET', 'POST'])
 @article_editor_required
 def new_article():
+    section = _section()
     form = ArticleForm()
-    form.category_id.choices = [(0, '— بدون دسته‌بندی —')] + [
-        (c.id, c.name) for c in ArticleCategory.query.order_by(ArticleCategory.name).all()
-    ]
+    form.category_id.choices = _category_choices(section)
 
 
     if form.validate_on_submit():
@@ -205,14 +238,16 @@ def new_article():
             status=form.status.data,
             category_id=(form.category_id.data or None),
             author_id=current_user.id,
+            section=section,
         )
+        _apply_activity_fields(article, form)
 
         if form.featured_image.data:
             try:
                 article.featured_image_filename = save_uploaded_image(form.featured_image.data)
             except ValueError as e:
                 flash(str(e), 'danger')
-                return render_template('articles/admin/editor.html', form=form, article=None, image_url=image_url,
+                return render_template('articles/admin/editor.html', form=form, article=None, section=section, image_url=image_url,
                                        pending_corrections_count =0)
 
         if article.status == Article.STATUS_PUBLISHED:
@@ -222,10 +257,10 @@ def new_article():
         db.session.flush()
         _sync_media(article)
         db.session.commit()
-        flash('مقاله با موفقیت ذخیره شد.', 'success')
-        return redirect(url_for('articles_public.list_articles'))
+        flash('مطلب با موفقیت ذخیره شد.', 'success')
+        return redirect(_after_save_url(article))
 
-    return render_template('articles/admin/editor.html', form=form, article=None, image_url=image_url,
+    return render_template('articles/admin/editor.html', form=form, article=None, section=section, image_url=image_url,
                            pending_corrections_count =0)
 
 
@@ -238,10 +273,9 @@ def edit_article(article_id):
     article = Article.query.get_or_404(article_id)
     if current_user.role != 'admin' and article.author_id != current_user.id:
         abort(403)
+    section = article.section
     form = ArticleForm(obj=article)
-    form.category_id.choices = [(0, '— بدون دسته‌بندی —')] + [
-        (c.id, c.name) for c in ArticleCategory.query.order_by(ArticleCategory.name).all()
-    ]
+    form.category_id.choices = _category_choices(section)
 
     if request.method == 'GET':
         form.category_id.data = article.category_id or 0
@@ -264,13 +298,14 @@ def edit_article(article_id):
         article.meta_keywords = form.meta_keywords.data or None
         article.status = form.status.data
         article.category_id = form.category_id.data or None
+        _apply_activity_fields(article, form)
 
         if form.featured_image.data:
             try:
                 article.featured_image_filename = save_uploaded_image(form.featured_image.data)
             except ValueError as e:
                 flash(str(e), 'danger')
-                return render_template('articles/admin/editor.html', form=form, article=article, image_url=image_url,
+                return render_template('articles/admin/editor.html', form=form, article=article, section=section, image_url=image_url,
                                        pending_corrections_count=0)
 
         if not was_published and article.is_published:
@@ -291,9 +326,9 @@ def edit_article(article_id):
         db.session.commit()
 
         flash('تغییرات ذخیره شد.', 'success')
-        return redirect(url_for('articles_public.list_articles'))
+        return redirect(_after_save_url(article))
 
-    return render_template('articles/admin/editor.html', form=form, article=article, image_url=image_url,
+    return render_template('articles/admin/editor.html', form=form, article=article, section=section, image_url=image_url,
                            pending_corrections_count=0)
 
 
@@ -304,6 +339,7 @@ def edit_article(article_id):
 @admin_required
 def delete_article(article_id):
     article = Article.query.get_or_404(article_id)
+    section = article.section
     files = extract_media_filenames(article.content_html)
     if article.featured_image_filename:
         files.add(article.featured_image_filename)
@@ -314,7 +350,7 @@ def delete_article(article_id):
     _remove_if_unused(files)
     db.session.commit()
     flash('مقاله حذف شد.', 'info')
-    return redirect(url_for('articles_admin.list_articles'))
+    return redirect(url_for('articles_admin.list_articles', section=section))
 
 
 # ---------------------------------------------------------------------------
@@ -323,20 +359,22 @@ def delete_article(article_id):
 @admin_bp.route('/categories', methods=['GET', 'POST'])
 @admin_required
 def categories():
+    section = _section()
     form = ArticleCategoryForm()
     if form.validate_on_submit():
         category = ArticleCategory(
             name=form.name.data.strip(),
             slug=unique_slug(form.name.data, ArticleCategory),
             description=form.description.data,
+            section=section,
         )
         db.session.add(category)
         db.session.commit()
         flash('دسته‌بندی اضافه شد.', 'success')
-        return redirect(url_for('articles_admin.categories'))
+        return redirect(url_for('articles_admin.categories', section=section))
 
-    all_categories = ArticleCategory.query.order_by(ArticleCategory.name).all()
-    return render_template('articles/admin/categories.html', form=form, categories=all_categories,
+    all_categories = ArticleCategory.query.filter_by(section=section).order_by(ArticleCategory.name).all()
+    return render_template('articles/admin/categories.html', form=form, categories=all_categories, section=section,
                            pending_corrections_count =0)
 
 
@@ -354,12 +392,13 @@ def edit_category(category_id):
         category.description = form.description.data
         db.session.commit()
         flash('دسته‌بندی ویرایش شد.', 'success')
-        return redirect(url_for('articles_admin.categories'))
+        return redirect(url_for('articles_admin.categories', section=category.section))
 
     return render_template(
         'articles/admin/categories.html',
         form=form,
-        categories=ArticleCategory.query.order_by(ArticleCategory.name).all(),
+        categories=ArticleCategory.query.filter_by(section=category.section).order_by(ArticleCategory.name).all(),
+        section=category.section,
         editing_category=category,
         pending_corrections_count=0,
     )
@@ -369,11 +408,12 @@ def edit_category(category_id):
 @admin_required
 def delete_category(category_id):
     category = ArticleCategory.query.get_or_404(category_id)
+    section = category.section
     Article.query.filter_by(category_id=category.id).update({Article.category_id: None})
     db.session.delete(category)
     db.session.commit()
-    flash('دسته‌بندی حذف شد و مقاله‌های آن بدون دسته‌بندی باقی ماندند.', 'info')
-    return redirect(url_for('articles_admin.categories'))
+    flash('دسته‌بندی حذف شد و مطالب آن بدون دسته‌بندی باقی ماندند.', 'info')
+    return redirect(url_for('articles_admin.categories', section=section))
 
 
 # ---------------------------------------------------------------------------

@@ -10,8 +10,9 @@ app/articles/__init__.py
 
 def register_articles(app):
     """دو بلوپرینت (عمومی و مدیریت) ماژول مقالات را روی app ثبت می‌کند."""
-    from app.articles.routes_public import public_bp
+    from app.articles.routes_public import public_bp, activities_bp
     from app.articles.routes_admin import admin_bp
 
     app.register_blueprint(public_bp)
+    app.register_blueprint(activities_bp)
     app.register_blueprint(admin_bp)

@@ -271,7 +271,8 @@ fhosseini/
 │   ├── admin_excel_to_sqlite_temp.py            # انتقال موقت Excel به SQLite
 │   ├── admin_fix_title_ids_safe.py              # اصلاح امن شناسه عنوان‌ها
 │   ├── admin_migrate_research_data.py           # انتقال داده‌های پژوهشی
-│   └── populate_data.py                         # ورود داده‌های اولیه: python scripts/populate_data.py
+│   ├── populate_data.py                         # ورود داده‌های اولیه: python scripts/populate_data.py
+│   └── convert_images_to_webp.py                # تبدیل تصاویر قبلی به WebP (راهنما: doc/webp-conversion.md)
 ├── config.py                                    # تنظیمات برنامه و محیط اجرا
 ├── docker-compose.yml                           # تعریف سرویس‌های Docker Compose
 ├── Dockerfile                                   # دستور ساخت تصویر Docker

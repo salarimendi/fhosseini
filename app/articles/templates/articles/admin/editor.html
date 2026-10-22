@@ -5,12 +5,12 @@
 {# است، همین یک قالب را با آن هماهنگ کنید - بقیه‌ی فایل‌های پروژه لمس نشده‌اند. #}
 {% extends "base.html" %}
 
-{% block title %}{{ 'ویرایش مقاله' if article else 'مقاله‌ی جدید' }}{% endblock %}
+{% block title %}{{ ('ویرایش مطلب' if article else 'مطلب جدید') if section == 'activities' else ('ویرایش مقاله' if article else 'مقاله‌ی جدید') }}{% endblock %}
 
 {% block content %}
 
     <div class="container py-4">
-        <h1>{{ 'ویرایش مقاله' if article else 'مقاله‌ی جدید' }}</h1>
+        <h1>{{ ('ویرایش مطلب وبلاگ فعالیت‌ها' if article else 'مطلب جدید وبلاگ فعالیت‌ها') if section == 'activities' else ('ویرایش مقاله' if article else 'مقاله‌ی جدید') }}</h1>
 
         <form method="POST" enctype="multipart/form-data" id="article-form" novalidate>
             {{ form.hidden_tag() }}
@@ -25,6 +25,25 @@
                 {{ form.category_id.label }}
                 {{ form.category_id(class_="form-select") }}
             </div>
+
+                {% if section == 'activities' %}
+                <div class="mb-3">
+                    {{ form.stage_label.label(class_="form-label") }}
+                    {{ form.stage_label(class_="form-control") }}
+                    {% for error in form.stage_label.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                    {{ form.contributors.label(class_="form-label") }}
+                    {{ form.contributors(class_="form-control", rows=4) }}
+                    {% for error in form.contributors.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                    {{ form.video_url.label(class_="form-label") }}
+                    {{ form.video_url(class_="form-control", dir="ltr", placeholder="https://www.aparat.com/v/...") }}
+                    {% for error in form.video_url.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    <div class="field-hint">تصاویر هر مرحله را داخل متن با ویرایشگر وارد کنید؛ ویدیو با لینک آپارات/یوتیوب نمایش داده می‌شود.</div>
+                </div>
+                {% endif %}
 
             <div class="mb-3">
                 {{ form.featured_image.label }}

@@ -117,6 +117,15 @@ def normalize_media_urls(raw_html, upload_folder=None, max_bytes=5 * 1024 * 1024
                 return match.group(0)
             if len(payload) > max_bytes:
                 return match.group(0)
+            # تصویر چسبانده‌شده هم مثل آپلود عادی به WebP تبدیل می‌شود (در صورت خطا همان بایت‌های اصلی)
+            try:
+                from flask import current_app, has_app_context
+                if not has_app_context() or current_app.config.get('IMAGE_WEBP_ON_UPLOAD', True):
+                    from app.utils.images import convert_bytes_to_webp
+                    converted = convert_bytes_to_webp(payload)
+                    payload, ext = converted.data, converted.ext
+            except Exception:
+                pass
             os.makedirs(upload_folder, exist_ok=True)
             name = f'{uuid.uuid4().hex}.{ext}'
             with open(os.path.join(upload_folder, name), 'wb') as fh:
@@ -181,3 +190,26 @@ def remove_media_file(upload_folder, filename):
         os.remove(os.path.join(upload_folder, filename))
     except FileNotFoundError:
         pass
+
+
+# ---------------------------------------------------------------------------
+# ویدیوی وبلاگ فعالیت‌ها: فقط لینک‌های شناخته‌شده‌ی آپارات و یوتیوب → آدرس embed
+# (با frame-src در CSP همخوان است؛ هر لینک دیگری رد می‌شود)
+# ---------------------------------------------------------------------------
+_APARAT_RE = re.compile(r'^https://(?:www\.)?aparat\.com/v/([A-Za-z0-9]+)(?:[/?#].*)?$')
+_YOUTUBE_RE = re.compile(
+    r'^https://(?:www\.)?(?:youtube\.com/watch\?(?:[^#]*&)?v=|youtu\.be/)([\w-]{11})(?:[&#?].*)?$')
+
+
+def video_embed_url(url):
+    """نشانی صفحه‌ی ویدیو را به نشانی embed امن تبدیل می‌کند؛ نامعتبر → None."""
+    if not url:
+        return None
+    url = url.strip()
+    m = _APARAT_RE.match(url)
+    if m:
+        return f'https://www.aparat.com/video/video/embed/videohash/{m.group(1)}/vt/frame'
+    m = _YOUTUBE_RE.match(url)
+    if m:
+        return f'https://www.youtube-nocookie.com/embed/{m.group(1)}'
+    return None

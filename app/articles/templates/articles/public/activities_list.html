@@ -1,0 +1,67 @@
+{# وبلاگ فعالیت‌ها: خط زمانی مرحله‌به‌مرحله، صفحه‌بندی‌شده #}
+{% extends "base.html" %}
+{% from "_ui.html" import page_header %}
+{% block title %}{{ ('وبلاگ فعالیت‌ها: ' + active_category.name) if active_category else 'وبلاگ فعالیت‌ها' }}{% endblock %}
+
+{% block content %}
+{{ page_header(('وبلاگ فعالیت‌ها: ' + active_category.name) if active_category else 'وبلاگ فعالیت‌ها', (active_category.description if active_category and active_category.description else 'مراحل پیشرفت، اقدامات اساسی و مشارکت‌کنندگان پروژه'), 'fa-timeline') }}
+
+<div class="container pb-4 activities-page">
+    {% if categories %}
+    <nav class="activity-filters mb-4" aria-label="دسته‌بندی فعالیت‌ها">
+        <a href="{{ url_for('activities_public.list_activities') }}" class="chip {{ 'chip--active' if not active_category }}">همه</a>
+        {% for category in categories %}
+        <a href="{{ url_for('activities_public.by_category', slug=category.slug) }}" class="chip {{ 'chip--active' if active_category and active_category.id == category.id }}">{{ category.name }}</a>
+        {% endfor %}
+    </nav>
+    {% endif %}
+
+    <ol class="activity-timeline">
+        {% for activity in activities %}
+        <li class="activity-item">
+            <span class="activity-item__dot" aria-hidden="true"></span>
+            <article class="card activity-card">
+                {% if activity.featured_image_filename %}
+                <a href="{{ url_for('activities_public.detail', slug=activity.slug) }}" class="activity-card__media" tabindex="-1" aria-hidden="true">
+                    <img src="{{ url_for('articles_public.media', filename=activity.featured_image_filename) }}" alt="{{ activity.title }}" loading="lazy">
+                </a>
+                {% endif %}
+                <div class="card-body">
+                    <div class="activity-card__meta">
+                        {% if activity.stage_label %}<span class="chip">{{ activity.stage_label }}</span>{% endif %}
+                        {% if activity.category %}<a class="chip chip--soft" href="{{ url_for('activities_public.by_category', slug=activity.category.slug) }}">{{ activity.category.name }}</a>{% endif %}
+                        <span class="activity-card__date"><i class="far fa-calendar me-1"></i>{{ activity.published_at.strftime('%Y-%m-%d') if activity.published_at else '' }}</span>
+                    </div>
+                    <h2 class="h5 activity-card__title"><a href="{{ url_for('activities_public.detail', slug=activity.slug) }}">{{ activity.title }}</a></h2>
+                    <p class="activity-card__excerpt">{{ activity.excerpt }}</p>
+                    {% if activity.contributors_list %}
+                    <div class="activity-card__people"><i class="fas fa-users me-1" aria-hidden="true"></i>
+                        {% for person in activity.contributors_list[:4] %}<span>{{ person }}</span>{% endfor %}
+                        {% if activity.contributors_list|length > 4 %}<span>و {{ activity.contributors_list|length - 4 }} نفر دیگر</span>{% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="d-flex align-items-center gap-3 mt-2">
+                        <a href="{{ url_for('activities_public.detail', slug=activity.slug) }}" class="article-card__more">ادامه مطلب <i class="fas fa-arrow-left ms-1"></i></a>
+                        {% if activity.video_url %}<span class="text-muted small"><i class="fas fa-circle-play me-1" aria-hidden="true"></i>دارای ویدیو</span>{% endif %}
+                    </div>
+                </div>
+            </article>
+        </li>
+        {% else %}
+        <li><div class="empty-state panel"><i class="far fa-folder-open"></i>هنوز مطلبی در وبلاگ فعالیت‌ها منتشر نشده است.</div></li>
+        {% endfor %}
+    </ol>
+
+    {% if pagination.pages > 1 %}
+    <nav aria-label="صفحه‌بندی فعالیت‌ها">
+        <ul class="pagination justify-content-center flex-wrap">
+            {% for p in range(1, pagination.pages + 1) %}
+            <li class="page-item {{ 'active' if p == pagination.page else '' }}">
+                <a class="page-link" href="{{ url_for(request.endpoint, page=p, **request.view_args) }}">{{ p }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
