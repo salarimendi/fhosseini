@@ -66,6 +66,14 @@ class Article(db.Model):
     # url_for('articles_public.media', filename=...) ساخته می‌شود.
     featured_image_filename = db.Column(db.String(255), nullable=True)
 
+    # بخش محتوا: «مقالات» (پیش‌فرض، مقالات موجود) یا «وبلاگ فعالیت‌ها»
+    section = db.Column(db.String(20), nullable=False, default=SECTION_ARTICLES,
+                        server_default=SECTION_ARTICLES, index=True)
+    # فقط برای «وبلاگ فعالیت‌ها»: عنوان مرحله، افراد مشارکت‌کننده (هر نفر یک خط) و لینک ویدیو
+    stage_label = db.Column(db.String(120), nullable=True)
+    contributors = db.Column(db.Text, nullable=True)
+    video_url = db.Column(db.String(500), nullable=True)
+
     meta_title = db.Column(db.String(255), nullable=True)
     meta_description = db.Column(db.String(500), nullable=True)
     meta_keywords = db.Column(db.String(255), nullable=True)

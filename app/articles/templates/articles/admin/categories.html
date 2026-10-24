@@ -15,6 +15,11 @@
                 {{ form.name.label }} {{ form.name(class_="form-control") }}
             </div>
             <div class="mb-2">
+                {{ form.slug.label }} {{ form.slug(class_="form-control", dir="ltr", placeholder="مثلاً progress-report") }}
+                {% for error in form.slug.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                <div class="form-text">آدرس لاتین دسته در لینک‌ها؛ خالی بماند از نام ساخته می‌شود. تغییر نام، آدرس را عوض نمی‌کند.</div>
+            </div>
+            <div class="mb-2">
                 {{ form.description.label }} {{ form.description(class_="form-control", rows=2) }}
             </div>
             <button type="submit" class="btn btn-primary">

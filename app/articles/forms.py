@@ -12,6 +12,15 @@ from wtforms.validators import DataRequired, Length, Optional, ValidationError
 
 class ArticleCategoryForm(FlaskForm):
     name = StringField('نام دسته‌بندی', validators=[DataRequired(), Length(max=120)])
+    # نام (فارسی، برای نمایش) و slug (لاتین، برای آدرس) جدا هستند؛ خالی = ساخت خودکار از نام
+    slug = StringField('نشانی لاتین (slug)', validators=[Optional(), Length(max=120)])
+
+    def validate_slug(self, field):
+        import re
+        value = (field.data or '').strip().lower()
+        field.data = value
+        if value and not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', value):
+            raise ValidationError('فقط حروف کوچک لاتین، عدد و خط تیره (مثلاً progress-report).')
     description = TextAreaField('توضیحات', validators=[Optional(), Length(max=1000)])
 
 

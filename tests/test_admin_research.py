@@ -17,19 +17,20 @@ from app.routes.admin import comments_filter_args, safe_comments_return_url
 
 class _Base(unittest.TestCase):
     def setUp(self):
-        os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
-        self.app = create_app()
-        self.app.config.update(TESTING=True, SECRET_KEY='test', WTF_CSRF_ENABLED=False,
-                               SQLALCHEMY_DATABASE_URI='sqlite:///:memory:')
+        self.app = create_app('testing')
         self.ctx = self.app.app_context()
         self.ctx.push()
+        # ایمنی: تست‌ها فقط روی دیتابیس درون‌حافظه (TestingConfig) اجرا می‌شوند؛ اگر هر دلیلی باعث
+        # اتصال به دیتابیس واقعی شود، پیش از هر نوشتن متوقف می‌شویم.
+        if str(db.engine.url) not in ('sqlite://', 'sqlite:///:memory:'):
+            self.ctx.pop()
+            raise RuntimeError(f'تست روی دیتابیس غیرموقت اجرا نمی‌شود: {db.engine.url}')
         db.create_all()
         self.client = self.app.test_client()
 
     def tearDown(self):
         db.session.remove()
         self.ctx.pop()
-        os.environ.pop('DATABASE_URL', None)
 
     # --- کمکی‌ها ---
     def user(self, name, role='researcher'):

@@ -356,22 +356,33 @@ def delete_article(article_id):
 # ---------------------------------------------------------------------------
 # مدیریت دسته‌بندی‌ها
 # ---------------------------------------------------------------------------
+def _slug_taken(slug, instance_id=None):
+    query = ArticleCategory.query.filter(ArticleCategory.slug == slug)
+    if instance_id is not None:
+        query = query.filter(ArticleCategory.id != instance_id)
+    return query.first() is not None
+
+
 @admin_bp.route('/categories', methods=['GET', 'POST'])
 @admin_required
 def categories():
     section = _section()
     form = ArticleCategoryForm()
     if form.validate_on_submit():
-        category = ArticleCategory(
-            name=form.name.data.strip(),
-            slug=unique_slug(form.name.data, ArticleCategory),
-            description=form.description.data,
-            section=section,
-        )
-        db.session.add(category)
-        db.session.commit()
-        flash('دسته‌بندی اضافه شد.', 'success')
-        return redirect(url_for('articles_admin.categories', section=section))
+        slug = form.slug.data or None
+        if slug and _slug_taken(slug):
+            form.slug.errors.append('این نشانی قبلاً برای دسته‌بندی دیگری استفاده شده است.')
+        else:
+            category = ArticleCategory(
+                name=form.name.data.strip(),
+                slug=slug or unique_slug(form.name.data, ArticleCategory),
+                description=form.description.data,
+                section=section,
+            )
+            db.session.add(category)
+            db.session.commit()
+            flash('دسته‌بندی اضافه شد.', 'success')
+            return redirect(url_for('articles_admin.categories', section=section))
 
     all_categories = ArticleCategory.query.filter_by(section=section).order_by(ArticleCategory.name).all()
     return render_template('articles/admin/categories.html', form=form, categories=all_categories, section=section,
@@ -385,14 +396,17 @@ def edit_category(category_id):
     form = ArticleCategoryForm(obj=category)
 
     if form.validate_on_submit():
-        new_name = form.name.data.strip()
-        if new_name != category.name:
-            category.slug = unique_slug(new_name, ArticleCategory, instance_id=category.id)
-        category.name = new_name
-        category.description = form.description.data
-        db.session.commit()
-        flash('دسته‌بندی ویرایش شد.', 'success')
-        return redirect(url_for('articles_admin.categories', section=category.section))
+        # تغییر نام هرگز slug (و لینک‌های موجود) را عوض نمی‌کند؛ slug فقط با فیلد خودش تغییر می‌کند
+        new_slug = form.slug.data or category.slug
+        if new_slug != category.slug and _slug_taken(new_slug, category.id):
+            form.slug.errors.append('این نشانی قبلاً برای دسته‌بندی دیگری استفاده شده است.')
+        else:
+            category.name = form.name.data.strip()
+            category.slug = new_slug
+            category.description = form.description.data
+            db.session.commit()
+            flash('دسته‌بندی ویرایش شد.', 'success')
+            return redirect(url_for('articles_admin.categories', section=category.section))
 
     return render_template(
         'articles/admin/categories.html',

@@ -22,12 +22,14 @@ class VideoUrlTest(unittest.TestCase):
 
 class ActivitiesTest(unittest.TestCase):
     def setUp(self):
-        os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
-        self.app = create_app()
-        self.app.config.update(TESTING=True, SECRET_KEY='t', WTF_CSRF_ENABLED=False,
-                               SQLALCHEMY_DATABASE_URI='sqlite:///:memory:')
+        self.app = create_app('testing')
         self.ctx = self.app.app_context()
         self.ctx.push()
+        # ایمنی: تست‌ها فقط روی دیتابیس درون‌حافظه (TestingConfig) اجرا می‌شوند؛ اگر هر دلیلی باعث
+        # اتصال به دیتابیس واقعی شود، پیش از هر نوشتن متوقف می‌شویم.
+        if str(db.engine.url) not in ('sqlite://', 'sqlite:///:memory:'):
+            self.ctx.pop()
+            raise RuntimeError(f'تست روی دیتابیس غیرموقت اجرا نمی‌شود: {db.engine.url}')
         db.create_all()
         self.client = self.app.test_client()
         admin = User(username='adm', email='a@example.com', fullname='adm', role='admin')
@@ -43,7 +45,6 @@ class ActivitiesTest(unittest.TestCase):
     def tearDown(self):
         db.session.remove()
         self.ctx.pop()
-        os.environ.pop('DATABASE_URL', None)
 
     def test_sections_are_separate_and_menu_lists_activity_categories(self):
         db.session.add_all([ArticleCategory(name='ادبی', slug='adabi'),
@@ -74,6 +75,27 @@ class ActivitiesTest(unittest.TestCase):
             'title': 'x', 'content_html': 'y', 'status': 'draft', 'video_url': 'https://evil.com/v/1'})
         self.assertEqual(bad.status_code, 200)                                                   # لینک نامعتبر رد شد
         self.assertEqual(Article.query.count(), 1)
+
+    def test_category_slug_is_independent_of_name(self):
+        r = self.client.post('/admin/articles/categories?section=activities',
+                             data={'name': 'گزارش پیشرفت', 'slug': 'Progress-Report', 'description': ''})
+        self.assertEqual(r.status_code, 302)
+        cat = ArticleCategory.query.one()
+        self.assertEqual((cat.name, cat.slug, cat.section), ('گزارش پیشرفت', 'progress-report', 'activities'))
+        # slug تکراری و نامعتبر رد می‌شود
+        for slug in ('progress-report', 'گزارش'):
+            r = self.client.post('/admin/articles/categories?section=activities',
+                                 data={'name': 'دیگر', 'slug': slug})
+            self.assertEqual(r.status_code, 200)
+        self.assertEqual(ArticleCategory.query.count(), 1)
+        # تغییر نام، slug را عوض نمی‌کند؛ تغییر slug با فیلد خودش انجام می‌شود
+        self.client.post(f'/admin/articles/categories/{cat.id}/edit', data={'name': 'نام جدید', 'slug': 'progress-report'})
+        db.session.refresh(cat)
+        self.assertEqual((cat.name, cat.slug), ('نام جدید', 'progress-report'))
+        self.client.post(f'/admin/articles/categories/{cat.id}/edit', data={'name': 'نام جدید', 'slug': 'steps'})
+        db.session.refresh(cat)
+        self.assertEqual(cat.slug, 'steps')
+        self.assertIn('/activities/category/steps', self.client.get('/').get_data(as_text=True))
 
     def test_upload_is_converted_to_webp(self):
         from PIL import Image
