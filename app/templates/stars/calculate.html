@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}اجرام سماوی و قمر در عقرب{% endblock %}
+{% block title %}کواکب، اتصالات و استهلال هلال{% endblock %}
 
 {% block head %}
 <style>
@@ -27,8 +27,8 @@
         linear-gradient(135deg, #0d1535 0%, #1d2a63 55%, #3a2a74 100%);
 }
 .st-hero-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-.st-hero h1 { font-size: clamp(1.4rem, 3.4vw, 2.1rem); margin: 0 0 8px; font-weight: 800; }
-.st-hero p { margin: 0; color: #cfd6f5; max-width: 620px; line-height: 2; font-size: .95rem; }
+.st-hero h1 { color: #fff !important; text-shadow: 0 2px 18px #0008; font-size: clamp(1.4rem, 3.4vw, 2.1rem); margin: 0 0 8px; font-weight: 800; }
+.st-hero p { margin: 0; color: #e3e8ff !important; max-width: 620px; line-height: 2; font-size: .95rem; }
 .st-hero-time { margin-top: 12px; font-size: .85rem; color: #aab4e6; }
 .st-hero-time b { color: #fff; direction: ltr; unicode-bidi: embed; }
 .st-hero-moon { flex: 0 0 auto; filter: drop-shadow(0 0 22px #f6efd055); }
@@ -99,7 +99,7 @@
 .st-table th:first-child { border-radius: 0 12px 0 0; } .st-table th:last-child { border-radius: 12px 0 0 0; }
 .st-table td { padding: 11px 10px; border-bottom: 1px solid var(--st-line); text-align: center; vertical-align: middle; }
 .st-table tbody tr:hover { background: #f5f6ff; }
-.st-ltr { direction: ltr; unicode-bidi: embed; white-space: nowrap; }
+.st-ltr { direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
 .st-table tr.is-sel { background: #eef0ff; font-weight: 700; }
 .st-table tr.is-scorpio { background: linear-gradient(90deg, #eaf2ff, #f4ecff); }
 .st-table tr.is-scorpio td:first-child { box-shadow: inset -4px 0 0 #6d28d9; }
@@ -180,8 +180,8 @@
     <header class="st-hero">
         <div class="st-wrap st-hero-inner">
             <div>
-                <h1>اجرام سماوی و قمر در عقرب</h1>
-                <p>طول و عرض کواکب از منطقةالبروج، استقامت و اقامت و رجعت خمسه‌ی متحیره، اتصالات و نظرها، و بعدالسواء و بعدالمعدل برای استهلال هلال در افق قم، تهران، ساری و گناباد.</p>
+                <h1>کواکب، اتصالات و استهلال هلال</h1>
+                <p>طول و عرض کواکب از منطقةالبروج، استقامت و اقامت و رجعت خمسه‌ی متحیره، اتصالات و نظرها، و بعد سواء و بعد معدل برای استهلال هلال در افق قم، تهران، ساری و گناباد.</p>
                 <div class="st-hero-time">
                     زمان محاسبه: <b>{{ utc.strftime("%Y-%m-%d %H:%M") }} UTC</b>
                     &nbsp;|&nbsp; وقت ایران (UTC+03:30): <b>{{ jdt(iran_dt) }}</b>
@@ -239,11 +239,11 @@
                     </div>
                     <div class="st-note" style="margin-top:14px;font-weight:700">معیار رؤیت هلال (زیج ایلخانی — پژوهش حمیدرضا گیاهی‌یزدی)</div>
                     <div class="st-settings-grid">
-                        <div class="st-field"><label for="crit_sawa">حد بعدالسواء (°)</label><input class="st-input" type="number" step="0.5" min="0.5" max="60" id="crit_sawa" name="crit_sawa" value="{{ crit.sawa_min }}"></div>
+                        <div class="st-field"><label for="crit_sawa">حد بعد سواء (°)</label><input class="st-input" type="number" step="0.5" min="0.5" max="60" id="crit_sawa" name="crit_sawa" value="{{ crit.sawa_min }}"></div>
                         {% for i in range(5) %}
-                        <div class="st-field"><label for="crit_t{{ i+1 }}">مرز بعدالمعدل {{ tier_labels[i] if i < 4 else 'رؤیت بسیار آسان' }} (°)</label><input class="st-input" type="number" step="0.5" min="0.5" max="90" id="crit_t{{ i+1 }}" name="crit_t{{ i+1 }}" value="{{ crit.tiers[i] }}"></div>
+                        <div class="st-field"><label for="crit_t{{ i+1 }}">مرز بعد معدل {{ tier_labels[i] if i < 4 else 'رؤیت بسیار آسان' }} (°)</label><input class="st-input" type="number" step="0.5" min="0.5" max="90" id="crit_t{{ i+1 }}" name="crit_t{{ i+1 }}" value="{{ crit.tiers[i] }}"></div>
                         {% endfor %}
-                        <div class="st-field"><label for="crit_low">بعدالمعدل لازم وقتی بعدالسواء کمتر از حد است (°)</label><input class="st-input" type="number" step="0.5" min="0.5" max="60" id="crit_low" name="crit_low" value="{{ crit.low_maadal }}"></div>
+                        <div class="st-field"><label for="crit_low">بعد معدل لازم وقتی بعد سواء کمتر از حد است (°)</label><input class="st-input" type="number" step="0.5" min="0.5" max="60" id="crit_low" name="crit_low" value="{{ crit.low_maadal }}"></div>
                     </div>
                     <p class="st-note">اقامت: وقتی |سرعت طولی| از حد تلورانس کوکب کمتر باشد (عطارد ۰٫۱۰، زهره ۰٫۰۸، مریخ ۰٫۰۴، مشتری ۰٫۰۲، زحل ۰٫۰۱۵ درجه در روز) × ضریب. بعد از تغییر مقادیر، «محاسبه» را بزنید.</p>
                 </details>
@@ -266,7 +266,7 @@
         <section class="st-card">
             <h2><span class="st-ic">🌙</span> استهلال هلال — افق {{ a.city.name }}</h2>
             <p class="st-sub">
-                بعدالسواء: اختلاف طول منطقةالبروجی قمر و شمس در لحظه‌ی غروب خورشید. بعدالمعدل: فاصله‌ی زمانی غروب قمر از غروب شمس (هر ساعت = ۱۵ درجه).
+                بعد سواء: اختلاف طول منطقةالبروجی قمر و شمس در لحظه‌ی غروب خورشید. بعد معدل: فاصله‌ی زمانی غروب قمر از غروب شمس (هر ساعت = ۱۵ درجه).
                 روز محاسبه: <b class="st-ltr">{{ jdate(ev.date) if ev else '' }}</b> (وقت ایران)
             </p>
 
@@ -279,26 +279,26 @@
                 <div>
                     <div class="st-metrics">
                         <div class="st-metric st-metric--sawa">
-                            <div class="k">بعدالسواء (طول قمر − شمس)</div>
-                            <div class="v">{{ "%+.2f"|format(ev.elong) }}°</div>
-                            <div class="st-bar" title="آستانه‌ی بعدالسواء">
+                            <div class="k">بعد سواء (طول قمر − شمس)</div>
+                            <div class="v" style="font-size:1.2rem">{{ dms_s(ev.elong) }}</div>
+                            <div class="st-bar" title="آستانه‌ی بعد سواء">
                                 <i style="width: {{ [ [ev.abs_elong if ev.elong > 0 else 0, 0]|max / (crit.sawa_min * 2) * 100, 100]|min }}%"></i>
                                 <u style="inset-inline-start: 50%"></u>
                             </div>
                             <div class="n">خط عمودی = آستانه‌ی {{ "%g"|format(crit.sawa_min) }} درجه</div>
                         </div>
                         <div class="st-metric st-metric--maadal">
-                            <div class="k">بعدالمعدل (فاصله‌ی دو مغرب روی معدل‌النهار)</div>
+                            <div class="k">بعد معدل (فاصله‌ی دو مغرب روی معدل‌النهار)</div>
                             {% if ev.lag_min is not none %}
-                            <div class="v">{{ "%+.2f"|format(ev.lag_deg) }}°</div>
-                            <div class="n">هر ساعت = ۱۵ درجه</div>
+                            <div class="v" style="font-size:1.2rem">{{ dms_s(ev.lag_deg) }}</div>
+                            <div class="n">درجه، دقیقه و ثانیه‌ی فلکی؛ هر ساعت = ۱۵ درجه</div>
                             {% else %}<div class="v">—</div>{% endif %}
                         </div>
                         <div class="st-metric st-metric--maadal">
                             <div class="k">مکث ماه پس از غروب خورشید</div>
                             {% if ev.lag_min is not none %}
-                            <div class="v">{{ "%+.1f"|format(ev.lag_min) }} دقیقه</div>
-                            <div class="n">{{ 'ماه پس از خورشید غروب می‌کند' if ev.lag_min > 0 else 'ماه پیش از خورشید غروب می‌کند' }}</div>
+                            <div class="v" style="font-size:1.2rem"><span class="st-ltr">{{ hms(ev.lag_min) }}</span></div>
+                            <div class="n">ساعت:دقیقه:ثانیه؛ {{ 'ماه پس از خورشید غروب می‌کند' if ev.lag_min > 0 else 'ماه پیش از خورشید غروب می‌کند' }}</div>
                             {% else %}<div class="v">—</div>{% endif %}
                         </div>
                         <div class="st-metric">
@@ -308,25 +308,25 @@
                         </div>
                         <div class="st-metric">
                             <div class="k">ارتفاع ماه از افق در غروب شمس</div>
-                            <div class="v">{{ "%.2f"|format(ev.moon_alt) }}°</div>
-                            <div class="n">ارتفاع مرکز ماه با تصحیح اختلاف منظر</div>
+                            <div class="v" style="font-size:1.2rem">{{ dms_s(ev.moon_alt) }}</div>
+                            <div class="n">درجه، دقیقه و ثانیه‌ی فلکی؛ ارتفاع مرکز ماه با تصحیح اختلاف منظر</div>
                         </div>
                         <div class="st-metric">
                             <div class="k">عرض ماه از منطقةالبروج</div>
-                            <div class="v st-moon-lat">{{ "%+.2f"|format(ev.moon_lat) }}°</div>
+                            <div class="v st-moon-lat" style="font-size:1.2rem">{{ dms_s(ev.moon_lat) }}</div>
                             <div class="n">{{ 'شمالی' if ev.moon_lat >= 0 else 'جنوبی' }}</div>
                         </div>
                         <div class="st-metric">
                             <div class="k">سن ماه در غروب</div>
-                            <div class="v" style="font-size:1.1rem">{% if ev.age_hours < 0 %}—{% else %}{{ "%.1f"|format(ev.age_hours) }} ساعت{% endif %}</div>
-                            <div class="n">از آخرین اجتماع</div>
+                            <div class="v" style="font-size:1.1rem">{% if ev.age_hours < 0 %}—{% else %}<span class="st-ltr">{{ hms(ev.age_hours * 60, false) }}</span>{% endif %}</div>
+                            <div class="n">ساعت:دقیقه:ثانیه از آخرین اجتماع</div>
                         </div>
                     </div>
                     <div class="st-verdict st-verdict--{{ ev.status }}">{{ ev.verdict }}: {{ ev.status_text }}</div>
                     <details class="st-settings">
                         <summary>جدول معیار خواجه نصیرالدین طوسی (زیج ایلخانی)</summary>
                         <div class="st-scroll"><table class="st-table" style="margin-top:10px">
-                            <thead><tr><th>بعدالسواء</th><th>بعدالمعدل (درجه)</th><th>حکم</th></tr></thead>
+                            <thead><tr><th>بعد سواء</th><th>بعد معدل (درجه)</th><th>حکم</th></tr></thead>
                             <tbody>
                             {% for i in range(5) %}
                             <tr><td>بیش از {{ "%g"|format(crit.sawa_min) }}</td>
@@ -343,17 +343,18 @@
             <h2 style="margin-top:24px; font-size:1rem">شب‌های استهلال پیرامون اجتماع <span class="st-ltr">{{ jdt(a.ref_conj) }}</span></h2>
             <div class="st-scroll">
                 <table class="st-table">
-                    <thead><tr><th>تاریخ</th><th>غروب شمس</th><th>غروب قمر</th><th>بعدالسواء</th><th>بعدالمعدل</th><th>ارتفاع ماه</th><th>عرض ماه</th><th>وضعیت</th></tr></thead>
+                    <thead><tr><th>تاریخ</th><th>غروب شمس</th><th>غروب قمر</th><th>بعد سواء</th><th>بعد معدل</th><th>مکث ماه</th><th>ارتفاع ماه</th><th>عرض ماه</th><th>وضعیت</th></tr></thead>
                     <tbody>
                     {% for r in a.evenings %}
                     <tr class="{{ 'is-sel' if r.is_selected }}">
                         <td class="st-ltr">{{ jdate(r.date) }}</td>
                         <td class="st-ltr">{{ r.sunset_short }}</td>
                         <td class="st-ltr">{{ r.moonset_short }}</td>
-                        <td class="st-ltr">{{ "%+.2f"|format(r.elong) }}°</td>
-                        <td class="st-ltr">{% if r.lag_min is not none %}{{ "%+.1f"|format(r.lag_min) }} د ({{ "%+.2f"|format(r.lag_deg) }}°){% else %}—{% endif %}</td>
-                        <td class="st-ltr">{{ "%.1f"|format(r.moon_alt) }}°</td>
-                        <td class="st-ltr">{{ "%+.2f"|format(r.moon_lat) }}°</td>
+                        <td class="st-ltr">{{ dms_s(r.elong) }}</td>
+                        <td class="st-ltr">{% if r.lag_min is not none %}{{ dms_s(r.lag_deg) }}{% else %}—{% endif %}</td>
+                        <td class="st-ltr">{% if r.lag_min is not none %}{{ hms(r.lag_min) }}{% else %}—{% endif %}</td>
+                        <td class="st-ltr">{{ dms_s(r.moon_alt) }}</td>
+                        <td class="st-ltr">{{ dms_s(r.moon_lat) }}</td>
                         <td><span class="st-chip {{ {'before':'chip-muqim','unlikely':'chip-muqim','no':'chip-raji','possible':'chip-mustaqim'}[r.status] }}">{{ r.verdict }}</span></td>
                     </tr>
                     {% endfor %}
@@ -362,7 +363,7 @@
             </div>
             <p class="st-note">
                 آخرین اجتماع: <b class="st-ltr">{{ jdt(a.last_conj) }}</b> — اجتماع بعدی: <b class="st-ltr">{{ jdt(a.next_conj) }}</b> (همه به وقت ایران).
-                در لحظه‌ی ورودی: بعدالسواء <b class="st-ltr">{{ "%+.2f"|format(a.elong_now) }}°</b>، ارتفاع ماه <b class="st-ltr">{{ "%.1f"|format(a.moon_alt) }}°</b>، ارتفاع شمس <b class="st-ltr">{{ "%.1f"|format(a.sun_alt) }}°</b> در افق {{ a.city.name }}.
+                در لحظه‌ی ورودی: بعد سواء <b class="st-ltr">{{ dms_s(a.elong_now) }}</b>، ارتفاع ماه <b class="st-ltr">{{ dms_s(a.moon_alt) }}</b>، ارتفاع شمس <b class="st-ltr">{{ dms_s(a.sun_alt) }}</b> در افق {{ a.city.name }}.
                 این نتایج معیار محاسباتی کلاسیک‌اند و جایگزین رصد نیستند.
             </p>
             {% else %}
@@ -483,11 +484,12 @@
                     <dt>اقامت</dt><dd>کندی شدید حرکت طولی تا نزدیکی سرعت صفر؛ کوکب مقیم.</dd>
                     <dt>رجعت</dt><dd>حرکت خلاف ترتیب بروج؛ کوکب راجع.</dd>
                     <dt>مقارنه</dt><dd>هم‌طولی دو کوکب. مقارنه‌ی شمس و قمر «اجتماع» و مقارنه‌ی خمسه‌ی متحیره با شمس «احتراق» نام دارد.</dd>
-                    <dt>تسدیس</dt><dd>فاصله‌ی ۶۰ درجه. ایمن: سریع‌السیر پیش از کندتر؛ ایسر: سریع‌السیر پس از کندتر.</dd>
+                    <dt>تسدیس</dt><dd>فاصله‌ی ۶۰ درجه.</dd>
+                    <dt>ایمن / ایسر</dt><dd>در تسدیس، تربیع، تثلیث و مقابله: ایمن یعنی سریع‌السیر پیش از کندتر باشد؛ ایسر یعنی پس از کندتر.</dd>
                     <dt>تربیع / تثلیث</dt><dd>فاصله‌ی ۹۰ و ۱۲۰ درجه.</dd>
                     <dt>مقابله</dt><dd>فاصله‌ی ۱۸۰ درجه؛ مقابله‌ی شمس و قمر «استقبال» است.</dd>
-                    <dt>بعدالسواء</dt><dd>اختلاف طول منطقةالبروجی قمر و شمس (تقویم دو نیّر) در لحظه‌ی غروب خورشید در یک افق.</dd>
-                    <dt>بعدالمعدل</dt><dd>بُعد مغرب قمر از مغرب شمس زماناً؛ فاصله‌ی زمانی غروب دو جرم که به درجه‌ی معدل‌النهار تبدیل می‌شود.</dd>
+                    <dt>بعد سواء</dt><dd>اختلاف طول منطقةالبروجی قمر و شمس (تقویم دو نیّر) در لحظه‌ی غروب خورشید در یک افق.</dd>
+                    <dt>بعد معدل</dt><dd>بُعد مغرب قمر از مغرب شمس زماناً؛ فاصله‌ی زمانی غروب دو جرم که به درجه‌ی معدل‌النهار تبدیل می‌شود.</dd>
                 </dl>
             </details>
         </section>

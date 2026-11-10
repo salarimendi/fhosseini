@@ -142,6 +142,9 @@ def calculate():
         tier_labels=astro.TIER_LABELS,
         jdate=astro.jalali_str,
         jdt=astro.fmt_local,
+        dms_s=astro.dms_signed,
+        min_sec=astro.min_sec,
+        hms=astro.hms,
         timezones={k: v[0] for k, v in TIMEZONES.items()},
     )
     return localize_digits(html)

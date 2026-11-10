@@ -4,7 +4,7 @@
 - طول و عرض هر کوکب از منطقةالبروج (Swiss Ephemeris)
 - حالت حرکت خمسه‌ی متحیره: استقامت / اقامت / رجعت
 - اتصالات (مقارنه، تسدیس، تربیع، تثلیث، مقابله) با حدود جرم
-- اجتماع و استقبال، احتراق، تسدیس ایمن/ایسر
+- اجتماع و استقبال، احتراق، ایمن/ایسر در تسدیس و تربیع و تثلیث و مقابله
 - بعد السواء و بعد المعدل برای استهلال در افق شهرهای انتخابی
 
 همه‌ی زمان‌ها در محاسبه UTC هستند و فقط هنگام نمایش به وقت ایران برمی‌گردند.
@@ -79,8 +79,8 @@ CITIES = {
 DEFAULT_CITY = "qom"
 
 # معیار رؤیت هلال بر اساس زیج ایلخانی (پژوهش حمیدرضا گیاهی‌یزدی).
-# sawa_min: حد بعدالسواء؛ tiers: مرزهای بعدالمعدل (درجه) برای بعدالسواء >= حد؛
-# low_maadal: حداقل بعدالمعدل وقتی بعدالسواء کمتر از حد است.
+# sawa_min: حد بعد سواء؛ tiers: مرزهای بعد معدل (درجه) برای بعد سواء >= حد؛
+# low_maadal: حداقل بعد معدل وقتی بعد سواء کمتر از حد است.
 DEFAULT_CRITERIA = dict(sawa_min=10.0, tiers=[10.0, 12.0, 14.0, 16.0, 18.0], low_maadal=12.0)
 TIER_LABELS = ["هلال باریک", "هلال متوسط", "هلال روشن", "رؤیت‌پذیر", "رؤیت بسیار آسان"]
 SAWA_THRESHOLD = DEFAULT_CRITERIA["sawa_min"]
@@ -134,6 +134,29 @@ def fmt_hm(dt):
 
 def wrap180(x):
     return (x + 180.0) % 360.0 - 180.0
+
+
+def dms_signed(deg):
+    """درجه‌ی علامت‌دار به درجه/دقیقه/ثانیه‌ی فلکی (تا ثانیه)."""
+    d, m, sec = dms_parts(deg)
+    return f"{'-' if deg < 0 and (d or m or sec) else '+'}{d}° {m:02d}′ {sec:02d}″"
+
+
+def min_sec(minutes):
+    """دقیقه‌ی علامت‌دار (اعشاری) به دقیقه و ثانیه‌ی زمانی."""
+    total = int(round(abs(minutes) * 60))
+    m, sec = divmod(total, 60)
+    sign = "-" if minutes < 0 and total else "+"
+    return f"{sign}{m} دقیقه و {sec:02d} ثانیه"
+
+
+def hms(minutes, signed=True):
+    """دقیقه (اعشاری) به ساعت زمانی HH:MM:SS؛ با علامت اختیاری."""
+    total = int(round(abs(minutes) * 60))
+    h, rem = divmod(total, 3600)
+    m, sec = divmod(rem, 60)
+    sign = ("-" if minutes < 0 and total else "+") if signed else ""
+    return f"{sign}{h:02d}:{m:02d}:{sec:02d}"
 
 
 def fmt_duration(hours):
@@ -268,8 +291,13 @@ def calculate_aspects(rows, jorms):
                         tags.append("استقبال")
                 elif "sun" in keys and asp["key"] == "conj":
                     tags.append("احتراق")
-                if asp["key"] == "sext":
-                    tags.append("تسدیس ایمن" if target > 0 else "تسدیس ایسر")
+                if asp["key"] != "conj":
+                    # ایمن: سریع‌السیر پیش از (طول کمتر از) کندتر؛ ایسر: پس از آن
+                    if a == 180:
+                        before = ((slow["longitude"] - fast["longitude"]) % 360.0) < 180.0
+                    else:
+                        before = target > 0
+                    tags.append(f"{asp['name']} {'ایمن' if before else 'ایسر'}")
 
                 result.append(dict(
                     type=asp["key"], type_name=asp["name"], glyph=asp["glyph"], angle=asp["angle"],
@@ -383,23 +411,23 @@ def classify_evening(elong, lag_deg, crit=None):
     crit = crit or DEFAULT_CRITERIA
     t, smin, low = crit["tiers"], crit["sawa_min"], crit["low_maadal"]
     if elong < 0:
-        return "before", "قبل از مقارنه", "قبل از مقارنه: ماه هنوز به خورشید نرسیده است و هلال دیده نمی‌شود."
+        return "before", "قبل از مقارنه", "ماه هنوز به خورشید نرسیده است و هلال دیده نمی‌شود."
     if lag_deg is None or lag_deg <= 0:
         return "no", "غیرممکن", "ماه پیش از خورشید (یا همزمان) غروب می‌کند؛ رؤیت هلال ممکن نیست."
     if elong >= smin:
         if lag_deg < t[0]:
-            return "unlikely", "رؤیت بعید", (f"بعدالسواء بیش از {smin:g} درجه است، اما بعدالمعدل کمتر از "
+            return "unlikely", "رؤیت بعید", (f"بعد سواء بیش از {smin:g} درجه است، اما بعد معدل کمتر از "
                                               f"{t[0]:g} درجه است؛ پایین‌تر از حد جدول خواجه نصیرالدین طوسی در زیج ایلخانی و رؤیت بعید است.")
         label = TIER_LABELS[-1]
         for i in range(1, 5):
             if lag_deg < t[i]:
                 label = TIER_LABELS[i - 1]
                 break
-        return "possible", label, f"طبق جدول خواجه نصیرالدین طوسی در زیج ایلخانی (بعدالسواء بیش از {smin:g} درجه): {label}."
+        return "possible", label, f"طبق جدول خواجه نصیرالدین طوسی در زیج ایلخانی (بعد سواء بیش از {smin:g} درجه و بعد معدل در این محدوده)."
     if lag_deg >= low:
-        return "possible", "رؤیت‌پذیر", (f"بعدالسواء کمتر از {smin:g} درجه است، اما بعدالمعدل حدود {low:g} درجه "
+        return "possible", "رؤیت‌پذیر", (f"بعد سواء کمتر از {smin:g} درجه است، اما بعد معدل حدود {low:g} درجه "
                                           "یا بیشتر است؛ طبق جدول خواجه نصیرالدین طوسی در زیج ایلخانی رؤیت‌پذیر است.")
-    return "unlikely", "رؤیت بعید", (f"بعدالسواء کمتر از {smin:g} درجه و بعدالمعدل کمتر از {low:g} درجه است؛ "
+    return "unlikely", "رؤیت بعید", (f"بعد سواء کمتر از {smin:g} درجه و بعد معدل کمتر از {low:g} درجه است؛ "
                                       "رؤیت هلال بعید است.")
 
 
@@ -504,5 +532,5 @@ def build_alerts(jd, elong_now, last_conj, next_conj, evening):
 
     if evening and (-30 <= evening["elong"] <= 40):
         level = {"before": "warn", "no": "danger", "unlikely": "warn", "possible": "good"}[evening["status"]]
-        alerts.append((level, "غروب همین روز در افق انتخابی", evening["status_text"]))
+        alerts.append((level, "غروب همین روز در افق انتخابی", f'{evening["verdict"]}: {evening["status_text"]}'))
     return alerts

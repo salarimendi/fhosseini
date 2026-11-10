@@ -118,10 +118,10 @@ def test_evening_report_and_page(astro, monkeypatch):
             date_value="2026-11-10T17:30", tz_key="iran", city_key="qom", cities=astro.CITIES,
             bodies=astro.BODIES, jorms={b["key"]: b["jorm"] for b in astro.BODIES}, factor=1.0,
             aspect_types=astro.ASPECTS, crit=astro.DEFAULT_CRITERIA, tier_labels=astro.TIER_LABELS,
-            jdate=astro.jalali_str, jdt=astro.fmt_local,
+            jdate=astro.jalali_str, jdt=astro.fmt_local, dms_s=astro.dms_signed, min_sec=astro.min_sec, hms=astro.hms,
             timezones={k: v[0] for k, v in stars.TIMEZONES.items()},
         )
-    assert "بعدالسواء" in html and "بعدالمعدل" in html and "عرض (°)" in html
+    assert "بعد سواء" in html and "بعد معدل" in html and "عرض (°)" in html
     assert 'data-bodies="' in html and "built-in" not in html  # باگ فیلتر: کلید keys
     assert "(استقامت)" not in html
     out = stars.localize_digits(html)
@@ -134,6 +134,19 @@ def test_tusi_criteria(astro):
     assert c(12, 9)[0] == "unlikely"
     assert [c(12, x)[1] for x in (11, 13, 15, 17, 19)] == astro.TIER_LABELS
     assert c(8, 12.5)[0] == "possible" and c(8, 11)[0] == "unlikely"
+
+
+def test_dms_and_trine_side(astro):
+    assert astro.dms_signed(5.74) == "+5° 44′ 24″" and astro.min_sec(23.5) == "+23 دقیقه و 30 ثانیه"
+    row = lambda k, lon, sp: dict(key=k, name=k, glyph="x", color="#000", longitude=lon, speed=sp)
+    r = [row("sun", 100.0, 1.0), row("moon", 220.0, 13.0)]  # قمر ۱۲۰ درجه پس از شمس
+    tri = [a for a in astro.calculate_aspects(r, {"sun": 35, "moon": 12}) if a["type"] == "trine"][0]
+    assert "تثلیث ایسر" in tri["tags"]
+
+
+def test_hms_and_no_duplicate(astro):
+    assert astro.hms(22.4) == "+00:22:24" and astro.hms(-1.5) == "-00:01:30" and astro.hms(1836, False) == "30:36:00"
+    assert not astro.classify_evening(-3, 5)[2].startswith("قبل از مقارنه")
 
 
 def test_jalali(astro):
