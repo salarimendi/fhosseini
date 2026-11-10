@@ -288,10 +288,17 @@
                             <div class="n">خط عمودی = آستانه‌ی {{ "%g"|format(crit.sawa_min) }} درجه</div>
                         </div>
                         <div class="st-metric st-metric--maadal">
-                            <div class="k">بعدالمعدل (غروب قمر − غروب شمس)</div>
+                            <div class="k">بعدالمعدل (فاصله‌ی دو مغرب روی معدل‌النهار)</div>
+                            {% if ev.lag_min is not none %}
+                            <div class="v">{{ "%+.2f"|format(ev.lag_deg) }}°</div>
+                            <div class="n">هر ساعت = ۱۵ درجه</div>
+                            {% else %}<div class="v">—</div>{% endif %}
+                        </div>
+                        <div class="st-metric st-metric--maadal">
+                            <div class="k">مکث ماه پس از غروب خورشید</div>
                             {% if ev.lag_min is not none %}
                             <div class="v">{{ "%+.1f"|format(ev.lag_min) }} دقیقه</div>
-                            <div class="n">معادل <b class="st-ltr">{{ "%+.2f"|format(ev.lag_deg) }}°</b> روی معدل‌النهار</div>
+                            <div class="n">{{ 'ماه پس از خورشید غروب می‌کند' if ev.lag_min > 0 else 'ماه پیش از خورشید غروب می‌کند' }}</div>
                             {% else %}<div class="v">—</div>{% endif %}
                         </div>
                         <div class="st-metric">
@@ -317,7 +324,7 @@
                     </div>
                     <div class="st-verdict st-verdict--{{ ev.status }}">{{ ev.verdict }}: {{ ev.status_text }}</div>
                     <details class="st-settings">
-                        <summary>جدول معیار طوسی (زیج ایلخانی)</summary>
+                        <summary>جدول معیار خواجه نصیرالدین طوسی (زیج ایلخانی)</summary>
                         <div class="st-scroll"><table class="st-table" style="margin-top:10px">
                             <thead><tr><th>بعدالسواء</th><th>بعدالمعدل (درجه)</th><th>حکم</th></tr></thead>
                             <tbody>

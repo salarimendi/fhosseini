@@ -379,7 +379,7 @@ def moonset_near(city, jd_ref):
 
 
 def classify_evening(elong, lag_deg, crit=None):
-    """حکم رؤیت بر پایه‌ی جدول طوسی؛ (سطح، برچسب کوتاه، متن)."""
+    """حکم رؤیت بر پایه‌ی جدول خواجه نصیرالدین طوسی؛ (سطح، برچسب کوتاه، متن)."""
     crit = crit or DEFAULT_CRITERIA
     t, smin, low = crit["tiers"], crit["sawa_min"], crit["low_maadal"]
     if elong < 0:
@@ -389,16 +389,16 @@ def classify_evening(elong, lag_deg, crit=None):
     if elong >= smin:
         if lag_deg < t[0]:
             return "unlikely", "رؤیت بعید", (f"بعدالسواء بیش از {smin:g} درجه است، اما بعدالمعدل کمتر از "
-                                              f"{t[0]:g} درجه است؛ پایین‌تر از حد جدول طوسی و رؤیت بعید است.")
+                                              f"{t[0]:g} درجه است؛ پایین‌تر از حد جدول خواجه نصیرالدین طوسی در زیج ایلخانی و رؤیت بعید است.")
         label = TIER_LABELS[-1]
         for i in range(1, 5):
             if lag_deg < t[i]:
                 label = TIER_LABELS[i - 1]
                 break
-        return "possible", label, f"طبق جدول طوسی (بعدالسواء بیش از {smin:g} درجه): {label}."
+        return "possible", label, f"طبق جدول خواجه نصیرالدین طوسی در زیج ایلخانی (بعدالسواء بیش از {smin:g} درجه): {label}."
     if lag_deg >= low:
         return "possible", "رؤیت‌پذیر", (f"بعدالسواء کمتر از {smin:g} درجه است، اما بعدالمعدل حدود {low:g} درجه "
-                                          "یا بیشتر است؛ طبق جدول طوسی رؤیت‌پذیر است.")
+                                          "یا بیشتر است؛ طبق جدول خواجه نصیرالدین طوسی در زیج ایلخانی رؤیت‌پذیر است.")
     return "unlikely", "رؤیت بعید", (f"بعدالسواء کمتر از {smin:g} درجه و بعدالمعدل کمتر از {low:g} درجه است؛ "
                                       "رؤیت هلال بعید است.")
 
