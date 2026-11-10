@@ -1,353 +1,591 @@
 {% extends "base.html" %}
 
-{% block title %}موقعیت سیارات{% endblock %}
+{% block title %}اجرام سماوی و قمر در عقرب{% endblock %}
 
 {% block head %}
-    <style>
-        .stars-page {
-            padding: 40px 20px;
-            background: #f4f6f8;
-            color: #202124;
-           
-        }
-
-        .stars-container {
-            max-width: 1000px;
-            margin: auto;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .date {
-            text-align: center;
-            color: #666;
-            margin-bottom: 25px;
-        }
-
-
-.date-form {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    margin: 25px 0;
-    flex-wrap: wrap;
+<style>
+.st-page {
+    --st-ink: #1e2540; --st-muted: #66708f; --st-line: #e4e8f3; --st-bg: #f2f4fb; --st-card: #fff;
+    --st-accent: #4f46e5; --st-gold: #d9a441;
+    --st-good: #15803d; --st-good-bg: #e8f7ee; --st-warn: #b45309; --st-warn-bg: #fff4e0;
+    --st-bad: #b91c1c; --st-bad-bg: #fdecec; --st-info: #1d4ed8; --st-info-bg: #e8f0ff;
+    background: var(--st-bg); color: var(--st-ink); padding-bottom: 48px;
 }
+.st-page * { box-sizing: border-box; }
+.st-wrap { max-width: 1120px; margin: 0 auto; padding: 0 14px; }
 
-.date-form label {
-    font-weight: bold;
+/* ---------- Hero ---------- */
+.st-hero {
+    position: relative; overflow: hidden; color: #fff; padding: 34px 0 78px;
+    background:
+        radial-gradient(1.5px 1.5px at 12% 28%, #fff9 50%, transparent 51%),
+        radial-gradient(1px 1px at 28% 68%, #fff8 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 47% 22%, #fffb 50%, transparent 51%),
+        radial-gradient(1px 1px at 63% 74%, #fff7 50%, transparent 51%),
+        radial-gradient(2px 2px at 82% 30%, #fffc 50%, transparent 51%),
+        radial-gradient(1px 1px at 92% 62%, #fff8 50%, transparent 51%),
+        linear-gradient(135deg, #0d1535 0%, #1d2a63 55%, #3a2a74 100%);
 }
+.st-hero-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.st-hero h1 { font-size: clamp(1.4rem, 3.4vw, 2.1rem); margin: 0 0 8px; font-weight: 800; }
+.st-hero p { margin: 0; color: #cfd6f5; max-width: 620px; line-height: 2; font-size: .95rem; }
+.st-hero-time { margin-top: 12px; font-size: .85rem; color: #aab4e6; }
+.st-hero-time b { color: #fff; direction: ltr; unicode-bidi: embed; }
+.st-hero-moon { flex: 0 0 auto; filter: drop-shadow(0 0 22px #f6efd055); }
 
-.date-form input,
-.date-form select {
-    padding: 10px;
-    border: 1px solid #b0bec5;
-    border-radius: 4px;
+/* ---------- Cards ---------- */
+.st-card { background: var(--st-card); border-radius: 18px; box-shadow: 0 6px 26px #1d2a6314; padding: 22px; margin-top: 22px; }
+.st-card h2 { font-size: 1.12rem; font-weight: 800; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+.st-card h2 .st-ic { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: #eceaff; color: var(--st-accent); font-size: 1rem; }
+.st-sub { color: var(--st-muted); font-size: .85rem; margin: 0 0 16px; line-height: 1.9; }
 
-    font-size: 14px;
-    direction: ltr;
+/* ---------- Controls ---------- */
+.st-controls { margin-top: -50px; position: relative; z-index: 2; }
+.st-form-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+.st-field { display: flex; flex-direction: column; gap: 6px; }
+.st-field > label, .st-field > .st-lbl { font-size: .8rem; font-weight: 700; color: var(--st-muted); }
+.st-input { padding: 10px 12px; border: 1px solid #cdd4ea; border-radius: 10px; font-size: .92rem; direction: ltr; background: #fff; color: var(--st-ink); font-family: inherit; }
+.st-input:focus { outline: 2px solid #c7c2ff; border-color: var(--st-accent); }
+.st-cities { display: flex; gap: 8px; flex-wrap: wrap; }
+.st-city input { position: absolute; opacity: 0; pointer-events: none; }
+.st-city span { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 999px; border: 1px solid #cdd4ea; cursor: pointer; font-weight: 700; font-size: .9rem; background: #fff; transition: .15s; }
+.st-city { position: relative; }
+.st-city input:checked + span { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; border-color: transparent; box-shadow: 0 4px 14px #4f46e555; }
+.st-city input:focus-visible + span { outline: 2px solid #c7c2ff; outline-offset: 2px; }
+.st-btn { padding: 10px 22px; border: 0; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: .92rem; }
+.st-btn--primary { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; box-shadow: 0 4px 14px #4f46e544; }
+.st-btn--primary:hover { filter: brightness(1.08); }
+.st-btn--ghost { background: #eef0fa; color: var(--st-ink); }
+.st-btn--ghost:hover { background: #e1e5f6; }
+.st-settings { margin-top: 14px; border-top: 1px dashed var(--st-line); padding-top: 12px; }
+.st-settings summary { cursor: pointer; font-weight: 700; font-size: .85rem; color: var(--st-muted); }
+.st-settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 12px; }
+.st-settings-grid .st-input { width: 100%; }
+
+/* ---------- Alerts ---------- */
+.st-alerts { display: grid; gap: 10px; margin-top: 18px; }
+.st-alert { display: flex; gap: 12px; align-items: flex-start; padding: 13px 16px; border-radius: 14px; border-inline-start: 5px solid; line-height: 1.9; font-size: .92rem; }
+.st-alert b { display: block; font-size: .95rem; }
+.st-alert--info { background: var(--st-info-bg); color: var(--st-info); border-color: var(--st-info); }
+.st-alert--good { background: var(--st-good-bg); color: var(--st-good); border-color: var(--st-good); }
+.st-alert--warn { background: var(--st-warn-bg); color: var(--st-warn); border-color: var(--st-warn); }
+.st-alert--danger { background: var(--st-bad-bg); color: var(--st-bad); border-color: var(--st-bad); }
+.st-alert-ic { font-size: 1.3rem; line-height: 1.5; }
+
+/* ---------- Crescent ---------- */
+.st-cres { display: grid; grid-template-columns: 190px 1fr; gap: 22px; align-items: center; }
+.st-cres-moon { text-align: center; }
+.st-cres-moon small { display: block; color: var(--st-muted); margin-top: 6px; font-size: .78rem; }
+.st-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.st-metric { background: #f7f8fe; border: 1px solid var(--st-line); border-radius: 14px; padding: 12px 14px; }
+.st-metric .k { font-size: .76rem; color: var(--st-muted); font-weight: 700; }
+.st-metric .v { font-size: 1.35rem; font-weight: 800; direction: ltr; text-align: right; margin-top: 2px; }
+.st-metric .n { font-size: .75rem; color: var(--st-muted); line-height: 1.7; margin-top: 2px; }
+.st-metric--sawa { background: linear-gradient(135deg, #eef0ff, #f6efff); }
+.st-metric--maadal { background: linear-gradient(135deg, #fff6e4, #fff0f0); }
+.st-bar { height: 8px; background: #dfe3f5; border-radius: 99px; overflow: hidden; margin-top: 8px; position: relative; }
+.st-bar > i { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: 99px; background: linear-gradient(90deg, #6366f1, #a855f7); }
+.st-bar > u { position: absolute; inset-block: -2px; width: 2px; background: #1e2540; }
+.st-verdict { margin-top: 14px; padding: 12px 16px; border-radius: 12px; font-weight: 700; line-height: 1.9; font-size: .93rem; }
+.st-verdict--before, .st-verdict--unlikely { background: var(--st-warn-bg); color: var(--st-warn); }
+.st-verdict--no { background: var(--st-bad-bg); color: var(--st-bad); }
+.st-verdict--possible { background: var(--st-good-bg); color: var(--st-good); }
+.st-note { font-size: .76rem; color: var(--st-muted); margin-top: 8px; line-height: 1.9; }
+
+/* ---------- Tables ---------- */
+.st-scroll { overflow-x: auto; margin: 0 -6px; padding: 0 6px; }
+.st-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .9rem; }
+.st-table th { background: #1d2a63; color: #fff; padding: 11px 10px; font-size: .78rem; font-weight: 700; white-space: nowrap; text-align: center; }
+.st-table th:first-child { border-radius: 0 12px 0 0; } .st-table th:last-child { border-radius: 12px 0 0 0; }
+.st-table td { padding: 11px 10px; border-bottom: 1px solid var(--st-line); text-align: center; vertical-align: middle; }
+.st-table tbody tr:hover { background: #f5f6ff; }
+.st-ltr { direction: ltr; unicode-bidi: embed; white-space: nowrap; }
+.st-table tr.is-sel { background: #eef0ff; font-weight: 700; }
+.st-table tr.is-scorpio { background: linear-gradient(90deg, #eaf2ff, #f4ecff); }
+.st-table tr.is-scorpio td:first-child { box-shadow: inset -4px 0 0 #6d28d9; }
+.st-body { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; white-space: nowrap; }
+.st-body .g { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: #fff; font-size: 1.05rem; }
+.st-sign { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.st-abbr { display: inline-grid; place-items: center; min-width: 28px; height: 28px; padding: 0 5px; border-radius: 8px; font-weight: 800; color: #fff; font-size: .9rem; }
+.el-fire { background: #ef4444; } .el-earth { background: #16a34a; } .el-air { background: #d99a06; } .el-water { background: #2563eb; }
+.st-chip { display: inline-block; padding: 3px 11px; border-radius: 99px; font-size: .78rem; font-weight: 700; white-space: nowrap; }
+.chip-mustaqim { background: var(--st-good-bg); color: var(--st-good); }
+.chip-muqim { background: var(--st-warn-bg); color: var(--st-warn); }
+.chip-raji { background: var(--st-bad-bg); color: var(--st-bad); }
+.chip-applying { background: var(--st-info-bg); color: var(--st-info); }
+.chip-exact { background: #f3e8ff; color: #7e22ce; }
+.chip-separating { background: #eef0f4; color: #4b5563; }
+.chip-tag { background: #fff4e0; color: #92400e; margin-inline-start: 4px; }
+.st-moon-lat { font-weight: 800; color: #6d28d9; }
+.st-scorpio-badge { display: inline-block; margin-inline-start: 6px; padding: 2px 9px; border-radius: 99px; background: #6d28d9; color: #fff; font-size: .72rem; }
+.st-legend { display: flex; gap: 8px 14px; flex-wrap: wrap; margin-top: 12px; font-size: .78rem; color: var(--st-muted); align-items: center; }
+
+/* ---------- Aspects ---------- */
+.st-filter { background: #f7f8fe; border: 1px solid var(--st-line); border-radius: 14px; padding: 14px; margin-bottom: 14px; display: grid; gap: 12px; }
+.st-filter-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.st-filter-row > .t { font-size: .78rem; font-weight: 800; color: var(--st-muted); min-width: 74px; }
+.st-tick { position: relative; }
+.st-tick input { position: absolute; opacity: 0; pointer-events: none; }
+.st-tick span { display: inline-flex; gap: 5px; align-items: center; padding: 6px 13px; border-radius: 99px; border: 1px solid #cdd4ea; background: #fff; cursor: pointer; font-size: .83rem; font-weight: 700; color: #7b84a6; transition: .12s; user-select: none; }
+.st-tick input:checked + span { background: #eceaff; border-color: #7c6ff0; color: #3b2fb5; }
+.st-tick input:focus-visible + span { outline: 2px solid #c7c2ff; }
+.st-mini { font-size: .76rem; padding: 5px 12px; }
+.st-count { margin-inline-start: auto; font-size: .8rem; color: var(--st-muted); }
+.asp-type { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; white-space: nowrap; }
+.asp-type .gl { font-size: 1.15rem; }
+.asp-conj { color: #b45309; } .asp-sext { color: #0d9488; } .asp-quad { color: #dc2626; } .asp-trine { color: #2563eb; } .asp-opp { color: #7e22ce; }
+.st-strength { display: block; height: 5px; background: #e7eaf6; border-radius: 9px; overflow: hidden; margin-top: 5px; min-width: 70px; }
+.st-strength i { display: block; height: 100%; background: linear-gradient(90deg, #6366f1, #22c55e); }
+.st-empty { text-align: center; padding: 22px; color: var(--st-muted); display: none; }
+
+/* ---------- Glossary / poems ---------- */
+.st-gloss summary { cursor: pointer; font-weight: 800; }
+.st-gloss dl { display: grid; grid-template-columns: 150px 1fr; gap: 8px 14px; margin: 14px 0 0; font-size: .88rem; line-height: 1.9; }
+.st-gloss dt { font-weight: 800; color: var(--st-accent); }
+.st-gloss dd { margin: 0; color: #3b4263; }
+.st-poems { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 22px; }
+.st-poem { background: #fffdf7; border: 1px solid #efe6cc; border-radius: 16px; padding: 16px 18px; color: #5b4c22; line-height: 2.15; font-weight: 600; font-size: .95rem; position: relative; }
+.st-poem::before { content: "❝"; position: absolute; top: 4px; inset-inline-end: 12px; font-size: 1.8rem; color: #e6d9aa; }
+.st-poem .v { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; text-align: center; }
+.st-poem .v + .v { margin-top: 2px; }
+.st-poems-title { margin: 28px 0 0; font-size: .82rem; letter-spacing: .04em; color: var(--st-muted); text-align: center; font-weight: 700; }
+
+@media (max-width: 760px) {
+    .st-cres { grid-template-columns: 1fr; }
+    .st-hero-moon { display: none; }
+    .st-table { font-size: .8rem; } .st-table td, .st-table th { padding: 9px 6px; }
+    .st-gloss dl { grid-template-columns: 1fr; }
+    .st-poem .v { column-gap: 12px; font-size: .85rem; }
 }
-
-.date-form button {
-    padding: 10px 24px;
-    border: none;
-    border-radius: 4px;
-    background: #2e7d32;
-    color: white;
-    cursor: pointer;
-
-    font-size: 14px;
-}
-
-.date-form button:hover {
-    background: #1b5e20;
-}
-
-
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            box-shadow: 0 2px 10px #00000018;
-        }
-
-        th,
-        td {
-            padding: 14px 12px;
-            border-bottom: 1px solid #e3e6e8;
-            text-align: center;
-        }
-
-        th {
-            background: #263238;
-            color: white;
-        }
-
-        tr:hover {
-            background: #f1f8e9;
-        }
-
-        .planet {
-            font-weight: bold;
-            white-space: nowrap;
-        }
-
-        .longitude,
-        .speed {
-            direction: ltr;
-
-        }
-
-        .retrograde {
-            color: #c62828;
-            font-weight: bold;
-        }
-        .description-warning {
-            color: #c62828;
-            font-weight: bold;
-        }
-        .date-form button[type="button"] {
-            background: #546e7a;
-        }
-
-        .date-form button[type="button"]:hover {
-            background: #37474f;
-        }
-
-.poem-box {
-    max-width: 900px;
-    margin: 28px auto 22px;
-    padding: 14px 24px;
-    color: #37474f;
-    background: #fff;
-    border-top: 2px solid #2e7d32;
-    border-bottom: 2px solid #2e7d32;
-    box-shadow: 0 2px 8px #00000012;
-
-    font-size: 18px;
-    font-weight: bold;
-    line-height: 2.2;
-    direction: rtl;
-}
-
-.poem-verse {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 90px;
-    text-align: center;
-}
-
-.poem-verse + .poem-verse {
-    margin-top: 4px;
-}
-
-@media (max-width: 700px) {
-    .poem-box {
-        padding: 10px;
-        font-size: 15px;
-    }
-
-    .poem-verse {
-        column-gap: 20px;
-    }
-}
-        
-        
-
-        @media (max-width: 700px) {
-            .stars-page {
-                padding: 20px 8px;
-            }
-
-            table {
-                font-size: 12px;
-            }
-
-            th,
-            td {
-                padding: 10px 4px;
-            }
-        }
-    </style>
+</style>
 {% endblock %}
 
+{% macro moon_svg(p, size=120, uid='m') %}
+<svg width="{{ size }}" height="{{ size }}" viewBox="-60 -60 120 120" role="img" aria-label="شکل ماه، نورانیت {{ p.illumination }} درصد">
+    <defs>
+        <radialGradient id="lit-{{ uid }}" cx="50%" cy="45%" r="60%">
+            <stop offset="0" stop-color="#fffdf0"/><stop offset="1" stop-color="#f1e3a8"/>
+        </radialGradient>
+    </defs>
+    <circle r="50" fill="#161f48" stroke="#3a4784" stroke-width="1.5"/>
+    <g {% if p.waning %}transform="scale(-1,1)"{% endif %}>
+        <path d="M0,-50 A50,50 0 0 1 0,50 A{{ p.rx }},50 0 0 {{ p.sweep }} 0,-50 Z" fill="url(#lit-{{ uid }})"/>
+    </g>
+</svg>
+{% endmacro %}
+
 {% block content %}
-    <main class="stars-page">
-        <div class="stars-container">
-        <h1>موقعیت ستاره های سیار</h1>
+{% set ev = a.evening %}
+<main class="st-page">
+    <header class="st-hero">
+        <div class="st-wrap st-hero-inner">
+            <div>
+                <h1>اجرام سماوی و قمر در عقرب</h1>
+                <p>طول و عرض کواکب از منطقةالبروج، استقامت و اقامت و رجعت خمسه‌ی متحیره، اتصالات و نظرها، و بعدالسواء و بعدالمعدل برای استهلال هلال در افق قم، تهران، ساری و گناباد.</p>
+                <div class="st-hero-time">
+                    زمان محاسبه: <b>{{ utc.strftime("%Y-%m-%d %H:%M") }} UTC</b>
+                    &nbsp;|&nbsp; وقت ایران (UTC+03:30): <b>{{ jdt(iran_dt) }}</b>
+                </div>
+            </div>
+            <div class="st-hero-moon">{{ moon_svg(a.phase_now, 130, 'hero') }}</div>
+        </div>
+    </header>
 
-        <form method="post" class="date-form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="st-wrap">
+        <!-- ================= فرم ================= -->
+        <section class="st-card st-controls">
+            <form method="post" id="st-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="st-form-row">
+                    <div class="st-field">
+                        <span class="st-lbl">افق (شهر)</span>
+                        <div class="st-cities" role="radiogroup" aria-label="شهر">
+                            {% for key, c in cities.items() %}
+                            <label class="st-city"><input type="radio" name="city" value="{{ key }}" {% if key == city_key %}checked{% endif %}><span>📍 {{ c.name }}</span></label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="st-field">
+                        <label for="tz">منطقه زمانی</label>
+                        <select id="tz" name="tz" class="st-input">
+                            {% for key, label in timezones.items() %}
+                            <option value="{{ key }}" {% if key == tz_key %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="st-field">
+                        <label for="date_time">تاریخ و ساعت</label>
+                        <input type="datetime-local" id="date_time" name="date_time" class="st-input" value="{{ date_value }}" required>
+                    </div>
+                    <div class="st-field" style="flex-direction:row; gap:8px;">
+                        <button type="button" id="reset-date" class="st-btn st-btn--ghost">اکنون</button>
+                        <button type="submit" class="st-btn st-btn--primary">محاسبه</button>
+                    </div>
+                </div>
 
-            <label for="tz">منطقه زمانی:</label>
-            <select id="tz" name="tz">
-                {% for key, label in timezones.items() %}
-                <option value="{{ key }}" {% if key == tz_key %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-            </select>
+                <details class="st-settings">
+                    <summary>⚙️ تنظیم جرم کواکب و تلورانس اقامت</summary>
+                    <div class="st-settings-grid">
+                        {% for b in bodies %}
+                        <div class="st-field">
+                            <label for="jorm_{{ b.key }}">جرم {{ b.name }} (°)</label>
+                            <input class="st-input" type="number" step="0.5" min="0" max="60" id="jorm_{{ b.key }}" name="jorm_{{ b.key }}" value="{{ jorms[b.key] }}">
+                        </div>
+                        {% endfor %}
+                        <div class="st-field">
+                            <label for="stat_factor">ضریب تلورانس اقامت</label>
+                            <input class="st-input" type="number" step="0.1" min="0.1" max="5" id="stat_factor" name="stat_factor" value="{{ factor }}">
+                        </div>
+                    </div>
+                    <div class="st-note" style="margin-top:14px;font-weight:700">معیار رؤیت هلال (زیج ایلخانی — پژوهش حمیدرضا گیاهی‌یزدی)</div>
+                    <div class="st-settings-grid">
+                        <div class="st-field"><label for="crit_sawa">حد بعدالسواء (°)</label><input class="st-input" type="number" step="0.5" min="0.5" max="60" id="crit_sawa" name="crit_sawa" value="{{ crit.sawa_min }}"></div>
+                        {% for i in range(5) %}
+                        <div class="st-field"><label for="crit_t{{ i+1 }}">مرز بعدالمعدل {{ tier_labels[i] if i < 4 else 'رؤیت بسیار آسان' }} (°)</label><input class="st-input" type="number" step="0.5" min="0.5" max="90" id="crit_t{{ i+1 }}" name="crit_t{{ i+1 }}" value="{{ crit.tiers[i] }}"></div>
+                        {% endfor %}
+                        <div class="st-field"><label for="crit_low">بعدالمعدل لازم وقتی بعدالسواء کمتر از حد است (°)</label><input class="st-input" type="number" step="0.5" min="0.5" max="60" id="crit_low" name="crit_low" value="{{ crit.low_maadal }}"></div>
+                    </div>
+                    <p class="st-note">اقامت: وقتی |سرعت طولی| از حد تلورانس کوکب کمتر باشد (عطارد ۰٫۱۰، زهره ۰٫۰۸، مریخ ۰٫۰۴، مشتری ۰٫۰۲، زحل ۰٫۰۱۵ درجه در روز) × ضریب. بعد از تغییر مقادیر، «محاسبه» را بزنید.</p>
+                </details>
+            </form>
+        </section>
 
-            <label for="date_time">تاریخ و ساعت:</label>
+        <!-- ================= هشدارها ================= -->
+        {% if a.alerts %}
+        <div class="st-alerts" role="status">
+            {% for level, title, text in a.alerts %}
+            <div class="st-alert st-alert--{{ level }}">
+                <span class="st-alert-ic">{{ {'info':'🌑','good':'🌒','warn':'⏳','danger':'🚫'}[level] }}</span>
+                <div><b>{{ title }}</b>{{ text }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
-            <input
-                type="datetime-local"
-                id="date_time"
-                name="date_time"
-                value="{{ date_value }}"
-                required
-            >
-            <button type="button" id="reset-date">زمان فعلی</button>
+        <!-- ================= استهلال ================= -->
+        <section class="st-card">
+            <h2><span class="st-ic">🌙</span> استهلال هلال — افق {{ a.city.name }}</h2>
+            <p class="st-sub">
+                بعدالسواء: اختلاف طول منطقةالبروجی قمر و شمس در لحظه‌ی غروب خورشید. بعدالمعدل: فاصله‌ی زمانی غروب قمر از غروب شمس (هر ساعت = ۱۵ درجه).
+                روز محاسبه: <b class="st-ltr">{{ jdate(ev.date) if ev else '' }}</b> (وقت ایران)
+            </p>
 
-            <button type="submit">محاسبه</button>
-        </form>
+            {% if ev %}
+            <div class="st-cres">
+                <div class="st-cres-moon">
+                    {{ moon_svg(a.phase, 160, 'ev') }}
+                    <small>ماه در غروب — نورانیت {{ a.phase.illumination }}٪</small>
+                </div>
+                <div>
+                    <div class="st-metrics">
+                        <div class="st-metric st-metric--sawa">
+                            <div class="k">بعدالسواء (طول قمر − شمس)</div>
+                            <div class="v">{{ "%+.2f"|format(ev.elong) }}°</div>
+                            <div class="st-bar" title="آستانه‌ی بعدالسواء">
+                                <i style="width: {{ [ [ev.abs_elong if ev.elong > 0 else 0, 0]|max / (crit.sawa_min * 2) * 100, 100]|min }}%"></i>
+                                <u style="inset-inline-start: 50%"></u>
+                            </div>
+                            <div class="n">خط عمودی = آستانه‌ی {{ "%g"|format(crit.sawa_min) }} درجه</div>
+                        </div>
+                        <div class="st-metric st-metric--maadal">
+                            <div class="k">بعدالمعدل (غروب قمر − غروب شمس)</div>
+                            {% if ev.lag_min is not none %}
+                            <div class="v">{{ "%+.1f"|format(ev.lag_min) }} دقیقه</div>
+                            <div class="n">معادل <b class="st-ltr">{{ "%+.2f"|format(ev.lag_deg) }}°</b> روی معدل‌النهار</div>
+                            {% else %}<div class="v">—</div>{% endif %}
+                        </div>
+                        <div class="st-metric">
+                            <div class="k">غروب شمس / غروب قمر</div>
+                            <div class="v" style="font-size:1.1rem">{{ ev.sunset_text }} / {{ ev.moonset_text }}</div>
+                            <div class="n">وقت ایران (UTC+03:30)</div>
+                        </div>
+                        <div class="st-metric">
+                            <div class="k">ارتفاع ماه از افق در غروب شمس</div>
+                            <div class="v">{{ "%.2f"|format(ev.moon_alt) }}°</div>
+                            <div class="n">ارتفاع مرکز ماه با تصحیح اختلاف منظر</div>
+                        </div>
+                        <div class="st-metric">
+                            <div class="k">عرض ماه از منطقةالبروج</div>
+                            <div class="v st-moon-lat">{{ "%+.2f"|format(ev.moon_lat) }}°</div>
+                            <div class="n">{{ 'شمالی' if ev.moon_lat >= 0 else 'جنوبی' }}</div>
+                        </div>
+                        <div class="st-metric">
+                            <div class="k">سن ماه در غروب</div>
+                            <div class="v" style="font-size:1.1rem">{% if ev.age_hours < 0 %}—{% else %}{{ "%.1f"|format(ev.age_hours) }} ساعت{% endif %}</div>
+                            <div class="n">از آخرین اجتماع</div>
+                        </div>
+                    </div>
+                    <div class="st-verdict st-verdict--{{ ev.status }}">{{ ev.verdict }}: {{ ev.status_text }}</div>
+                    <details class="st-settings">
+                        <summary>جدول معیار طوسی (زیج ایلخانی)</summary>
+                        <div class="st-scroll"><table class="st-table" style="margin-top:10px">
+                            <thead><tr><th>بعدالسواء</th><th>بعدالمعدل (درجه)</th><th>حکم</th></tr></thead>
+                            <tbody>
+                            {% for i in range(5) %}
+                            <tr><td>بیش از {{ "%g"|format(crit.sawa_min) }}</td>
+                                <td>{% if i < 4 %}{{ "%g"|format(crit.tiers[i]) }} تا {{ "%g"|format(crit.tiers[i+1]) }}{% else %}بیش از {{ "%g"|format(crit.tiers[4]) }}{% endif %}</td>
+                                <td>{{ tier_labels[i] }}</td></tr>
+                            {% endfor %}
+                            <tr><td>کمتر از {{ "%g"|format(crit.sawa_min) }}</td><td>حدود {{ "%g"|format(crit.low_maadal) }} یا بیشتر</td><td>رؤیت‌پذیر</td></tr>
+                            </tbody></table></div>
+                        <p class="st-note">معیارها بر اساس زیج ایلخانی (پژوهش حمیدرضا گیاهی‌یزدی) — «Naṣīr al-Dīn Ṭūsī on Lunar Crescent Visibility and an Analysis with Modern Altitude–Azimuth Criteria». حدود جدول از بخش «تنظیمات» قابل تغییر است.</p>
+                    </details>
+                </div>
+            </div>
 
-        <div class="date">
-            زمان محاسبه:
-            <span dir="ltr">{{ utc.strftime("%Y-%m-%d %H:%M UTC") }}</span>
-            {% if tz_key != 'utc' %}
-            <br>
-            زمان واردشده — {{ timezones[tz_key] }}:
-            <span dir="ltr">{{ local_dt.strftime("%Y-%m-%d %H:%M") }}</span>
+            <h2 style="margin-top:24px; font-size:1rem">شب‌های استهلال پیرامون اجتماع <span class="st-ltr">{{ jdt(a.ref_conj) }}</span></h2>
+            <div class="st-scroll">
+                <table class="st-table">
+                    <thead><tr><th>تاریخ</th><th>غروب شمس</th><th>غروب قمر</th><th>بعدالسواء</th><th>بعدالمعدل</th><th>ارتفاع ماه</th><th>عرض ماه</th><th>وضعیت</th></tr></thead>
+                    <tbody>
+                    {% for r in a.evenings %}
+                    <tr class="{{ 'is-sel' if r.is_selected }}">
+                        <td class="st-ltr">{{ jdate(r.date) }}</td>
+                        <td class="st-ltr">{{ r.sunset_short }}</td>
+                        <td class="st-ltr">{{ r.moonset_short }}</td>
+                        <td class="st-ltr">{{ "%+.2f"|format(r.elong) }}°</td>
+                        <td class="st-ltr">{% if r.lag_min is not none %}{{ "%+.1f"|format(r.lag_min) }} د ({{ "%+.2f"|format(r.lag_deg) }}°){% else %}—{% endif %}</td>
+                        <td class="st-ltr">{{ "%.1f"|format(r.moon_alt) }}°</td>
+                        <td class="st-ltr">{{ "%+.2f"|format(r.moon_lat) }}°</td>
+                        <td><span class="st-chip {{ {'before':'chip-muqim','unlikely':'chip-muqim','no':'chip-raji','possible':'chip-mustaqim'}[r.status] }}">{{ r.verdict }}</span></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="st-note">
+                آخرین اجتماع: <b class="st-ltr">{{ jdt(a.last_conj) }}</b> — اجتماع بعدی: <b class="st-ltr">{{ jdt(a.next_conj) }}</b> (همه به وقت ایران).
+                در لحظه‌ی ورودی: بعدالسواء <b class="st-ltr">{{ "%+.2f"|format(a.elong_now) }}°</b>، ارتفاع ماه <b class="st-ltr">{{ "%.1f"|format(a.moon_alt) }}°</b>، ارتفاع شمس <b class="st-ltr">{{ "%.1f"|format(a.sun_alt) }}°</b> در افق {{ a.city.name }}.
+                این نتایج معیار محاسباتی کلاسیک‌اند و جایگزین رصد نیستند.
+            </p>
+            {% else %}
+            <p class="st-note">غروب خورشید در این روز برای این افق محاسبه نشد.</p>
             {% endif %}
+        </section>
+
+        <!-- ================= جدول اجرام ================= -->
+        <section class="st-card">
+            <h2><span class="st-ic">✦</span> موقعیت کواکب سبعه‌ی سیاره</h2>
+            <p class="st-sub">برج با حرف اختصاری هیئت: حمل «ها»، ثور «ا»، جوزا «ب»، سرطان «ج»، اسد «د»، سنبله «ه»، میزان «و»، عقرب «ز»، قوس «ح»، جدی «ط»، دلو «ی»، حوت «یا».</p>
+            <div class="st-scroll">
+                <table class="st-table">
+                    <thead><tr>
+                        <th>کوکب</th><th>برج</th><th>درجه در برج</th><th>طول (°)</th><th>عرض (°)</th><th>عرض (DMS)</th><th>سرعت طولی (°/روز)</th><th>حرکت</th>
+                    </tr></thead>
+                    <tbody>
+                    {% for p in a.rows %}
+                    <tr class="{{ 'is-scorpio' if p.key == 'moon' and p.in_scorpio }}">
+                        <td><span class="st-body"><span class="g" style="background: {{ p.color }}">{{ p.glyph }}</span>{{ p.name }}</span></td>
+                        <td><span class="st-sign"><span class="st-abbr el-{{ p.element }}">{{ p.sign_abbr }}</span>{{ p.sign_name }}{% if p.key == 'moon' and p.in_scorpio %}<span class="st-scorpio-badge">قمر در عقرب</span>{% endif %}</span></td>
+                        <td class="st-ltr">{{ p.dms }}</td>
+                        <td class="st-ltr">{{ "%.6f"|format(p.longitude) }}</td>
+                        <td class="st-ltr {{ 'st-moon-lat' if p.key == 'moon' }}">{{ "%+.4f"|format(p.latitude) }}</td>
+                        <td class="st-ltr">{{ p.lat_dms }}</td>
+                        <td class="st-ltr">{{ "%+.6f"|format(p.speed) }}</td>
+                        <td>
+                            {% if p.motion %}<span class="st-chip chip-{{ p.motion.key }}">{{ p.motion.name }}</span>
+                            {% else %}<span class="st-note">—</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="st-legend">
+                <span><span class="st-chip chip-mustaqim">مستقیم</span> حرکت در جهت ترتیب بروج</span>
+                <span><span class="st-chip chip-muqim">مقیم</span> سرعت طولی نزدیک صفر</span>
+                <span><span class="st-chip chip-raji">راجع</span> حرکت خلاف ترتیب بروج</span>
+                <span>عناصر برج:
+                    <span class="st-abbr el-fire" style="min-width:16px;height:16px"></span> آتشی
+                    <span class="st-abbr el-earth" style="min-width:16px;height:16px"></span> خاکی
+                    <span class="st-abbr el-air" style="min-width:16px;height:16px"></span> بادی
+                    <span class="st-abbr el-water" style="min-width:16px;height:16px"></span> آبی
+                </span>
+            </div>
+        </section>
+
+        <!-- ================= اتصالات ================= -->
+        <section class="st-card">
+            <h2><span class="st-ic">☌</span> اتصالات و نظرها</h2>
+            <p class="st-sub">
+                شروع اتصال: فاصله از نقطه‌ی دقیق برابر مجموع دو جرم؛ پس از دقیق شدن، اتصال هنگامی که بعد حقیقی به نصف مجموع جرمین برسد باطل می‌شود.
+                کوکب سریع‌السیر مقدم نوشته می‌شود. با تیک نوع اتصال یا کوکب، فقط همان‌ها نمایش داده می‌شوند.
+            </p>
+
+            <div class="st-filter" id="asp-filter">
+                <div class="st-filter-row">
+                    <span class="t">نوع اتصال</span>
+                    {% for t in aspect_types %}
+                    <label class="st-tick"><input type="checkbox" class="js-type" value="{{ t.key }}" checked><span>{{ t.glyph }} {{ t.name }}</span></label>
+                    {% endfor %}
+                </div>
+                <div class="st-filter-row">
+                    <span class="t">کوکب</span>
+                    {% for b in bodies %}
+                    <label class="st-tick"><input type="checkbox" class="js-body" value="{{ b.key }}" checked><span>{{ b.glyph }} {{ b.name }}</span></label>
+                    {% endfor %}
+                    <label class="st-tick" title="اگر تیک بخورد، هر دو کوکب اتصال باید انتخاب‌شده باشند؛ وگرنه کافی است یکی از آن‌ها انتخاب شده باشد"><input type="checkbox" id="js-both"><span>هر دو کوکب انتخاب‌شده باشند</span></label>
+                </div>
+                <div class="st-filter-row">
+                    <span class="t">وضعیت</span>
+                    <label class="st-tick"><input type="checkbox" class="js-state" value="applying" checked><span>نزدیک‌شونده</span></label>
+                    <label class="st-tick"><input type="checkbox" class="js-state" value="exact" checked><span>دقیق</span></label>
+                    <label class="st-tick"><input type="checkbox" class="js-state" value="separating" checked><span>جداشونده</span></label>
+                    <span class="st-count" id="asp-count"></span>
+                </div>
+                <div class="st-filter-row">
+                    <span class="t">میان‌بر</span>
+                    <button type="button" class="st-btn st-btn--ghost st-mini" data-preset="all">همه</button>
+                    <button type="button" class="st-btn st-btn--ghost st-mini" data-preset="moon">فقط قمر</button>
+                    <button type="button" class="st-btn st-btn--ghost st-mini" data-preset="sun">فقط شمس</button>
+                    <button type="button" class="st-btn st-btn--ghost st-mini" data-preset="nosun">بدون شمس</button>
+                    <button type="button" class="st-btn st-btn--ghost st-mini" data-preset="exact">فقط نزدیک دقیق (≤۳°)</button>
+                </div>
+            </div>
+
+            <div class="st-scroll">
+                <table class="st-table" id="asp-table">
+                    <thead><tr><th>اتصال</th><th>کواکب</th><th>انحراف از دقیق</th><th>قدرت</th><th>وضعیت</th><th>زمان دقیق شدن</th><th>حد (شروع / ابطال)</th><th>توضیح</th></tr></thead>
+                    <tbody>
+                    {% for s in a.aspects %}
+                    <tr data-type="{{ s.type }}" data-bodies="{{ s.pair_keys }}" data-state="{{ s.state }}" data-dev="{{ '%.4f'|format(s.deviation) }}">
+                        <td><span class="asp-type asp-{{ s.type }}"><span class="gl">{{ s.glyph }}</span>{{ s.type_name }}{% if s.angle %} <small class="st-ltr">{{ s.angle }}°</small>{% endif %}</span></td>
+                        <td><span class="st-body" style="font-size:.88rem"><span class="g" style="background: {{ s.fast.color }}; width:24px; height:24px; font-size:.85rem">{{ s.fast.glyph }}</span>{{ s.fast.name }}</span>
+                            <span class="st-note">با</span>
+                            <span class="st-body" style="font-size:.88rem"><span class="g" style="background: {{ s.slow.color }}; width:24px; height:24px; font-size:.85rem">{{ s.slow.glyph }}</span>{{ s.slow.name }}</span></td>
+                        <td class="st-ltr">{{ "%.3f"|format(s.deviation) }}°</td>
+                        <td><span class="st-strength"><i style="width: {{ (s.strength * 100)|round|int }}%"></i></span></td>
+                        <td><span class="st-chip chip-{{ s.state }}">{{ {'applying':'نزدیک‌شونده','exact':'دقیق','separating':'جداشونده'}[s.state] }}</span></td>
+                        <td>{% if s.hours is not none %}{{ '≈ ' ~ s.hours_text ~ (' دیگر' if s.hours > 0 else ' پیش') }}{% else %}—{% endif %}</td>
+                        <td class="st-ltr">{{ "%g"|format(s.limit) }}° {% if s.state == 'separating' %}(ابطال){% else %}(شروع){% endif %}</td>
+                        <td>{% for t in s.tags %}<span class="st-chip chip-tag">{{ t }}</span>{% endfor %}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="st-empty" id="asp-empty">اتصالی با این فیلترها یافت نشد.</div>
+        </section>
+
+        <!-- ================= راهنما ================= -->
+        <section class="st-card st-gloss">
+            <details>
+                <summary>📖 راهنمای اصطلاحات</summary>
+                <dl>
+                    <dt>استقامت</dt><dd>حرکت کوکب در جهت ترتیب بروج (از مغرب به مشرق)؛ کوکب مستقیم.</dd>
+                    <dt>اقامت</dt><dd>کندی شدید حرکت طولی تا نزدیکی سرعت صفر؛ کوکب مقیم.</dd>
+                    <dt>رجعت</dt><dd>حرکت خلاف ترتیب بروج؛ کوکب راجع.</dd>
+                    <dt>مقارنه</dt><dd>هم‌طولی دو کوکب. مقارنه‌ی شمس و قمر «اجتماع» و مقارنه‌ی خمسه‌ی متحیره با شمس «احتراق» نام دارد.</dd>
+                    <dt>تسدیس</dt><dd>فاصله‌ی ۶۰ درجه. ایمن: سریع‌السیر پیش از کندتر؛ ایسر: سریع‌السیر پس از کندتر.</dd>
+                    <dt>تربیع / تثلیث</dt><dd>فاصله‌ی ۹۰ و ۱۲۰ درجه.</dd>
+                    <dt>مقابله</dt><dd>فاصله‌ی ۱۸۰ درجه؛ مقابله‌ی شمس و قمر «استقبال» است.</dd>
+                    <dt>بعدالسواء</dt><dd>اختلاف طول منطقةالبروجی قمر و شمس (تقویم دو نیّر) در لحظه‌ی غروب خورشید در یک افق.</dd>
+                    <dt>بعدالمعدل</dt><dd>بُعد مغرب قمر از مغرب شمس زماناً؛ فاصله‌ی زمانی غروب دو جرم که به درجه‌ی معدل‌النهار تبدیل می‌شود.</dd>
+                </dl>
+            </details>
+        </section>
+
+        <!-- ================= اشعار (حاشیه) ================= -->
+        <p class="st-poems-title">✦ حاشیه ✦</p>
+        <div class="st-poems">
+            <div class="st-poem">
+                <div class="v"><span>در جهان هفت کوکب سیار</span><span>آفریده است خدای عز و وجل</span></div>
+                <div class="v"><span>قمر است و عطارد و زهره</span><span>شمس و مریخ و مشتری و زحل</span></div>
+                <div class="v" style="margin-top:12px"><span>کواکب مه و تیر و ناهید میدان</span><span>چو خورشید و بهرام و برجیس و کیوان</span></div>
+            </div>
+            <div class="st-poem">
+                <div class="v"><span>جهان چون زلف و خط و خال و ابروست</span><span>که هر چیزی به جای خویش نیکوست</span></div>
+                <div class="v"><span>هر آن چیزی که در عالم عیان است</span><span>چو عکسی ز آفتاب آن جهان است</span></div>
+                <div class="v"><span>تجلی گه جمال و گه جلال است</span><span>رخ و زلف آن معانی را مثال است</span></div>
+                <div class="v"><span>صفات حق تعالی لطف و قهر است</span><span>رخ و زلف بتان را زان دو بهر است</span></div>
+            </div>
         </div>
-
-
-
-        <div class="poem-box">
-            <div class="poem-verse">
-                <span>در جهان هفت کوکب سیار</span>
-                <span>آفریده است خدای عز و وجل</span>
-            </div>
-
-            <div class="poem-verse">
-                <span>قمر است و عطارد و زهره</span>
-                <span>شمس و مریخ و مشتری و زحل</span>
-            </div>
-        </div>
-
-
-
-
-        <table>
-            <thead>
-                <tr>
-                    <th>جرم</th>
-                    <th>برج</th>
-                    <th>DMS</th>
-                    <th>طول جغرافیایی</th>
-                    <th>سرعت طولی</th>
-                    <th>توضیحات</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for planet in planets %}
-                <tr>
-                    <td class="planet">
-                        {{ planet.name }}
-                    </td>
-
-                    <td>
-                        {{ planet.sign }}
-                    </td>
-
-                    <td dir="ltr">
-                        {{ planet.dms }}
-                    </td>
-
-                    <td class="longitude">
-                        {{ "%.6f"|format(planet.longitude) }}
-                    </td>
-
-                    <td class="speed {% if planet.speed < 0 %}retrograde{% endif %}">
-                        {{ "%.6f"|format(planet.speed) }}
-                    </td>
- 
-                    <td class="{% if planet.description %}description-warning{% endif %}">
-                        {{ planet.description }}
-                    </td>                    
-                    
-
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <div class="poem-box">
-            <div class="poem-verse">
-                <span>کواکب مه و تیر و ناهید میدان</span>
-                <span>چو خورشید و بهرام و برجیس و کیوان</span>
-            </div>
-        </div>        
-
-        <div class="poem-box">
-            <div class="poem-verse">
-                <span>جهان چون زلف و خط و خال و ابروست</span>
-                <span>که هر چیزی به جای خویش نیکوست</span>
-            </div>
-
-            <div class="poem-verse">
-                <span>هر آن چیزی که در عالم عیان است</span>
-                <span>چو عکسی ز آفتاب آن جهان است</span>
-            </div>
-
-
-            <div class="poem-verse">
-                <span>تجلی گه جمال و گه جلال است</span>
-                <span>رخ و زلف آن معانی را مثال است</span>
-            </div>
-            
-            <div class="poem-verse">
-                <span>صفات حق تعالی لطف و قهر است</span>
-                <span>رخ و زلف بتان را زان دو بهر است</span>
-            </div>            
-        </div>
-
-        </div>
-    </main>
+    </div>
+</main>
 
 <script>
-    // «زمان فعلی» را در منطقه‌ی زمانی انتخاب‌شده می‌نویسد (UTC یا ایران +03:30)
+(function () {
+    // ---------- زمان ----------
     const TZ_OFFSET_MINUTES = { utc: 0, iran: 210 };
+    const p2 = (n) => String(n).padStart(2, "0");
+    const fmt = (x) => `${x.getUTCFullYear()}-${p2(x.getUTCMonth() + 1)}-${p2(x.getUTCDate())}T${p2(x.getUTCHours())}:${p2(x.getUTCMinutes())}`;
+    const tzSel = document.getElementById("tz");
+    const input = document.getElementById("date_time");
 
     document.getElementById("reset-date").addEventListener("click", function () {
-        const tz = document.getElementById("tz").value;
-        const offset = TZ_OFFSET_MINUTES[tz] || 0;
-        const shifted = new Date(Date.now() + offset * 60000);
-
-        const year = shifted.getUTCFullYear();
-        const month = String(shifted.getUTCMonth() + 1).padStart(2, "0");
-        const day = String(shifted.getUTCDate()).padStart(2, "0");
-        const hours = String(shifted.getUTCHours()).padStart(2, "0");
-        const minutes = String(shifted.getUTCMinutes()).padStart(2, "0");
-
-        document.getElementById("date_time").value =
-            `${year}-${month}-${day}T${hours}:${minutes}`;
+        input.value = fmt(new Date(Date.now() + (TZ_OFFSET_MINUTES[tzSel.value] || 0) * 60000));
     });
 
-    // با تغییر منطقه، همان لحظه‌ی زمانی در منطقه‌ی جدید نمایش داده می‌شود
-    (function () {
-        const tzSelect = document.getElementById("tz");
-        const input = document.getElementById("date_time");
-        let prevOffset = TZ_OFFSET_MINUTES[tzSelect.value] || 0;
+    let prevOffset = TZ_OFFSET_MINUTES[tzSel.value] || 0;
+    tzSel.addEventListener("change", function () {
+        const newOffset = TZ_OFFSET_MINUTES[tzSel.value] || 0;
+        if (input.value) {
+            const [d, t] = input.value.split("T");
+            const [Y, M, D] = d.split("-").map(Number);
+            const [h, m] = t.split(":").map(Number);
+            input.value = fmt(new Date(Date.UTC(Y, M - 1, D, h, m) + (newOffset - prevOffset) * 60000));
+        }
+        prevOffset = newOffset;
+    });
 
-        tzSelect.addEventListener("change", function () {
-            const newOffset = TZ_OFFSET_MINUTES[tzSelect.value] || 0;
-            if (input.value) {
-                const [d, t] = input.value.split("T");
-                const [Y, M, D] = d.split("-").map(Number);
-                const [h, m] = t.split(":").map(Number);
-                const ms = Date.UTC(Y, M - 1, D, h, m) + (newOffset - prevOffset) * 60000;
-                const x = new Date(ms);
-                const p2 = (n) => String(n).padStart(2, "0");
-                input.value = `${x.getUTCFullYear()}-${p2(x.getUTCMonth() + 1)}-${p2(x.getUTCDate())}T${p2(x.getUTCHours())}:${p2(x.getUTCMinutes())}`;
-            }
-            prevOffset = newOffset;
+    // ---------- فیلتر اتصالات ----------
+    const rows = Array.from(document.querySelectorAll("#asp-table tbody tr"));
+    const typeBoxes = Array.from(document.querySelectorAll(".js-type"));
+    const bodyBoxes = Array.from(document.querySelectorAll(".js-body"));
+    const stateBoxes = Array.from(document.querySelectorAll(".js-state"));
+    const bothEl = document.getElementById("js-both");
+    const countEl = document.getElementById("asp-count");
+    const emptyEl = document.getElementById("asp-empty");
+    const STORE = "stars-asp-filter-v1";
+    let maxDev = null;
+
+    const fa = (s) => String(s).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+    const checked = (boxes) => new Set(boxes.filter(b => b.checked).map(b => b.value));
+
+    function apply() {
+        const both = bothEl.checked;
+        const types = checked(typeBoxes), bodies = checked(bodyBoxes), states = checked(stateBoxes);
+        let shown = 0;
+        rows.forEach(tr => {
+            const pair = tr.dataset.bodies.split(" ");
+            let ok = types.has(tr.dataset.type) && states.has(tr.dataset.state) && (both ? pair.every(k => bodies.has(k)) : pair.some(k => bodies.has(k)));
+            if (ok && maxDev !== null && parseFloat(tr.dataset.dev) > maxDev) ok = false;
+            tr.style.display = ok ? "" : "none";
+            if (ok) shown++;
         });
-    })();
-</script>
+        countEl.textContent = fa(`نمایش ${shown} از ${rows.length}`);
+        emptyEl.style.display = shown ? "none" : "block";
+        try {
+            localStorage.setItem(STORE, JSON.stringify({
+                t: [...types], b: [...bodies], s: [...states], d: maxDev, m: both
+            }));
+        } catch (e) { /* ذخیره‌سازی در دسترس نیست */ }
+    }
 
+    function setBoxes(boxes, values) { boxes.forEach(b => { b.checked = values.has(b.value); }); }
+    const all = (boxes) => new Set(boxes.map(b => b.value));
+
+    try {
+        const saved = JSON.parse(localStorage.getItem(STORE) || "null");
+        if (saved) {
+            setBoxes(typeBoxes, new Set(saved.t)); setBoxes(bodyBoxes, new Set(saved.b));
+            setBoxes(stateBoxes, new Set(saved.s)); maxDev = saved.d; bothEl.checked = !!saved.m;
+        }
+    } catch (e) { /* نادیده */ }
+
+    document.querySelectorAll("#asp-filter input").forEach(b => b.addEventListener("change", () => { maxDev = null; apply(); }));
+    document.querySelectorAll("[data-preset]").forEach(btn => btn.addEventListener("click", function () {
+        const p = this.dataset.preset;
+        setBoxes(typeBoxes, all(typeBoxes)); setBoxes(stateBoxes, all(stateBoxes)); maxDev = null;
+        bothEl.checked = false;
+        if (p === "all") setBoxes(bodyBoxes, all(bodyBoxes));
+        if (p === "moon") setBoxes(bodyBoxes, new Set(["moon"]));
+        if (p === "sun") setBoxes(bodyBoxes, new Set(["sun"]));
+        if (p === "nosun") { setBoxes(bodyBoxes, new Set(bodyBoxes.map(b => b.value).filter(v => v !== "sun"))); bothEl.checked = true; }
+        if (p === "exact") { setBoxes(bodyBoxes, all(bodyBoxes)); maxDev = 3; }
+        apply();
+    }));
+    apply();
+})();
+</script>
 {% endblock %}
